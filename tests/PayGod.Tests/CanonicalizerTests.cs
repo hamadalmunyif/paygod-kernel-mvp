@@ -174,4 +174,67 @@ public class CanonicalizerTests
         Assert.Contains("{\"active\":true,\"age\":30,\"name\":\"Alice\"}", result);
         Assert.Contains("{\"timestamp\":1234567890,\"version\":\"1.0\"}", result);
     }
+
+    [Fact]
+    public void Canonicalize_GoldenFile_MatchesExpectedOutput()
+    {
+        // Arrange
+        var inputJson = File.ReadAllText("golden.json");
+        var node = JsonNode.Parse(inputJson);
+        var expected = "{\"a\":1,\"b\":0,\"c\":100,\"d\":\"hello\\nworld\",\"e\":{\"y\":2,\"z\":1},\"f\":[1,2,3]}";
+
+        // Act
+        var result = Canonicalizer.Canonicalize(node);
+
+        // Assert
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void Canonicalize_DoubleRun_IsConsistent()
+    {
+        // Arrange
+        var inputJson = File.ReadAllText("golden.json");
+        var node = JsonNode.Parse(inputJson);
+
+        // Act
+        var result1 = Canonicalizer.Canonicalize(node);
+        var result2 = Canonicalizer.Canonicalize(node);
+
+        // Assert
+        Assert.Equal(result1, result2);
+    }
+
+    [Theory]
+    [InlineData("1.0", "1")]
+    [InlineData("1.230", "1.23")]
+    [InlineData("1E2", "100")]
+    [InlineData("1e-2", "0.01")]
+    [InlineData("-0", "0")]
+    public void Canonicalize_NumberFormatting_IsStrict(string input, string expected)
+    {
+        // Arrange
+        var node = JsonNode.Parse(input);
+
+        // Act
+        var result = Canonicalizer.Canonicalize(node);
+
+        // Assert
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData("\"e\u0301\"", "\"\\u00e9\"")] // NFC: é
+    [InlineData("\"\u00e9\"", "\"\\u00e9\"")]   // NFD: e + ´
+    public void Canonicalize_UnicodeNormalization_IsConsistent(string input, string expected)
+    {
+        // Arrange
+        var node = JsonNode.Parse(input);
+
+        // Act
+        var result = Canonicalizer.Canonicalize(node);
+
+        // Assert
+        Assert.Equal(expected, result);
+    }
 }
