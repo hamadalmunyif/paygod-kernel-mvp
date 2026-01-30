@@ -1,0 +1,40 @@
+site_name: PayGod Kernel MVP
+site_url: https://hamadalmunyif.github.io/paygod-kernel-mvp/
+site_author: Hamad Almunyif
+
+repo_name: hamadalmunyif/paygod-kernel-mvp
+repo_url: https://github.com/hamadalmunyif/paygod-kernel-mvp
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+
+plugins:
+  - search
+
+nav:
+  - 'Home': 'index.md'
+  - 'User Guide':
+    - 'Introduction': 'guide/introduction.md'
+    - 'Getting Started': 'guide/getting-started.md'
+  - 'Developer Guide':
+    - 'Architecture': 'dev/architecture.md'
+    - 'Contracts': 'dev/contracts.md'
