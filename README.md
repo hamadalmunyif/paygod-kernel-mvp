@@ -1,5 +1,10 @@
 # Paygod Kernel
 
+![CI](https://github.com/hamadalmunyif/paygod-kernel-mvp/actions/workflows/ci.yml/badge.svg)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![GitHub issues](https://img.shields.io/github/issues/hamadalmunyif/paygod-kernel-mvp)](https://github.com/hamadalmunyif/paygod-kernel-mvp/issues)
+[![GitHub stars](https://img.shields.io/github/stars/hamadalmunyif/paygod-kernel-mvp)](https://github.com/hamadalmunyif/paygod-kernel-mvp/stargazers)
+
 **Paygod Kernel** is a contracts-first, evidence-first core for **continuous compliance and measurement**.
 
 It turns any operational event into:
