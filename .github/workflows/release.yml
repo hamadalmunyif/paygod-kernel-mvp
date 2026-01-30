@@ -1,0 +1,46 @@
+name: PayGod Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Build Single File Binaries
+      run: |
+        dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -r linux-x64 -p:PublishSingleFile=true --self-contained true -o dist/linux-x64
+        dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -r win-x64 -p:PublishSingleFile=true --self-contained true -o dist/win-x64
+        dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -r osx-x64 -p:PublishSingleFile=true --self-contained true -o dist/osx-x64
+        
+    - name: Generate SBOM
+      uses: anchore/sbom-action@v0
+      with:
+        path: ./src
+        format: spdx-json
+        output-file: dist/paygod-sbom.spdx.json
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/linux-x64/paygod
+          dist/win-x64/paygod.exe
+          dist/osx-x64/paygod
+          dist/paygod-sbom.spdx.json
+        draft: true
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
