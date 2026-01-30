@@ -24,10 +24,10 @@ jobs:
         dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -r linux-x64 -p:PublishSingleFile=true --self-contained true -o dist/linux-x64
         dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -r win-x64 -p:PublishSingleFile=true --self-contained true -o dist/win-x64
         dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -r osx-x64 -p:PublishSingleFile=true --self-contained true -o dist/osx-x64
-        # Rename binaries to expected names
-        mv dist/linux-x64/PayGod.Cli dist/linux-x64/paygod || true
-        mv dist/win-x64/PayGod.Cli.exe dist/win-x64/paygod.exe || true
-        mv dist/osx-x64/PayGod.Cli dist/osx-x64/paygod || true
+        # Rename binaries to platform-specific names
+        mv dist/linux-x64/PayGod.Cli dist/linux-x64/paygod-linux-x64 || true
+        mv dist/win-x64/PayGod.Cli.exe dist/win-x64/paygod-windows-x64.exe || true
+        mv dist/osx-x64/PayGod.Cli dist/osx-x64/paygod-macos-x64 || true
         
     - name: Generate SBOM
       uses: anchore/sbom-action@v0
@@ -40,9 +40,9 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          dist/linux-x64/paygod
-          dist/win-x64/paygod.exe
-          dist/osx-x64/paygod
+          dist/linux-x64/paygod-linux-x64
+          dist/win-x64/paygod-windows-x64.exe
+          dist/osx-x64/paygod-macos-x64
           dist/paygod-sbom.spdx.json
         draft: true
         prerelease: false
