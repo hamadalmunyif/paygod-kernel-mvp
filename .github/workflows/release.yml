@@ -24,6 +24,10 @@ jobs:
         dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -r linux-x64 -p:PublishSingleFile=true --self-contained true -o dist/linux-x64
         dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -r win-x64 -p:PublishSingleFile=true --self-contained true -o dist/win-x64
         dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -r osx-x64 -p:PublishSingleFile=true --self-contained true -o dist/osx-x64
+        # Rename binaries to expected names
+        mv dist/linux-x64/PayGod.Cli dist/linux-x64/paygod || true
+        mv dist/win-x64/PayGod.Cli.exe dist/win-x64/paygod.exe || true
+        mv dist/osx-x64/PayGod.Cli dist/osx-x64/paygod || true
         
     - name: Generate SBOM
       uses: anchore/sbom-action@v0
