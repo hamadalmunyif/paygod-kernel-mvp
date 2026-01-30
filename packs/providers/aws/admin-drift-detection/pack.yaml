@@ -1,0 +1,38 @@
+api_version: "paygod/v1"
+kind: Pack
+metadata:
+  name: "admin-drift-detection"
+  version: "1.0.0"
+  description: "Detects unauthorized escalation of privileges (IAM Drift) in cloud environments."
+  maintainer: "compliance@paygod.org"
+  tags: ["compliance", "iam", "cloud-security"]
+
+spec:
+  inputs:
+    - name: "iam_event"
+      type: "observation"
+      source: "cloudtrail"
+      schema:
+        type: "object"
+        properties:
+          event_name: { type: "string" }
+          user_identity: { type: "string" }
+          policy_attached: { type: "string" }
+          change_request_id: { type: "string" }
+
+  policy:
+    rules:
+      - name: "admin-access-without-ticket"
+        condition: "input.iam_event.policy_attached == 'AdministratorAccess' and not input.iam_event.change_request_id"
+        decision: "deny"
+        reason: "AdministratorAccess granted without a linked Change Request ID."
+        
+      - name: "authorized-admin-access"
+        condition: "input.iam_event.policy_attached == 'AdministratorAccess' and input.iam_event.change_request_id"
+        decision: "allow"
+        reason: "AdministratorAccess granted with valid Change Request."
+
+      - name: "benign-change"
+        condition: "input.iam_event.policy_attached != 'AdministratorAccess'"
+        decision: "allow"
+        reason: "Non-critical policy change."

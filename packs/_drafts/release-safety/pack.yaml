@@ -1,0 +1,5 @@
+pack_id: paygod.release-safety
+version: 0.1.0
+description: 'release-safety profile pack (skeleton).'
+modules: []
+tests: []

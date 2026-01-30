@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Append-only truth ledger entry (references-only).",
+  "properties": {
+    "data": {
+      "$ref": "truth_decision.schema.json"
+    },
+    "entry_index": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "previous_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "record_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "timestamp": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "entry_index",
+    "timestamp",
+    "previous_hash",
+    "data",
+    "record_hash"
+  ],
+  "title": "TruthLedgerEntry",
+  "type": "object"
+}

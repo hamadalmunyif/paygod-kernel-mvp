@@ -1,0 +1,5 @@
+pack_id: paygod.memory-waste-guardrails
+version: 0.1.0
+description: 'Example pack.'
+modules: [{id: R1, title: 'Require requests/limits'}]
+tests: [{name: fixture-allow-deny}]

@@ -1,0 +1,37 @@
+cases:
+  - name: "deny when evidence missing"
+    input:
+      ghg_report:
+        reporting_year: 2025
+        scope1_tco2e: 100.0
+        scope2_tco2e: 50.0
+        methodology_ref: "ref:methodology/v1"
+    expected:
+      decision: "deny"
+      matchers:
+        - field: "reason"
+          operator: "contains"
+          value: "evidence_refs"
+
+  - name: "flag when emission factors missing"
+    input:
+      ghg_report:
+        reporting_year: 2025
+        scope1_tco2e: 100.0
+        scope2_tco2e: 50.0
+        methodology_ref: "ref:methodology/v1"
+        evidence_refs: ["ref:evidence/ghg/2025-01"]
+    expected:
+      decision: "flag"
+
+  - name: "allow when complete"
+    input:
+      ghg_report:
+        reporting_year: 2025
+        scope1_tco2e: 100.0
+        scope2_tco2e: 50.0
+        methodology_ref: "ref:methodology/v1"
+        emission_factor_refs: ["ref:ef/grid/v2"]
+        evidence_refs: ["ref:evidence/ghg/2025-01"]
+    expected:
+      decision: "allow"

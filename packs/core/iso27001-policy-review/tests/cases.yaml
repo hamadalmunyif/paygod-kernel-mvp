@@ -1,0 +1,47 @@
+cases:
+  - name: "deny missing evidence for required policy"
+    input:
+      policy_inventory:
+        policies:
+          - policy_id: "ISMS-POL-001"
+            required: true
+            last_reviewed_days: 20
+            approved_by_role: "CISO"
+    expected:
+      decision: "deny"
+
+  - name: "deny overdue review"
+    input:
+      policy_inventory:
+        policies:
+          - policy_id: "ISMS-POL-001"
+            required: true
+            last_reviewed_days: 400
+            approved_by_role: "CISO"
+            evidence_refs: ["ref:policy/pr/123"]
+    expected:
+      decision: "deny"
+
+  - name: "flag near overdue"
+    input:
+      policy_inventory:
+        policies:
+          - policy_id: "ISMS-POL-001"
+            required: true
+            last_reviewed_days: 200
+            approved_by_role: "CISO"
+            evidence_refs: ["ref:policy/pr/123"]
+    expected:
+      decision: "flag"
+
+  - name: "allow compliant"
+    input:
+      policy_inventory:
+        policies:
+          - policy_id: "ISMS-POL-001"
+            required: true
+            last_reviewed_days: 30
+            approved_by_role: "CISO"
+            evidence_refs: ["ref:policy/pr/123"]
+    expected:
+      decision: "allow"

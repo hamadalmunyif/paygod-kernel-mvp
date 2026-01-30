@@ -1,0 +1,27 @@
+version: "1.0.0"
+cases:
+  - name: "Deny Admin Access Without Ticket"
+    description: "Should flag unauthorized admin escalation."
+    input:
+      iam_event:
+        event_name: "AttachUserPolicy"
+        user_identity: "arn:aws:iam::123:user/dave"
+        policy_attached: "AdministratorAccess"
+        change_request_id: null
+    expected:
+      decision: "deny"
+      matchers:
+        - field: "reason"
+          operator: "contains"
+          value: "without a linked Change Request"
+
+  - name: "Allow Admin Access With Ticket"
+    description: "Should allow admin escalation if ticket is present."
+    input:
+      iam_event:
+        event_name: "AttachUserPolicy"
+        user_identity: "arn:aws:iam::123:user/alice"
+        policy_attached: "AdministratorAccess"
+        change_request_id: "CHG-9988"
+    expected:
+      decision: "allow"

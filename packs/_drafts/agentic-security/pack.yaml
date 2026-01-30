@@ -1,0 +1,5 @@
+pack_id: paygod.agentic-security
+version: 0.1.0
+description: 'agentic-security profile pack (skeleton).'
+modules: []
+tests: []

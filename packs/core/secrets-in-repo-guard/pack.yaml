@@ -1,0 +1,32 @@
+api_version: "paygod/v1"
+kind: Pack
+metadata:
+  name: "secrets-in-repo-guard"
+  version: "1.0.0"
+  description: "Blocks release if high-entropy secrets (keys, tokens) are detected in the repository history."
+  maintainer: "security@paygod.org"
+  tags: ["security", "compliance", "git"]
+
+spec:
+  inputs:
+    - name: "scan_report"
+      type: "observation"
+      source: "gitleaks" # or trufflehog
+      schema:
+        type: "object"
+        properties:
+          secrets_found: { type: "integer" }
+          critical_count: { type: "integer" }
+          report_url: { type: "string" }
+
+  policy:
+    rules:
+      - name: "no-critical-secrets"
+        condition: "input.scan_report.secrets_found > 0"
+        decision: "deny"
+        reason: "Secrets detected in repository. Rotate keys immediately."
+        
+      - name: "clean-scan"
+        condition: "input.scan_report.secrets_found == 0"
+        decision: "allow"
+        reason: "No secrets detected."

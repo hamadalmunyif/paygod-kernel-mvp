@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Signals for triage produced by a Paygod run. Not part of truth ledger.",
+  "properties": {
+    "api_version": {
+      "const": "paygod/v1",
+      "type": "string"
+    },
+    "findings": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "enum": [
+              "flag",
+              "info"
+            ],
+            "type": "string"
+          },
+          "message": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "rule_name": {
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "severity",
+          "code",
+          "message"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "kind": {
+      "const": "FindingsReport",
+      "type": "string"
+    },
+    "pack": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "api_version",
+    "kind",
+    "generated_at",
+    "pack",
+    "findings"
+  ],
+  "title": "FindingsReport",
+  "type": "object"
+}

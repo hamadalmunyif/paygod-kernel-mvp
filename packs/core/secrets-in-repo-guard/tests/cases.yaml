@@ -1,0 +1,25 @@
+version: "1.0.0"
+cases:
+  - name: "Deny Release When Secrets Found"
+    description: "Should block release if Gitleaks reports any findings."
+    input:
+      scan_report:
+        secrets_found: 3
+        critical_count: 1
+        report_url: "https://ci.example.com/job/123/artifacts/gitleaks.json"
+    expected:
+      decision: "deny"
+      matchers:
+        - field: "reason"
+          operator: "contains"
+          value: "Secrets detected"
+
+  - name: "Allow Release When Scan is Clean"
+    description: "Should allow release if no secrets are found."
+    input:
+      scan_report:
+        secrets_found: 0
+        critical_count: 0
+        report_url: "https://ci.example.com/job/124/artifacts/gitleaks.json"
+    expected:
+      decision: "allow"

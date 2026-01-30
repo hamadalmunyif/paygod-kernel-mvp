@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MetricSpecRecord",
+  "description": "Metric definition.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "record_type": {
+      "const": "metricspec"
+    },
+    "metric_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "unit": {
+      "type": "string"
+    },
+    "boundary": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "method": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "uncertainty": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "schema_id": {
+      "type": "string"
+    },
+    "schema_version": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "record_id",
+    "record_type",
+    "metric_id",
+    "name",
+    "unit",
+    "schema_id",
+    "schema_version"
+  ]
+}

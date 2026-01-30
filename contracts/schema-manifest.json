@@ -1,0 +1,45 @@
+{
+  "generated_at": "2026-01-29T09:41:22Z",
+  "manifest_version": "1.0.0",
+  "schemas": {
+    "decision.schema.json": {
+      "sha256": "73b10c331d63c063ff44ec3dc637a4bc171ec0d35b94f3f3780adf259a15d0cd"
+    },
+    "evidence.schema.json": {
+      "sha256": "d26fe721621821f74852f2965a60f52b2d8812993e4be3316c3c4861f80d39da"
+    },
+    "findings_report.schema.json": {
+      "sha256": "c1e4e7a409ac0e68a2dee08601de2952ee6876553b4606fe4b2b17dbd39c4fda"
+    },
+    "impact.schema.json": {
+      "sha256": "5cded0ef02befaa3509fcbfb41548a2f1e7e15217c4ef6e8914b57484e940981"
+    },
+    "ledger_entry.schema.json": {
+      "sha256": "8564165fb6f75df7d763d16dfa739a9951c5f55a44eb0d212a1f99d3cfafef22"
+    },
+    "measurement.schema.json": {
+      "sha256": "edf6e05ab7a1833776b3dc7014131c84a76e835cbe240d86e279d473d7586298"
+    },
+    "metricspec.schema.json": {
+      "sha256": "98b79de842f1b323aab1d0fcc2fbf0f177c422867b8655711415be941aebcb1c"
+    },
+    "observation.schema.json": {
+      "sha256": "c751a3872839fafa291835525de97b4dc447d5186a1bea9d806b55b25c140ba9"
+    },
+    "pack.schema.json": {
+      "sha256": "8f9d7abda1e748fc53a4ffc244fd3ae5522b7a8fb89e59bd1325fb86110733fd"
+    },
+    "pack_test_cases.schema.json": {
+      "sha256": "18d1a8d9152fa915a1cf52fa6ac1ad85355af396c1a318548789fd735fa3441f"
+    },
+    "plan_report.schema.json": {
+      "sha256": "2e36c5120f5c9de6afdb3eca4e7c01388b329955f69dff4a47df02be90e41a34"
+    },
+    "truth_decision.schema.json": {
+      "sha256": "0625941e98314b9c497ac4c41a4fe0f219643fa5619fa9cc4326642ee7dd4542"
+    },
+    "truth_ledger_entry.schema.json": {
+      "sha256": "d96361d61dd9b449ae95df7131de4021ac50217bf677d901db7ce14390956a96"
+    }
+  }
+}

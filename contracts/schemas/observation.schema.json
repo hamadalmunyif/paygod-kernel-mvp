@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ObservationRecord",
+  "description": "Canonical raw event record.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "record_type": {
+      "const": "observation"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "payload_digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the payload content"
+    },
+    "schema_id": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://paygod\\.org/schemas/observation$"
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$",
+      "description": "Semantic Versioning 2.0.0"
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "record_id",
+    "record_type",
+    "timestamp",
+    "source",
+    "payload_digest",
+    "schema_id",
+    "schema_version"
+  ]
+}

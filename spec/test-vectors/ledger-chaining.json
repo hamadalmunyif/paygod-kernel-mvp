@@ -1,0 +1,26 @@
+[
+  {
+    "description": "Genesis Block",
+    "input": {
+      "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "timestamp": "2023-01-01T00:00:00Z",
+      "data": {
+        "event": "genesis"
+      }
+    },
+    "expected_canonical": "{\"data\":{\"event\":\"genesis\"},\"previous_hash\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"timestamp\":\"2023-01-01T00:00:00Z\"}",
+    "expected_hash": "3c02da236d16b310782a536e0815b24d63d94dec239afee70f1d9a8839e0fb4d"
+  },
+  {
+    "description": "Second Block (linked to Genesis)",
+    "input": {
+      "previous_hash": "3c02da236d16b310782a536e0815b24d63d94dec239afee70f1d9a8839e0fb4d",
+      "timestamp": "2023-01-01T00:01:00Z",
+      "data": {
+        "event": "transaction_1"
+      }
+    },
+    "expected_canonical": "{\"data\":{\"event\":\"transaction_1\"},\"previous_hash\":\"3c02da236d16b310782a536e0815b24d63d94dec239afee70f1d9a8839e0fb4d\",\"timestamp\":\"2023-01-01T00:01:00Z\"}",
+    "expected_hash": "3967b4716109a01be0811664b6265578651aa2d02b91bf4acd5d8834fd174fe0"
+  }
+]

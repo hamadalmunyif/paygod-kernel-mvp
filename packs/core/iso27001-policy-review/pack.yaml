@@ -1,0 +1,57 @@
+api_version: "paygod/v1"
+kind: Pack
+metadata:
+  name: "iso27001-policy-review-a5-1"
+  version: "1.0.0"
+  description: "ISO/IEC 27001:2022 A.5.1 — Ensures policies are reviewed and approved with references-only evidence."
+  maintainer: "iso@paygod.org"
+  tags: ["iso27001", "governance", "policy-review", "audit"]
+
+spec:
+  standard:
+    name: "ISO/IEC 27001:2022"
+    controls:
+      - id: "A.5.1"
+        title: "Policies for information security"
+        intent: "Policies are defined, approved, communicated, and reviewed."
+  inputs:
+    - name: "policy_inventory"
+      type: "observation"
+      source: "grc"
+      schema:
+        type: "object"
+        properties:
+          policies:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                policy_id: { type: "string" }
+                required: { type: "boolean" }
+                last_reviewed_days: { type: "number" }
+                approved_by_role: { type: "string" }
+                evidence_refs:
+                  type: "array"
+                  items: { type: "string" }
+
+  policy:
+    rules:
+      - name: "deny-required-policy-missing-evidence"
+        condition: "input.policy_inventory.policies.any(p => p.required == true and not p.evidence_refs)"
+        decision: "deny"
+        reason: "ISO27001 A.5.1: Required policy must have evidence references."
+
+      - name: "deny-policy-overdue-review"
+        condition: "input.policy_inventory.policies.any(p => p.required == true and p.last_reviewed_days > 365)"
+        decision: "deny"
+        reason: "ISO27001 A.5.1: Required policies must be reviewed at least annually."
+
+      - name: "flag-policy-near-overdue"
+        condition: "input.policy_inventory.policies.any(p => p.required == true and p.last_reviewed_days > 180 and p.last_reviewed_days <= 365)"
+        decision: "flag"
+        reason: "ISO27001 A.5.1: Policy review is nearing the annual deadline."
+
+      - name: "allow-compliant"
+        condition: "input.policy_inventory.policies.any(p => p.required == true) == true"
+        decision: "allow"
+        reason: "Policies have evidence and are within review window."

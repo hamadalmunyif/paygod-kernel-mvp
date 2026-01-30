@@ -1,0 +1,29 @@
+cases:
+  - name: "deny when evidence missing"
+    input:
+      data_flow:
+        contains_pii: true
+        source_region: "KSA"
+        target_region: "EU"
+    expected:
+      decision: "deny"
+
+  - name: "flag cross-border pii without mechanism"
+    input:
+      data_flow:
+        contains_pii: true
+        source_region: "KSA"
+        target_region: "EU"
+        evidence_refs: ["ref:evidence/dpia/123"]
+    expected:
+      decision: "flag"
+
+  - name: "allow non pii"
+    input:
+      data_flow:
+        contains_pii: false
+        source_region: "KSA"
+        target_region: "EU"
+        evidence_refs: ["ref:evidence/catalog/flow-1"]
+    expected:
+      decision: "allow"

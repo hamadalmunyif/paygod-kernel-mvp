@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Final truth decision suitable for ledger append.",
+  "properties": {
+    "evidence_refs": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "input_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "pack": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "type": "object"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "rule_name": {
+      "type": "string"
+    },
+    "verdict": {
+      "enum": [
+        "allow",
+        "deny",
+        "error"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "verdict",
+    "pack",
+    "input_hash"
+  ],
+  "title": "TruthDecision",
+  "type": "object"
+}

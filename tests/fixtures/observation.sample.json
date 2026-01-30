@@ -1,0 +1,16 @@
+{
+  "record_id": "783488f4-8267-4d0e-b29b-1800ff3efd6c",
+  "record_type": "observation",
+  "timestamp": "2026-01-28T11:05:08Z",
+  "source": "fixture",
+  "payload_digest": "sha256:2a97516c354b68848cdbd8f54a226a0a55b21ed138e207ad6c5cbb9c00aa5aea",
+  "schema_id": "https://paygod.org/schemas/observation",
+  "schema_version": "0.1.0",
+  "subject": {
+    "kind": "workload",
+    "name": "demo"
+  },
+  "context": {
+    "env": "dev"
+  }
+}

@@ -1,0 +1,86 @@
+[
+  {
+    "description": "Simple object with unsorted keys",
+    "input": {
+      "c": 3,
+      "a": 1,
+      "b": 2
+    },
+    "expected_canonical": "{\"a\":1,\"b\":2,\"c\":3}",
+    "expected_hash": "e6a3385fb77c287a712e7f406a451727f0625041823ecf23bea7ef39b2e39805"
+  },
+  {
+    "description": "Object with whitespace",
+    "input": {
+      "a": 1,
+      "b": 2
+    },
+    "expected_canonical": "{\"a\":1,\"b\":2}",
+    "expected_hash": "43258cff783fe7036d8a43033f830adfc60ec037382473548ac742b888292777"
+  },
+  {
+    "description": "Nested object sorting",
+    "input": {
+      "z": {
+        "y": 2,
+        "x": 1
+      },
+      "a": 1
+    },
+    "expected_canonical": "{\"a\":1,\"z\":{\"x\":1,\"y\":2}}",
+    "expected_hash": "4a1cd3abb367ad5a1a93fd454f6ff43b1e42707b8bd7450d7952fc9ae37aea28"
+  },
+  {
+    "description": "Unicode and Emojis",
+    "input": {
+      "text": "مرحبا بالعالم",
+      "emoji": "🚀",
+      "mixed": "A©B"
+    },
+    "expected_canonical": "{\"emoji\":\"🚀\",\"mixed\":\"A©B\",\"text\":\"مرحبا بالعالم\"}",
+    "expected_hash": "01536c374729aafbf6455832158f48c45116d079c7b4a0074c25298cf6f1a75d"
+  },
+  {
+    "description": "Escaping special characters",
+    "input": {
+      "quote": "\"",
+      "backslash": "\\",
+      "backspace": "\b",
+      "formfeed": "\f",
+      "newline": "\n",
+      "return": "\r",
+      "tab": "\t"
+    },
+    "expected_canonical": "{\"backslash\":\"\\\\\",\"backspace\":\"\\b\",\"formfeed\":\"\\f\",\"newline\":\"\\n\",\"quote\":\"\\\"\",\"return\":\"\\r\",\"tab\":\"\\t\"}",
+    "expected_hash": "c9a0a0c7789b970301a0e528e633a8529eb257a9538c8ce9c8a23b1886eb0a19"
+  },
+  {
+    "description": "Arrays and nested structures",
+    "input": {
+      "list": [
+        3,
+        2,
+        1
+      ],
+      "nested": [
+        {
+          "b": 2,
+          "a": 1
+        },
+        0
+      ]
+    },
+    "expected_canonical": "{\"list\":[3,2,1],\"nested\":[{\"a\":1,\"b\":2},0]}",
+    "expected_hash": "2fcfbded120ffe9e634ee9d7010d28ebf90b46707d8dfd6b7666091365ad044c"
+  },
+  {
+    "description": "Floats and Scientific Notation",
+    "input": {
+      "simple": 1.5,
+      "scientific": 100.0,
+      "small": 0.005
+    },
+    "expected_canonical": "{\"scientific\":100,\"simple\":1.5,\"small\":0.005}",
+    "expected_hash": "c9459e7bdf89640d1cf7cf7f72dd9fa9b39b1d34b6f1c99c9f2fc8270acf6302"
+  }
+]

@@ -1,0 +1,41 @@
+api_version: "paygod/v1"
+kind: Pack
+metadata:
+  name: "cross-border-pii-guard"
+  version: "1.0.0"
+  description: "Flags PII processing that crosses borders without approved transfer mechanism (references-only)."
+  maintainer: "privacy@paygod.org"
+  tags: ["privacy", "pii", "cross-border", "compliance"]
+
+spec:
+  inputs:
+    - name: "data_flow"
+      type: "observation"
+      source: "data-catalog"
+      schema:
+        type: "object"
+        properties:
+          contains_pii: { type: "boolean" }
+          source_region: { type: "string" }
+          target_region: { type: "string" }
+          transfer_mechanism_ref: { type: "string" }
+          evidence_refs:
+            type: "array"
+            items: { type: "string" }
+
+  policy:
+    rules:
+      - name: "deny-missing-evidence"
+        condition: "not input.data_flow.evidence_refs"
+        decision: "deny"
+        reason: "Data flow must include evidence_refs (references-only)."
+
+      - name: "flag-cross-border-pii-without-mechanism"
+        condition: "input.data_flow.contains_pii == true and input.data_flow.source_region != input.data_flow.target_region and not input.data_flow.transfer_mechanism_ref"
+        decision: "flag"
+        reason: "Cross-border PII flow without an approved transfer mechanism reference."
+
+      - name: "allow-non-pii-or-in-region"
+        condition: "input.data_flow.contains_pii == false"
+        decision: "allow"
+        reason: "No PII in this flow."

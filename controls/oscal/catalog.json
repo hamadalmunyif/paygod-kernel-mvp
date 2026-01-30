@@ -1,0 +1,11 @@
+{
+  "oscal_version": "1.1.2",
+  "catalog": {
+    "uuid": "00000000-0000-0000-0000-000000000001",
+    "metadata": {
+      "title": "Paygod Core Controls",
+      "version": "0.1.0"
+    },
+    "groups": []
+  }
+}

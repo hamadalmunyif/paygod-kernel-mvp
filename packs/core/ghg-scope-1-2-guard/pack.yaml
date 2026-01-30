@@ -1,0 +1,49 @@
+api_version: "paygod/v1"
+kind: Pack
+metadata:
+  name: "ghg-scope-1-2-guard"
+  version: "1.0.0"
+  description: "Ensures Scope 1 & 2 emissions reporting includes references-only evidence and required factors."
+  maintainer: "sustainability@paygod.org"
+  tags: ["sustainability", "ghg", "scope1", "scope2", "evidence"]
+
+spec:
+  inputs:
+    - name: "ghg_report"
+      type: "observation"
+      source: "ghg-inventory"
+      schema:
+        type: "object"
+        properties:
+          reporting_year: { type: "integer" }
+          scope1_tco2e: { type: "number" }
+          scope2_tco2e: { type: "number" }
+          methodology_ref: { type: "string" }
+          emission_factor_refs:
+            type: "array"
+            items: { type: "string" }
+          evidence_refs:
+            type: "array"
+            items: { type: "string" }
+
+  policy:
+    rules:
+      - name: "deny-missing-evidence"
+        condition: "not input.ghg_report.evidence_refs"
+        decision: "deny"
+        reason: "GHG report must include evidence_refs (references-only) for auditability."
+
+      - name: "deny-missing-methodology"
+        condition: "not input.ghg_report.methodology_ref"
+        decision: "deny"
+        reason: "GHG report must include methodology_ref reference."
+
+      - name: "flag-missing-emission-factors"
+        condition: "not input.ghg_report.emission_factor_refs"
+        decision: "flag"
+        reason: "Emission factor references are missing. Provide references for Scope 1 & 2 factors."
+
+      - name: "allow-complete"
+        condition: "input.ghg_report.methodology_ref != ''"
+        decision: "allow"
+        reason: "GHG report has required references."

@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  kernel-api:
+    build:
+      context: ../../
+      dockerfile: deploy/docker/Dockerfile.dotnet
+      args:
+        SERVICE_NAME: Paygod.Kernel.Api
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - paygod-mesh
+
+  ledger-service:
+    build:
+      context: ../../
+      dockerfile: deploy/docker/Dockerfile.dotnet
+      args:
+        SERVICE_NAME: Paygod.Ledger.Service
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - paygod-mesh
+
+  metrics-service:
+    build:
+      context: ../../
+      dockerfile: deploy/docker/Dockerfile.dotnet
+      args:
+        SERVICE_NAME: Paygod.Metrics.Service
+    networks:
+      - paygod-mesh
+
+networks:
+  paygod-mesh:
+    driver: bridge

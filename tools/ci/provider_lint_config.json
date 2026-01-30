@@ -1,0 +1,33 @@
+{
+  "tokens": [
+    "aws",
+    "arn",
+    "eks",
+    "iam",
+    "sts",
+    "s3",
+    "cloudwatch",
+    "cloudtrail",
+    "azure",
+    "aks",
+    "entra",
+    "aad",
+    "arm",
+    "bicep",
+    "gcp",
+    "gke",
+    "google",
+    "cloudrun",
+    "cloudsql",
+    "terraform",
+    "cloudformation"
+  ],
+  "include_globs": [
+    "**/pack.yaml",
+    "**/tests/cases.yaml"
+  ],
+  "exclude_globs": [
+    "**/*.md"
+  ],
+  "allowlist_file": ".paygod-provider-lint-allowlist"
+}

@@ -1,0 +1,23 @@
+# .NET
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.pdb
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs & Temp
+*.log
+tmp_*.json
+sample.json

@@ -1,0 +1,11 @@
+{
+  "oscal_version": "1.1.2",
+  "profile": {
+    "uuid": "2b0c5028-fa56-4c3c-89f3-7dbff5647b1b",
+    "metadata": {
+      "title": "paygod-csf2-profile",
+      "version": "0.1.0"
+    },
+    "imports": []
+  }
+}

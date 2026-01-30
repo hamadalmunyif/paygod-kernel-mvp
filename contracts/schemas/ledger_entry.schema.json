@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LedgerEntry",
+  "description": "Immutable ledger record wrapper.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "entry_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "entry_index": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "prev_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Hash of the previous ledger entry"
+    },
+    "record_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Hash of the enclosed canonical record"
+    },
+    "record_type": {
+      "type": "string",
+      "enum": ["observation", "measurement", "decision", "evidence", "impact"]
+    },
+    "record_payload": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "signature": {
+      "type": "string",
+      "description": "Digital signature of the entry"
+    }
+  },
+  "required": [
+    "entry_id",
+    "entry_index",
+    "timestamp",
+    "prev_hash",
+    "record_hash",
+    "record_type",
+    "record_payload"
+  ]
+}

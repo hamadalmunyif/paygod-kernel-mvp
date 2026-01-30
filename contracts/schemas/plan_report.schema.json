@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Deterministic plan artifact for a Paygod evaluation run.",
+  "properties": {
+    "api_version": {
+      "const": "paygod/v1",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "input": {
+      "additionalProperties": false,
+      "properties": {
+        "canonical_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "canonical_hash"
+      ],
+      "type": "object"
+    },
+    "kind": {
+      "const": "PlanReport",
+      "type": "string"
+    },
+    "pack": {
+      "additionalProperties": false,
+      "properties": {
+        "digest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "path",
+        "digest_sha256"
+      ],
+      "type": "object"
+    },
+    "settings": {
+      "additionalProperties": true,
+      "type": "object"
+    }
+  },
+  "required": [
+    "api_version",
+    "kind",
+    "generated_at",
+    "pack",
+    "input"
+  ],
+  "title": "PlanReport",
+  "type": "object"
+}

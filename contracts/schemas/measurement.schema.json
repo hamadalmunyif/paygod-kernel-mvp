@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MeasurementRecord",
+  "description": "Metric value with provenance.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "record_type": {
+      "const": "measurement"
+    },
+    "metric_id": {
+      "type": "string"
+    },
+    "value": {
+      "type": [
+        "number",
+        "string",
+        "boolean",
+        "null"
+      ]
+    },
+    "unit": {
+      "type": "string"
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "time_window": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "uncertainty": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "schema_id": {
+      "type": "string"
+    },
+    "schema_version": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "record_id",
+    "record_type",
+    "metric_id",
+    "value",
+    "unit",
+    "schema_id",
+    "schema_version"
+  ]
+}

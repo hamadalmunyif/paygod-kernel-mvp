@@ -1,0 +1,5 @@
+pack_id: paygod.crypto-agility
+version: 0.1.0
+description: 'crypto-agility profile pack (skeleton).'
+modules: []
+tests: []

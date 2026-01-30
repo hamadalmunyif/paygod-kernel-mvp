@@ -1,0 +1,5 @@
+pack_id: paygod.data-constitution
+version: 0.1.0
+description: 'data-constitution profile pack (skeleton).'
+modules: []
+tests: []

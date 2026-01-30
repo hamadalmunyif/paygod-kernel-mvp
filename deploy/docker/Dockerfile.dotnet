@@ -1,0 +1,21 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+ARG SERVICE_NAME
+
+# Copy csproj and restore
+COPY src/$SERVICE_NAME/*.csproj ./$SERVICE_NAME/
+COPY src/Paygod.Contracts/*.csproj ./Paygod.Contracts/
+RUN dotnet restore $SERVICE_NAME/$SERVICE_NAME.csproj
+
+# Copy source and build
+COPY src/ ./
+RUN dotnet publish $SERVICE_NAME/$SERVICE_NAME.csproj -c Release -o /app/publish
+
+# Rename the service DLL to a generic name to solve ENTRYPOINT variable expansion issue
+RUN mv /app/publish/${SERVICE_NAME}.dll /app/publish/app.dll
+
+# Runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "app.dll"]

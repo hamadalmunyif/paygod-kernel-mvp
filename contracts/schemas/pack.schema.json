@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Paygod policy pack definition (paygod/v1).",
+  "properties": {
+    "api_version": {
+      "const": "paygod/v1",
+      "type": "string"
+    },
+    "kind": {
+      "const": "Pack",
+      "type": "string"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "maintainer": {
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "version": {
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "type": "object"
+    },
+    "spec": {
+      "additionalProperties": true,
+      "properties": {
+        "inputs": {
+          "type": "array"
+        },
+        "policy": {
+          "additionalProperties": false,
+          "properties": {
+            "rules": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "condition": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "decision": {
+                    "enum": [
+                      "allow",
+                      "deny",
+                      "flag",
+                      "error"
+                    ],
+                    "type": "string"
+                  },
+                  "name": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "reason": {
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "condition",
+                  "decision",
+                  "reason"
+                ],
+                "type": "object"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "rules"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "policy"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "api_version",
+    "kind",
+    "metadata",
+    "spec"
+  ],
+  "title": "Pack",
+  "type": "object"
+}

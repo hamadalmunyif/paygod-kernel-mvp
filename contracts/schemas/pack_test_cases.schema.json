@@ -1,0 +1,94 @@
+{
+  "$id": "https://paygod.org/schemas/pack_test_cases/v1",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Schema for defining deterministic test cases for Paygod Packs.",
+  "properties": {
+    "cases": {
+      "items": {
+        "properties": {
+          "description": {
+            "description": "Optional detailed explanation of the test intent.",
+            "type": "string"
+          },
+          "expected": {
+            "properties": {
+              "decision": {
+                "description": "The expected high-level decision outcome.",
+                "enum": [
+                  "allow",
+                  "deny",
+                  "flag",
+                  "error"
+                ],
+                "type": "string"
+              },
+              "matchers": {
+                "description": "List of specific field matchers to assert against the output.",
+                "items": {
+                  "properties": {
+                    "field": {
+                      "description": "JSON path to the field in the output record (e.g., 'payload.risk_score').",
+                      "type": "string"
+                    },
+                    "operator": {
+                      "description": "Assertion operator.",
+                      "enum": [
+                        "equals",
+                        "contains",
+                        "regex",
+                        "gt",
+                        "lt"
+                      ],
+                      "type": "string"
+                    },
+                    "value": {
+                      "description": "The value to match against."
+                    }
+                  },
+                  "required": [
+                    "field",
+                    "operator",
+                    "value"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "decision"
+            ],
+            "type": "object"
+          },
+          "input": {
+            "additionalProperties": true,
+            "description": "The input context (Observation, Measurement, or Evidence) to feed into the engine.",
+            "type": "object"
+          },
+          "name": {
+            "description": "Descriptive name of the test scenario.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "input",
+          "expected"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "version": {
+      "description": "SemVer version of the test schema.",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "version",
+    "cases"
+  ],
+  "title": "Paygod Pack Test Cases",
+  "type": "object"
+}

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Canonical decision output from DAA.",
+  "properties": {
+    "confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
+    },
+    "pack_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "pack_version": {
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$",
+      "type": "string"
+    },
+    "reasoning": {
+      "minLength": 10,
+      "type": "string"
+    },
+    "record_id": {
+      "format": "uuid",
+      "type": "string"
+    },
+    "record_type": {
+      "const": "decision"
+    },
+    "schema_id": {
+      "format": "uri",
+      "pattern": "^https://paygod\\.org/schemas/decision$",
+      "type": "string"
+    },
+    "schema_version": {
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$",
+      "type": "string"
+    },
+    "source": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "timestamp": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "verdict": {
+      "enum": [
+        "allow",
+        "deny",
+        "flag",
+        "error"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "record_id",
+    "record_type",
+    "timestamp",
+    "source",
+    "pack_id",
+    "pack_version",
+    "schema_id",
+    "schema_version",
+    "verdict",
+    "confidence"
+  ],
+  "title": "DecisionRecord",
+  "type": "object"
+}

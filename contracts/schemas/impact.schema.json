@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ImpactRecord",
+  "description": "Attributed delta.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "record_type": {
+      "const": "impact"
+    },
+    "metric_id": {
+      "type": "string"
+    },
+    "delta": {
+      "type": [
+        "number",
+        "string"
+      ]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "attribution": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "schema_id": {
+      "type": "string"
+    },
+    "schema_version": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "record_id",
+    "record_type",
+    "metric_id",
+    "delta",
+    "confidence",
+    "schema_id",
+    "schema_version"
+  ]
+}
