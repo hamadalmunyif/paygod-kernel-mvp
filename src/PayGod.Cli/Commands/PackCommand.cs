@@ -88,7 +88,8 @@ spec:
         reason: "Allowed by policy (block!=true)."
 """;
 
-        var casesYaml = """version: "1.0.0"
+        var casesYaml = """
+version: "1.0.0"
 cases:
   - name: "allow_minimal"
     description: "Allow when block flag is false."

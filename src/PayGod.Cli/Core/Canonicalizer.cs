@@ -60,9 +60,9 @@ public static class Canonicalizer
 
                 if (d == 0) { sb.Append("0"); return; } // Avoid "-0"
 
-                var s = d.ToString("R", CultureInfo.InvariantCulture);
-                s = s.Replace("E", "e");
-                sb.Append(s);
+                var numStr = d.ToString("R", CultureInfo.InvariantCulture);
+                numStr = numStr.Replace("E", "e");
+                sb.Append(numStr);
                 return;
             }
             
