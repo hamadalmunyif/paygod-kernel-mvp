@@ -36,6 +36,15 @@ jobs:
         format: spdx-json
         output-file: dist/paygod-sbom.spdx.json
 
+    - name: Generate Checksums
+      run: |
+        cd dist
+        sha256sum linux-x64/paygod-linux-x64 > checksums.txt
+        sha256sum win-x64/paygod-windows-x64.exe >> checksums.txt
+        sha256sum osx-x64/paygod-macos-x64 >> checksums.txt
+        sha256sum paygod-sbom.spdx.json >> checksums.txt
+        cat checksums.txt
+
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
@@ -44,6 +53,7 @@ jobs:
           dist/win-x64/paygod-windows-x64.exe
           dist/osx-x64/paygod-macos-x64
           dist/paygod-sbom.spdx.json
+          dist/checksums.txt
         draft: true
         prerelease: false
       env:
