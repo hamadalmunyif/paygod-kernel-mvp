@@ -87,7 +87,8 @@ jobs:
         run: |
           export PATH="$PATH:$HOME/.dotnet/tools"
           mkdir -p artifacts/sbom
-          CycloneDX src/PayGod.sln -o artifacts/sbom/sbom.cdx.json
+          dotnet CycloneDX src/PayGod.sln -o artifacts/sbom/sbom.cdx.json
+
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
