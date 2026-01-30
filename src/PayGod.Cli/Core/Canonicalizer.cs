@@ -68,6 +68,7 @@ public static class Canonicalizer
             
             if (val.TryGetValue<string>(out var s))
             {
+                s = s.Normalize(NormalizationForm.FormC);
                 WriteJcsString(s, sb);
                 return;
             }
@@ -95,13 +96,12 @@ public static class Canonicalizer
             else if (c == '\n') sb.Append("\\n");
             else if (c == '\r') sb.Append("\\r");
             else if (c == '\t') sb.Append("\\t");
-            else if (c < 0x20) // Control characters < 0x20 must be escaped as \uXXXX
+            else if (c < 0x20 || c > 0x7E) // Control characters and non-ASCII must be escaped
             {
                 sb.AppendFormat("\\u{0:x4}", (int)c);
             }
             else
             {
-                // All other characters (including Emojis/Unicode) are passed through raw
                 sb.Append(c);
             }
         }

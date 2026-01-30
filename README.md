@@ -78,3 +78,17 @@ Apache-2.0. See `LICENSE` and `NOTICE`.
 
 - `examples/sample.json`: sample input payload used during local experimentation.
 - `examples/tmp_entry.json`: sample ledger entry shape for quick manual checks.
+
+
+## Deterministic Output Policy (MVP)
+
+Given identical validated inputs, Paygod MUST produce byte-identical canonical JSON outputs across runs and platforms. Any change in canonical output is treated as a breaking change unless explicitly versioned.
+
+### Digest Scope
+
+The digest hash is calculated on the canonicalized form of the following fields:
+- `decision`
+- `findings`
+- `evidence_refs`
+
+Fields that are non-deterministic by nature, such as `generated_at`, `machine_metadata`, and absolute file paths, are excluded from the to-be-signed payload.
