@@ -1,4 +1,4 @@
-name: Paygod Kernel CI
+﻿name: Paygod Kernel CI
 
 on:
   push:
@@ -55,3 +55,12 @@ jobs:
           ./out/paygod test --pack packs/core/ghg-scope-1-2-guard
           ./out/paygod test --pack packs/core/iso27001-policy-review
           ./out/paygod test --pack packs/providers/aws/admin-drift-detection
+
+  report-build-status:
+    name: report-build-status
+    runs-on: ubuntu-latest
+    needs: [build-and-test]
+    steps:
+      - name: Report build status
+        run: echo "build-and-test completed"
+
