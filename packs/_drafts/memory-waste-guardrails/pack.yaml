@@ -1,5 +1,42 @@
-pack_id: paygod.memory-waste-guardrails
-version: 0.1.0
-description: 'Example pack.'
-modules: [{id: R1, title: 'Require requests/limits'}]
-tests: [{name: fixture-allow-deny}]
+api_version: "paygod/v1"
+kind: Pack
+metadata:
+  name: "memory-waste-guardrails"
+  version: "0.1.0"
+  description: "Learning pack: requires explicit resource limits/guards for LLM requests (tokens/time/budget)."
+  maintainer: "dev@paygod.org"
+  tags: ["learning", "llm", "governance", "limits", "guardrails"]
+
+spec:
+  inputs:
+    - name: "request"
+      type: "observation"
+      source: "llm-gateway"
+      schema:
+        type: "object"
+        properties:
+          request_kind: { type: "string" }
+          limits:
+            type: "object"
+            properties:
+              max_tokens: { type: "integer" }
+              max_seconds: { type: "integer" }
+              max_cost_usd: { type: "number" }
+          safety_level: { type: "string" }
+
+  policy:
+    rules:
+      - name: "deny-missing-limits"
+        condition: "not input.request.limits"
+        decision: "deny"
+        reason: "Request must include explicit limits (tokens/time/cost)."
+
+      - name: "flag-weak-limits"
+        condition: "input.request.limits and (input.request.limits.max_tokens > 8000 or input.request.limits.max_seconds > 60)"
+        decision: "flag"
+        reason: "Limits exist but appear too permissive for safe operation."
+
+      - name: "allow-guarded-request"
+        condition: "input.request.limits and input.request.limits.max_tokens <= 8000 and input.request.limits.max_seconds <= 60"
+        decision: "allow"
+        reason: "Request includes reasonable resource limits."
