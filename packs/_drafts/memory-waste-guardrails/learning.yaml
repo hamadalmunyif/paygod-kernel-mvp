@@ -1,0 +1,18 @@
+learning_track: true
+status: draft
+purpose: "Teach how legacy pack formats map into paygod/v1 Packs."
+
+migration:
+  from: "pack.legacy.yaml"
+  to: "pack.yaml"
+  mapping:
+    pack_id: "metadata.name"
+    version: "metadata.version"
+    modules: "spec.policy.rules"
+    tests: "tests/cases.yaml"
+
+promotion_to_core_requires:
+  - "pack.yaml is paygod/v1 (api_version/kind/metadata/spec)"
+  - "tests/cases.yaml exists with allow/flag/deny cases"
+  - "paygod test passes for this pack"
+  - "run produces plan/findings/ledger validated by canonical hash"

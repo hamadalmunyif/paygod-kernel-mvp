@@ -1,23 +1,38 @@
-version: "1.0.0"
-cases:
-  - name: "High Memory Usage Should Be Denied"
-    description: "If memory usage exceeds 85%, the pack should deny the operation."
-    input:
-      metric_name: "memory_usage_percent"
-      value: 90
-      timestamp: "2026-01-28T12:00:00Z"
-    expected:
-      decision: "deny"
-      matchers:
-        - field: "reason"
-          operator: "contains"
-          value: "exceeds threshold"
+api_version: "paygod/v1"
+kind: PackTestCases
+metadata:
+  pack: "memory-waste-guardrails"
+  version: "0.1.0"
 
-  - name: "Low Memory Usage Should Be Allowed"
-    description: "If memory usage is below 85%, the pack should allow the operation."
+cases:
+  - name: "deny_missing_limits"
     input:
-      metric_name: "memory_usage_percent"
-      value: 40
-      timestamp: "2026-01-28T12:05:00Z"
-    expected:
+      request:
+        request_kind: "chat.completion"
+        safety_level: "standard"
+    expect:
+      decision: "deny"
+
+  - name: "flag_weak_limits"
+    input:
+      request:
+        request_kind: "chat.completion"
+        safety_level: "standard"
+        limits:
+          max_tokens: 12000
+          max_seconds: 90
+          max_cost_usd: 2.0
+    expect:
+      decision: "flag"
+
+  - name: "allow_reasonable_limits"
+    input:
+      request:
+        request_kind: "chat.completion"
+        safety_level: "standard"
+        limits:
+          max_tokens: 2000
+          max_seconds: 30
+          max_cost_usd: 0.5
+    expect:
       decision: "allow"
