@@ -1,14 +1,14 @@
-﻿# --- Text normalization for PayGod factory ---
+# Text normalization for PayGod factory
 * text=auto
 
 # YAML / JSON / configs
-*.yaml text eol=lf
-*.yml  text eol=lf
-*.json text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+*.json  text eol=lf
 *.jsonl text eol=lf
 
 # Docs
-*.md   text eol=lf
+*.md    text eol=lf
 
 # Scripts
-*.sh   text eol=lf
+*.sh    text eol=lf
