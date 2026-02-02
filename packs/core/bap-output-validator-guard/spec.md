@@ -36,7 +36,7 @@ Anything else is Post-MVP and MUST be rejected until explicitly added via schema
 
 ## Validation Model (Three Gates)
 
-### Gate 1  Envelope Gate (Existence)
+### Gate 1 - Envelope Gate (Existence)
 All artifacts MUST be wrapped in the envelope schema:
 - `contracts/schemas/belloop_artifact_envelope.schema.json`
 
