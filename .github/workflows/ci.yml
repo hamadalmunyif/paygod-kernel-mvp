@@ -55,3 +55,11 @@ jobs:
           ./out/paygod test --pack packs/core/ghg-scope-1-2-guard
           ./out/paygod test --pack packs/core/iso27001-policy-review
           ./out/paygod test --pack packs/providers/aws/admin-drift-detection
+
+  paygod-kernel-ci:
+    name: Paygod Kernel CI
+    runs-on: ubuntu-latest
+    needs: [build-and-test]
+    steps:
+      - name: Gate OK
+        run: echo "Paygod Kernel CI gate passed."
