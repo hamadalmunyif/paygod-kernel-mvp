@@ -1,6 +1,3 @@
-* text=auto
-
-*.json  text eol=lf
-*.yml   text eol=lf
-*.yaml  text eol=lf
-*.md    text eol=lf
+# Enforce LF for contracts + docs to keep schema hashes stable across OSes
+contracts/**/*.json text eol=lf
+docs/**/*.md         text eol=lf
