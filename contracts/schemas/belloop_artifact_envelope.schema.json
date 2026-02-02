@@ -1,75 +1,104 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "BelloopArtifactEnvelope",
-  "description": "Belloop Artifact Protocol envelope. Wraps core MVP artifacts with stable metadata.",
-  "type": "object",
-  "additionalProperties": false,
-
-  "required": [
-    "kind",
-    "schema_version",
-    "timestamp",
-    "producer",
-    "data"
-  ],
-
-  "anyOf": [
-    { "required": ["schema"] },
-    { "required": ["schema_id"] }
-  ],
-
-  "properties": {
-    "kind": {
-      "type": "string",
-      "enum": ["decision", "evidence", "ledger_entry"]
-    },
-
-    "schema": {
-      "type": "string",
-      "minLength": 1,
-      "description": "Legacy schema locator (compatibility). Prefer schema_id."
-    },
-
-    "schema_id": {
-      "type": "string",
-      "minLength": 1,
-      "description": "Stable schema identifier (preferred). Example: contracts/schemas/decision.schema.json"
-    },
-
-    "schema_version": {
-      "type": "string",
-      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
-      "description": "Strict SemVer: MAJOR.MINOR.PATCH"
-    },
-
-    "timestamp": {
-      "type": "string",
-      "format": "date-time"
-    },
-
-    "producer": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["name", "version"],
-      "properties": {
-        "name": { "type": "string", "minLength": 1 },
-        "version": { "type": "string", "minLength": 1 },
-        "build": { "type": "string" }
-      }
-    },
-
-    "correlation_id": {
-      "type": "string",
-      "minLength": 1,
-      "description": "Optional in MVP; recommended for cross-artifact correlation."
-    },
-
-    "data": {
-      "oneOf": [
-        { "$ref": "decision.schema.json" },
-        { "$ref": "evidence.schema.json" },
-        { "$ref": "ledger_entry.schema.json" }
-      ]
-    }
-  }
+    "$schema":  "https://json-schema.org/draft/2020-12/schema",
+    "title":  "BelloopArtifactEnvelope",
+    "description":  "Belloop Artifact Protocol envelope. Wraps core MVP artifacts with stable metadata.",
+    "type":  "object",
+    "additionalProperties":  false,
+    "required":  [
+                     "kind",
+                     "schema_version",
+                     "timestamp",
+                     "producer",
+                     "data"
+                 ],
+    "anyOf":  [
+                  {
+                      "required":  [
+                                       "schema_ref"
+                                   ]
+                  },
+                  {
+                      "required":  [
+                                       "schema"
+                                   ]
+                  },
+                  {
+                      "required":  [
+                                       "schema_id"
+                                   ]
+                  }
+              ],
+    "properties":  {
+                       "kind":  {
+                                    "type":  "string",
+                                    "enum":  [
+                                                 "decision",
+                                                 "evidence",
+                                                 "ledger_entry"
+                                             ]
+                                },
+                       "schema":  {
+                                      "type":  "string",
+                                      "minLength":  1,
+                                      "description":  "Legacy schema locator (compatibility). Prefer schema_ref."
+                                  },
+                       "schema_id":  {
+                                         "type":  "string",
+                                         "minLength":  1,
+                                         "description":  "Legacy in envelope (compatibility). Prefer schema_ref. Payload schema_id remains official URI."
+                                     },
+                       "schema_version":  {
+                                              "type":  "string",
+                                              "pattern":  "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+                                              "description":  "Strict SemVer: MAJOR.MINOR.PATCH"
+                                          },
+                       "timestamp":  {
+                                         "type":  "string",
+                                         "format":  "date-time"
+                                     },
+                       "producer":  {
+                                        "type":  "object",
+                                        "additionalProperties":  false,
+                                        "required":  [
+                                                         "name",
+                                                         "version"
+                                                     ],
+                                        "properties":  {
+                                                           "name":  {
+                                                                        "type":  "string",
+                                                                        "minLength":  1
+                                                                    },
+                                                           "version":  {
+                                                                           "type":  "string",
+                                                                           "minLength":  1
+                                                                       },
+                                                           "build":  {
+                                                                         "type":  "string"
+                                                                     }
+                                                       }
+                                    },
+                       "correlation_id":  {
+                                              "type":  "string",
+                                              "minLength":  1,
+                                              "description":  "Optional in MVP; recommended for cross-artifact correlation."
+                                          },
+                       "data":  {
+                                    "oneOf":  [
+                                                  {
+                                                      "$ref":  "decision.schema.json"
+                                                  },
+                                                  {
+                                                      "$ref":  "evidence.schema.json"
+                                                  },
+                                                  {
+                                                      "$ref":  "ledger_entry.schema.json"
+                                                  }
+                                              ]
+                                },
+                       "schema_ref":  {
+                                          "type":  "string",
+                                          "minLength":  1,
+                                          "description":  "Preferred. Repo-local schema reference (e.g., contracts/schemas/decision.schema.json)."
+                                      }
+                   }
 }
