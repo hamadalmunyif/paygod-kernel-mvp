@@ -38,6 +38,25 @@ jobs:
       - name: Verify Spec Compliance (Python reference)
         run: python3 tools/verify_spec.py
 
+      - name: Reject CRLF in JSON schemas
+        run: |
+          python3 - <<'PY'
+          import glob, sys
+
+          bad = []
+          for p in glob.glob("contracts/schemas/**/*.json", recursive=True):
+              b = open(p, "rb").read()
+              if b.find(b"\r\n") != -1:
+                  bad.append(p)
+
+          if bad:
+              print("CRLF detected in schema files (must be LF for stable hashing):")
+              print("\n".join(bad))
+              sys.exit(1)
+
+          print("OK: no CRLF in schema files")
+          PY
+
       - name: Schema Stability Gate
         run: python3 tools/check_schema_manifest.py
 
