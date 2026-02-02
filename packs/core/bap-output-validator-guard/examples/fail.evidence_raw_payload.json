@@ -1,0 +1,10 @@
+{
+  "kind": "evidence",
+  "schema_id": "contracts/schemas/evidence.schema.json",
+  "schema_version": "1.0.0",
+  "timestamp": "2026-02-02T06:00:00Z",
+  "producer": { "name": "bap-output-validator-guard", "version": "1.0.0" },
+  "data": {
+    "raw": "THIS SHOULD NEVER BE STORED IN EVIDENCE"
+  }
+}
