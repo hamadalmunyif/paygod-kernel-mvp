@@ -1,4 +1,4 @@
-# BAP Output Validator Guard — Specification (Tutorial + Normative, MVP)
+# BAP Output Validator Guard  Specification (Tutorial + Normative, MVP)
 
 ## Status
 **Normative** for PayGodCloud-Belloop MVP.
@@ -36,7 +36,7 @@ Anything else is Post-MVP and MUST be rejected until explicitly added via schema
 
 ## Validation Model (Three Gates)
 
-### Gate 1 — Envelope Gate (Existence)
+### Gate 1  Envelope Gate (Existence)
 All artifacts MUST be wrapped in the envelope schema:
 - `contracts/schemas/belloop_artifact_envelope.schema.json`
 
@@ -60,7 +60,7 @@ Reason codes (Gate 1):
 
 ---
 
-### Gate 2 — Schema Binding Gate (Meaning)
+### Gate 2  Schema Binding Gate (Meaning)
 After the envelope is accepted, the validator MUST bind `data` to an explicit schema.
 
 Rules:
@@ -84,7 +84,7 @@ Reason codes (Gate 2):
 
 ---
 
-### Gate 3 — References-only Gate (Safety)
+### Gate 3  References-only Gate (Safety)
 For `evidence` and `ledger_entry` artifacts:
 - Raw content MUST NOT be stored inside the artifact.
 - Only references are allowed (hashes, IDs, URIs, minimal metadata).
