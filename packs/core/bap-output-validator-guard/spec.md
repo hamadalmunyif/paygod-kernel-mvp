@@ -1,4 +1,4 @@
-# BAP Output Validator Guard — Specification (Tutorial + Normative, MVP)
+# BAP Output Validator Guard â€” Specification (Tutorial + Normative, MVP)
 
 ## Status
 **Normative** for PayGodCloud-Belloop MVP.
@@ -37,7 +37,7 @@ Anything else is **Post-MVP** and MUST be rejected until explicitly added via sc
 
 ## Validation Model (Three Gates)
 
-### Gate 1 — Envelope Gate (Existence)
+### Gate 1 â€” Envelope Gate (Existence)
 All artifacts MUST be wrapped in the envelope schema:
 
 - `contracts/schemas/belloop_artifact_envelope.schema.json`
@@ -46,7 +46,7 @@ Required envelope checks:
 
 1) `kind` MUST be one of: `decision`, `evidence`, `ledger_entry`
 2) `schema_version` MUST be strict SemVer: `MAJOR.MINOR.PATCH`
-3) Either `schema_id` (preferred) OR legacy `schema` MUST exist
+3) Either `schema_ref` (preferred) OR legacy `schema` OR legacy `schema_id` MUST exist
 4) `timestamp` MUST be RFC3339 date-time
 5) `producer` MUST exist with:
    - `producer.name`
@@ -63,7 +63,7 @@ Required envelope checks:
 
 ---
 
-### Gate 2 — Schema Binding Gate (Meaning)
+### Gate 2 â€” Schema Binding Gate (Meaning)
 After the envelope is accepted, the validator MUST bind `data` to an explicit schema.
 
 Rules:
@@ -71,10 +71,10 @@ Rules:
 - `kind` MUST map deterministically to the correct payload schema.
 - `data` MUST validate against that schema.
 
-MVP kind → payload schema mapping:
-- `decision` → `contracts/schemas/decision.schema.json`
-- `evidence` → `contracts/schemas/evidence.schema.json`
-- `ledger_entry` → `contracts/schemas/ledger_entry.schema.json`
+MVP kind â†’ payload schema mapping:
+- `decision` â†’ `contracts/schemas/decision.schema.json`
+- `evidence` â†’ `contracts/schemas/evidence.schema.json`
+- `ledger_entry` â†’ `contracts/schemas/ledger_entry.schema.json`
 
 **Reason codes (Gate 2):**
 - `SCHEMA_NOT_FOUND`
@@ -83,7 +83,7 @@ MVP kind → payload schema mapping:
 
 ---
 
-### Gate 3 — References-only Gate (Safety)
+### Gate 3 â€” References-only Gate (Safety)
 For `evidence` and `ledger_entry` artifacts:
 
 - Raw content MUST NOT be stored inside the artifact.
