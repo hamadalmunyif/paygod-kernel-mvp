@@ -1,48 +1,48 @@
 {
-  "generated_at": "2026-02-02T13:51:08Z",
+  "generated_at": "2026-02-02T14:21:16Z",
   "manifest_version": "1.0.0",
   "schemas": {
     "belloop_artifact_envelope.schema.json": {
-      "sha256": "d5043e05135578079e0fd02a2131141af97a22b6c4592be3ff241edfe3178ff2"
+      "sha256": "c8a9057f316e6a781aeebb35e22b34c9a941079302208212d35e51822ebb6293"
     },
     "decision.schema.json": {
-      "sha256": "80a69ccc589d496735f199adfbc45f57872f36a442f444a879cf452358ade6e8"
+      "sha256": "73b10c331d63c063ff44ec3dc637a4bc171ec0d35b94f3f3780adf259a15d0cd"
     },
     "evidence.schema.json": {
-      "sha256": "f4b3aaec5d641b4dd5a4f43b15b52afaae21afb57381de189abe11e48c5bd04d"
+      "sha256": "d26fe721621821f74852f2965a60f52b2d8812993e4be3316c3c4861f80d39da"
     },
     "findings_report.schema.json": {
-      "sha256": "4d0f1a33b03f6cc3ef8e051083216aae6360ae093b93c12b0d4f38884cbbcd31"
+      "sha256": "c1e4e7a409ac0e68a2dee08601de2952ee6876553b4606fe4b2b17dbd39c4fda"
     },
     "impact.schema.json": {
-      "sha256": "1f17b122450777a491ae7883d414800cfacf4337e6ba94d0e8fe7bbdcc89449c"
+      "sha256": "5cded0ef02befaa3509fcbfb41548a2f1e7e15217c4ef6e8914b57484e940981"
     },
     "ledger_entry.schema.json": {
-      "sha256": "33a2405eaf70ea8c586a9cd177bdda4d74acd32ece34da81c0b4a5c01797d5e6"
+      "sha256": "8564165fb6f75df7d763d16dfa739a9951c5f55a44eb0d212a1f99d3cfafef22"
     },
     "measurement.schema.json": {
-      "sha256": "bb6cc91dec2f76cd01804728da35d8e94ae94a796416963f674c0f1d3cdee471"
+      "sha256": "edf6e05ab7a1833776b3dc7014131c84a76e835cbe240d86e279d473d7586298"
     },
     "metricspec.schema.json": {
-      "sha256": "67c6f0452912d27dc84cb5b0de4cf4f0fc09be54495f8527e46b5573c8910a33"
+      "sha256": "98b79de842f1b323aab1d0fcc2fbf0f177c422867b8655711415be941aebcb1c"
     },
     "observation.schema.json": {
-      "sha256": "bab44f6a1129722efe99ea7fe7ba7b57faa0b37960dea994f787f4b29a4b8dde"
+      "sha256": "c751a3872839fafa291835525de97b4dc447d5186a1bea9d806b55b25c140ba9"
     },
     "pack.schema.json": {
-      "sha256": "60b2926eb612cd6cb1c1c87dd3a11dcabbc30c0ea69d3626a521e97e206ef50f"
+      "sha256": "8f9d7abda1e748fc53a4ffc244fd3ae5522b7a8fb89e59bd1325fb86110733fd"
     },
     "pack_test_cases.schema.json": {
-      "sha256": "36b1a51adbf231a42dec0688593318a77ff0a61f949ea302941c900a67526e0e"
+      "sha256": "18d1a8d9152fa915a1cf52fa6ac1ad85355af396c1a318548789fd735fa3441f"
     },
     "plan_report.schema.json": {
-      "sha256": "d3adb2c3469ddec08f120150a1fce637dabdc41990611738454d1c9e0a533fa7"
+      "sha256": "2e36c5120f5c9de6afdb3eca4e7c01388b329955f69dff4a47df02be90e41a34"
     },
     "truth_decision.schema.json": {
-      "sha256": "51e072bf922d44290cb738ad5253c29fcb9618f5eb6f1c0647d4237e3d0689fc"
+      "sha256": "0625941e98314b9c497ac4c41a4fe0f219643fa5619fa9cc4326642ee7dd4542"
     },
     "truth_ledger_entry.schema.json": {
-      "sha256": "5b634c1c69935c490a80b5764a84076bb3a42468fd1f827c4e4080e415369d24"
+      "sha256": "d96361d61dd9b449ae95df7131de4021ac50217bf677d901db7ce14390956a96"
     }
   }
 }
