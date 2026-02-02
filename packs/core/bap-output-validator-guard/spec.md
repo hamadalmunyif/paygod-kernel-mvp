@@ -1,4 +1,4 @@
-# BAP Output Validator Guard â€” Specification (Tutorial + Normative, MVP)
+# BAP Output Validator Guard — Specification (Tutorial + Normative, MVP)
 
 ## Status
 **Normative** for PayGodCloud-Belloop MVP.
@@ -14,36 +14,33 @@ If an artifact fails these rules:
 ## Purpose (Why this pack exists)
 This pack is the strict teacher of the Belloop Artifact Protocol (BAP).
 
-It enforces *contract integrity*:
+It enforces contract integrity:
 - No artifact without an explicit contract (JSON Schema)
 - No meaning without schema binding
 - No safety without references-only for sensitive artifact types
 
-This pack does **not** judge business correctness.
-It judges: **Is this artifact allowed to exist here?**
+This pack does not judge business correctness.
+It judges: Is this artifact allowed to exist here?
 
 ---
 
 ## MVP Artifact Kinds (Only)
 MVP allows exactly three artifact kinds:
-
 - `decision`
 - `evidence`
 - `ledger_entry`
 
-Anything else is **Post-MVP** and MUST be rejected until explicitly added via schema + ADR.
+Anything else is Post-MVP and MUST be rejected until explicitly added via schema + ADR.
 
 ---
 
 ## Validation Model (Three Gates)
 
-### Gate 1 â€” Envelope Gate (Existence)
+### Gate 1 — Envelope Gate (Existence)
 All artifacts MUST be wrapped in the envelope schema:
-
 - `contracts/schemas/belloop_artifact_envelope.schema.json`
 
 Required envelope checks:
-
 1) `kind` MUST be one of: `decision`, `evidence`, `ledger_entry`
 2) `schema_version` MUST be strict SemVer: `MAJOR.MINOR.PATCH`
 3) Either `schema_ref` (preferred) OR legacy `schema` OR legacy `schema_id` MUST exist
@@ -53,7 +50,7 @@ Required envelope checks:
    - `producer.version`
 6) `correlation_id` is OPTIONAL in MVP (recommended for distributed operation)
 
-**Reason codes (Gate 1):**
+Reason codes (Gate 1):
 - `ENV_MISSING`
 - `ENV_KIND_INVALID`
 - `ENV_SCHEMA_REF_MISSING`
@@ -63,7 +60,7 @@ Required envelope checks:
 
 ---
 
-### Gate 2 â€” Schema Binding Gate (Meaning)
+### Gate 2 — Schema Binding Gate (Meaning)
 After the envelope is accepted, the validator MUST bind `data` to an explicit schema.
 
 Rules:
@@ -71,21 +68,24 @@ Rules:
 - `kind` MUST map deterministically to the correct payload schema.
 - `data` MUST validate against that schema.
 
-MVP kind â†’ payload schema mapping:
-- `decision` â†’ `contracts/schemas/decision.schema.json`
-- `evidence` â†’ `contracts/schemas/evidence.schema.json`
-- `ledger_entry` â†’ `contracts/schemas/ledger_entry.schema.json`
+MVP kind -> payload schema mapping:
 
-**Reason codes (Gate 2):**
+> Note: Envelope schema pointer fields are: schema_ref (preferred), schema (legacy), schema_id (legacy; envelope only).
+> Payload-level schema_id remains the canonical public URI (https://paygod.org/schemas/*).
+
+- `decision` -> `contracts/schemas/decision.schema.json`
+- `evidence` -> `contracts/schemas/evidence.schema.json`
+- `ledger_entry` -> `contracts/schemas/ledger_entry.schema.json`
+
+Reason codes (Gate 2):
 - `SCHEMA_NOT_FOUND`
 - `SCHEMA_VERSION_UNSUPPORTED`
 - `SCHEMA_VALIDATION_FAILED`
 
 ---
 
-### Gate 3 â€” References-only Gate (Safety)
+### Gate 3 — References-only Gate (Safety)
 For `evidence` and `ledger_entry` artifacts:
-
 - Raw content MUST NOT be stored inside the artifact.
 - Only references are allowed (hashes, IDs, URIs, minimal metadata).
 
@@ -94,7 +94,7 @@ This is mandatory because raw content creates:
 - legal/PII risk,
 - and breaks the principle of stable truth via references.
 
-**Reason codes (Gate 3):**
+Reason codes (Gate 3):
 - `REF_RAW_CONTENT_DETECTED`
 - `REF_PII_RISK_DETECTED`
 - `REF_UNBOUNDED_PAYLOAD`
@@ -103,16 +103,13 @@ This is mandatory because raw content creates:
 
 ## Outputs of the Validator (MVP)
 This pack defines that validation produces three artifacts:
-
-1) **decision**
+1) decision
    - pass/fail
    - reason codes
    - MUST NOT include sensitive payloads
-
-2) **evidence**
+2) evidence
    - references-only proof: refs + hashes + minimal metadata
-
-3) **ledger_entry**
+3) ledger_entry
    - append-only record of the validation (hash-chained reference)
 
 All outputs MUST themselves be wrapped by the BAP envelope.
