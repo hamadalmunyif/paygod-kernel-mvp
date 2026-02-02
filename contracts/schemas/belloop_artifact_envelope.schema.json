@@ -1,35 +1,52 @@
-﻿{
+{
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "BelloopArtifactEnvelope",
   "description": "Belloop Artifact Protocol envelope. Wraps core MVP artifacts with stable metadata.",
   "type": "object",
   "additionalProperties": false,
+
   "required": [
     "kind",
-    "schema",
     "schema_version",
     "timestamp",
     "producer",
-    "correlation_id",
     "data"
   ],
+
+  "anyOf": [
+    { "required": ["schema"] },
+    { "required": ["schema_id"] }
+  ],
+
   "properties": {
     "kind": {
       "type": "string",
       "enum": ["decision", "evidence", "ledger_entry"]
     },
+
     "schema": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "Legacy schema locator (compatibility). Prefer schema_id."
     },
+
+    "schema_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable schema identifier (preferred). Example: contracts/schemas/decision.schema.json"
+    },
+
     "schema_version": {
       "type": "string",
-      "minLength": 1
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Strict SemVer: MAJOR.MINOR.PATCH"
     },
+
     "timestamp": {
       "type": "string",
       "format": "date-time"
     },
+
     "producer": {
       "type": "object",
       "additionalProperties": false,
@@ -40,10 +57,13 @@
         "build": { "type": "string" }
       }
     },
+
     "correlation_id": {
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "description": "Optional in MVP; recommended for cross-artifact correlation."
     },
+
     "data": {
       "oneOf": [
         { "$ref": "decision.schema.json" },

@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-02-02T14:21:16Z",
+  "generated_at": "2026-02-02T18:18:14Z",
   "manifest_version": "1.0.0",
   "schemas": {
     "belloop_artifact_envelope.schema.json": {
-      "sha256": "c8a9057f316e6a781aeebb35e22b34c9a941079302208212d35e51822ebb6293"
+      "sha256": "c026f7f6c2c39fbdfaf28b63e3c6cd2e5928f9abb2e398e199d406753b7c0dfe"
     },
     "decision.schema.json": {
       "sha256": "73b10c331d63c063ff44ec3dc637a4bc171ec0d35b94f3f3780adf259a15d0cd"
