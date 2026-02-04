@@ -1,6 +1,13 @@
-# Schema Stability
+﻿# Schema Stability
 
-Schemas in `contracts/schemas/` are the project’s public contracts.
+## Hash Source of Truth (Governance)
+Schema hashes in `contracts/schema-manifest.json` are governed by Git, not by local files.
+- CI computes hashes from Git blobs (HEAD) as the canonical source of truth.
+- Working tree bytes (CRLF/BOM/editor filters) MUST NOT redefine the legal hash.
+- Local tooling MAY provide preview using STAGED (index) then fallback to HEAD, but this is not the enforcement truth source.
+
+
+Schemas in `contracts/schemas/` are the project's public contracts.
 
 ## How stability is enforced
 - `contracts/schema-manifest.json` stores SHA-256 digests for each schema file.

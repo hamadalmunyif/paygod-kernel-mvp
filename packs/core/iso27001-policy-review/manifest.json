@@ -1,0 +1,24 @@
+{
+    "manifest_version":  "1.0.0",
+    "bap":  {
+                "references_only_required":  true,
+                "allowed_kinds":  [
+                                      "decision",
+                                      "evidence",
+                                      "ledger_entry"
+                                  ],
+                "strict_schema_version_semver":  true,
+                "envelope_schema_id":  "contracts/schemas/belloop_artifact_envelope.schema.json",
+                "envelope_version":  "1.0.0"
+            },
+    "produces":  [
+                     "decision",
+                     "evidence"
+                 ],
+    "pack_name":  "iso27001-policy-review",
+    "pack_class":  "core",
+    "governance":  {
+                       "status":  "mvp",
+                       "owner":  "paygod"
+                   }
+}

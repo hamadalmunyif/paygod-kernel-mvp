@@ -1,6 +1,3 @@
-* text=auto
-
-*.json  text eol=lf
-*.yml   text eol=lf
-*.yaml  text eol=lf
-*.md    text eol=lf
+# Keep hashing stable across OSes
+contracts/schemas/**/*.json text eol=lf
+contracts/schema-manifest.json text eol=lf

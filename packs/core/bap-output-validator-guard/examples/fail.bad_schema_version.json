@@ -1,0 +1,8 @@
+{
+  "kind": "decision",
+  "schema_id": "contracts/schemas/decision.schema.json",
+  "schema_version": "1",
+  "timestamp": "2026-02-02T06:00:00Z",
+  "producer": { "name": "bap-output-validator-guard", "version": "1.0.0" },
+  "data": {}
+}

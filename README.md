@@ -20,6 +20,7 @@ It turns any operational event into:
 | **[cross-border-pii-guard](./packs/core/cross-border-pii-guard)** | Core | Enforces **evidence refs only** and prevents PII/raw payload leakage by design. |
 | **[iso27001-policy-review](./packs/core/iso27001-policy-review)** | Core | Base ISO 27001 control checks (starter). |
 | **[ghg-scope-1-2-guard](./packs/core/ghg-scope-1-2-guard)** | Core | Sustainability guardrails (Scope 1/2). |
+| **[bap-output-validator-guard](./packs/core/bap-output-validator-guard)** | Core | Local proof validator for BAP outputs (PowerShell). |
 | **[admin-drift-detection](./packs/providers/aws/admin-drift-detection)** | AWS Provider | Provider-specific pack (must live under `packs/providers/...`). |
 
 > Draft packs (not part of MVP core): `packs/_drafts/*`
