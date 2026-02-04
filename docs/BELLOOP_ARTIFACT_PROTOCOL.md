@@ -1,4 +1,4 @@
-﻿# Belloop Artifact Protocol (BAP)
+# Belloop Artifact Protocol (BAP)
 
 ## Scope (MVP)
 BAP defines the stable, schema-validated artifacts that power Belloop.
@@ -14,16 +14,32 @@ The system is governed by validated artifacts (schemas), not by code or services
 Any producer (CLI/service/pack) is interchangeable if it emits compliant artifacts.
 
 ## Envelope (Required)
-Every artifact MUST be wrapped in a common envelope:
-- kind
-- schema
-- schema_version
-- timestamp
-- producer
+Every artifact MUST be wrapped in a common envelope defined by the canonical schema:
+
+Fields (defined by contract):
 - correlation_id
 - data
+- kind
+- producer
+- schema
+- schema_id
+- schema_ref
+- schema_version
+- timestamp
+
+Required fields (must exist):
+- data
+- kind
+- producer
+- schema_version
+- timestamp
+
+Notes:
+- correlation_id is OPTIONAL in MVP by the current envelope contract (recommended when available).
 
 No envelope => non-compliant output.
+
+
 
 ## References-only (Security Rule)
 Artifacts MUST NOT store raw sensitive content or PII.
