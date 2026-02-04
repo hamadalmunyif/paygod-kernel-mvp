@@ -1,7 +1,7 @@
-# Schema Stability
+﻿# Schema Stability
 
 ## Hash Source of Truth (Governance)
-Schema hashes in contracts/schema-manifest.json are governed by Git, not by local files.
+Schema hashes in `contracts/schema-manifest.json` are governed by Git, not by local files.
 - CI computes hashes from Git blobs (HEAD) as the canonical source of truth.
 - Working tree bytes (CRLF/BOM/editor filters) MUST NOT redefine the legal hash.
 - Local tooling MAY provide preview using STAGED (index) then fallback to HEAD, but this is not the enforcement truth source.
