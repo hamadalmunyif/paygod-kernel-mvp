@@ -48,7 +48,23 @@ $e = Get-Prop $ok "evidence_refs"
 if ($null -eq $e -or $e.Count -lt 1) { Fail "Positive input missing evidence_refs." }
 
 # --- Deterministic timestamp (UTC, invariant) ---
-$utc = [DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ", [System.Globalization.CultureInfo]::InvariantCulture)
+# --- Reproducible proof time (bit-for-bit) ---
+# Priority:
+# 1) input.timestamp
+# 2) env:PAYGOD_PROOF_TIME
+# 3) fixed default (1970-01-01)
+function Get-ProofTime([object]$okObj) {
+  if ($null -ne $okObj.PSObject.Properties["timestamp"]) {
+    $t = $okObj.PSObject.Properties["timestamp"].Value
+    if (-not [string]::IsNullOrWhiteSpace($t)) { return $t }
+  }
+  if (-not [string]::IsNullOrWhiteSpace($env:PAYGOD_PROOF_TIME)) {
+    return $env:PAYGOD_PROOF_TIME
+  }
+  return "1970-01-01T00:00:00Z"
+}
+
+$utc = Get-ProofTime $ok
 
 # --- Build outputs (Phase 2 placeholders -> deterministic) ---
 $decisionObj = [ordered]@{
