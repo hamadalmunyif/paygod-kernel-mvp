@@ -1,0 +1,11 @@
+{
+  "artifact_type": "bap.proof_run.input",
+  "schema_version": "v0",
+  "timestamp": "1970-01-01T00:00:00Z",
+  "subject": {
+    "ref": "urn:example:subject:demo"
+  },
+  "raw_payload": {
+    "note": "This file intentionally violates refs-only policy. It exists to ensure validator rejects raw payloads."
+  }
+}

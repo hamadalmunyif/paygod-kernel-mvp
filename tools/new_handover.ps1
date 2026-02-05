@@ -1,5 +1,6 @@
-# tools/new_handover.ps1
-# Phase 2 - STEP 1: Generate docs/HANDOVER.md (UTF-8 no BOM), locked to baseline commit.
+﻿# tools/new_handover.ps1
+# Phase 2 - STEP 1: Generate docs/HANDOVER.md (UTF-8 no BOM).
+# Baseline commit is a fixed reference (does NOT require HEAD == baseline).
 # Run from repo root: pwsh -File tools/new_handover.ps1
 
 Set-StrictMode -Version Latest
@@ -13,13 +14,15 @@ function Get-GitValue([string]$cmd) {
   return $v.Trim()
 }
 
-# --- Guards ---
 if (-not (Test-Path ".git")) { throw "Run this from the repository root ('.git' not found)." }
 
+# Fixed Phase 1 baseline reference (law baseline)
 $baselineCommit = "1b6be2e"
-$headCommitFull = Get-GitValue "rev-parse HEAD"
+
+# Current repo state (snapshot)
 $headCommitShort = Get-GitValue "rev-parse --short HEAD"
-$branch = Get-GitValue "rev-parse --abbrev-ref HEAD"
+$branch          = Get-GitValue "rev-parse --abbrev-ref HEAD"
+
 $originUrl = ""
 try { $originUrl = (Get-GitValue "remote get-url origin") } catch { $originUrl = "(no origin remote)" }
 
@@ -27,33 +30,12 @@ if ($branch -ne "main") {
   throw "Direction Lock violation: current branch is '$branch'. You must be on 'main'."
 }
 
-if ($headCommitFull -notlike "$baselineCommit*") {
-  throw "Baseline mismatch: HEAD is '$headCommitShort' but must start with '$baselineCommit'. Aborting."
-}
+# NOTE: We do NOT gate on working tree cleanliness in STEP 1 generator.
+# This script is used to create/update HANDOVER.md and may be edited during execution.
 
-# Ensure clean working tree (no drift)
-$porcelain = & git status --porcelain
-if ($LASTEXITCODE -ne 0) { throw "git status failed." }
+$utcNow = [DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ", [System.Globalization.CultureInfo]::InvariantCulture)
 
-# Normalize output to a single string (handles both array and scalar cases)
-$porcelainText = ($porcelain | Out-String).Trim()
-
-# Allow exactly ONE untracked file: tools/new_handover.ps1 (this script).
-# Anything else must be clean.
-if (-not [string]::IsNullOrWhiteSpace($porcelainText)) {
-  $lines = $porcelainText -split "`r?`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" }
-  $allowed = @("?? tools/new_handover.ps1", "?? tools\new_handover.ps1")
-
-  $unexpected = @($lines | Where-Object { $allowed -notcontains $_ })
-  if ($unexpected.Length -gt 0) {
-    throw "Working tree not clean. Unexpected changes:`n$($unexpected -join "`n")"
-  }
-}
-
-# --- Build content ---
-$utcNow = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-
-# NOTE: use ASCII '-' instead of '—' to avoid mojibake in some Windows console/codepage setups.
+# ASCII-only to avoid mojibake in Windows codepages.
 $handover = @"
 # Paygod Kernel MVP - Phase 1 Closed Handover
 
@@ -71,7 +53,7 @@ $handover = @"
 
 - Repository (origin): $originUrl
 - Branch: $branch
-- Baseline Commit: $headCommitShort
+- Current HEAD: $headCommitShort
 - Generated At (UTC): $utcNow
 
 ## What is Locked
@@ -105,12 +87,10 @@ Multi-pack composition deferred.
 Future default: **deny-wins + reason aggregation**.
 "@
 
-# --- Write file (UTF-8 no BOM) ---
 New-Item -ItemType Directory -Force -Path "docs" | Out-Null
 $path = Join-Path (Get-Location) "docs/HANDOVER.md"
 
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText($path, $handover, $utf8NoBom)
 
-Write-Host "OK: generated docs/HANDOVER.md locked to baseline $baselineCommit at HEAD $headCommitShort"
-Write-Host "Next: git add docs/HANDOVER.md tools/new_handover.ps1 && git commit -m `"docs: fix handover rendering and encoding`""
+Write-Host "OK: generated docs/HANDOVER.md (baseline=$baselineCommit, head=$headCommitShort)"
