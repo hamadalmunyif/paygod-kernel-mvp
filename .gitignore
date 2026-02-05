@@ -21,3 +21,7 @@ Thumbs.db
 *.log
 tmp_*.json
 sample.json
+
+# paygod runtime ledger (outside git)
+paygod_runtime_ledger.jsonl
+*_runtime_ledger.jsonl
