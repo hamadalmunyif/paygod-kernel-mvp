@@ -44,9 +44,7 @@ if (-not [string]::IsNullOrWhiteSpace($porcelainText)) {
   $lines = $porcelainText -split "`r?`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" }
   $allowed = @("?? tools/new_handover.ps1", "?? tools\new_handover.ps1")
 
-  # Force array (prevents .Count issues on scalar)
   $unexpected = @($lines | Where-Object { $allowed -notcontains $_ })
-
   if ($unexpected.Length -gt 0) {
     throw "Working tree not clean. Unexpected changes:`n$($unexpected -join "`n")"
   }
@@ -55,29 +53,30 @@ if (-not [string]::IsNullOrWhiteSpace($porcelainText)) {
 # --- Build content ---
 $utcNow = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 
+# NOTE: use ASCII '-' instead of '—' to avoid mojibake in some Windows console/codepage setups.
 $handover = @"
-# Paygod Kernel MVP — Phase 1 Closed Handover
+# Paygod Kernel MVP - Phase 1 Closed Handover
 
 ## Direction Lock (Non-Negotiable)
 
-- Phase 1: **CLOSED** at baseline commit `$baselineCommit`
+- Phase 1: **CLOSED** at baseline commit $baselineCommit
 - Baseline branch: **main only**
 - Canonical Truth:
-  - `contracts/` = Law
-  - `docs/` = Literal reflection of contracts (no opinion)
-  - `CI` = Execution gate / enforcement
+  - contracts/ = Law
+  - docs/ = Literal reflection of contracts (no opinion)
+  - CI = Execution gate / enforcement
 - No re-interpretation of Phase 1 decisions is allowed.
 
 ## Repository Snapshot (as generated)
 
-- Repository (origin): `$originUrl`
-- Branch: `$branch`
-- Baseline Commit: `$headCommitShort`
-- Generated At (UTC): `$utcNow`
+- Repository (origin): $originUrl
+- Branch: $branch
+- Baseline Commit: $headCommitShort
+- Generated At (UTC): $utcNow
 
 ## What is Locked
 
-- Contracts-first baseline at `$baselineCommit`
+- Contracts-first baseline at $baselineCommit
 - BAP + Envelope contract alignment
 - Schema governance (hash source-of-truth = Git HEAD blobs)
 - CI as the enforcement mechanism
@@ -92,17 +91,17 @@ $handover = @"
 ## Phase 2 Entrypoint (Single Goal)
 
 Ship **one deterministic Proof Run** using:
-- `packs/core/bap-output-validator-guard`
+- packs/core/bap-output-validator-guard
 
 Outputs must be verifiable and enforced by CI:
-- `decision`
-- `evidence` (refs-only; no raw payload; no PII)
-- `ledger_entry` (hash-chained)
+- decision
+- evidence (refs-only; no raw payload; no PII)
+- ledger_entry (hash-chained)
 
 ## Phase 2 Composition Rule (Law-only, no implementation yet)
 
-Phase 2 early execution uses **single-pack authority**.  
-Multi-pack composition deferred.  
+Phase 2 early execution uses **single-pack authority**.
+Multi-pack composition deferred.
 Future default: **deny-wins + reason aggregation**.
 "@
 
@@ -114,4 +113,4 @@ $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText($path, $handover, $utf8NoBom)
 
 Write-Host "OK: generated docs/HANDOVER.md locked to baseline $baselineCommit at HEAD $headCommitShort"
-Write-Host "Next: git add docs/HANDOVER.md tools/new_handover.ps1 && git commit -m `"docs: add Phase 1 closed handover`""
+Write-Host "Next: git add docs/HANDOVER.md tools/new_handover.ps1 && git commit -m `"docs: fix handover rendering and encoding`""
