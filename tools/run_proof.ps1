@@ -14,7 +14,7 @@ $outDir = Join-Path $base "outputs"
 
 if (-not (Test-Path $okIn))  { Fail "Missing: $okIn" }
 if (-not (Test-Path $badIn)) { Fail "Missing: $badIn" }
-New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+New-Item -ItemType Directory -Force -Path $outDir
 
 # --- Load JSON ---
 try { $ok  = Get-Content $okIn  -Raw | ConvertFrom-Json } catch { Fail "Invalid JSON: $okIn" }
@@ -114,4 +114,22 @@ foreach ($p in @($decisionPath,$evidencePath,$ledgerPath)) {
 }
 
 Write-Host "OK: Step 3 proof_run generated outputs in $outDir"
+# --- Optional: append runtime ledger (outside git) ---
+if (-not [string]::IsNullOrWhiteSpace($env:PAYGOD_LEDGER_PATH)) {
+  $append = Join-Path $PSScriptRoot "append_ledger.ps1"
+  if (Test-Path $append) {
+    pwsh -File $append `
+      -DecisionPath $decisionPath `
+      -EvidencePath $evidencePath `
+      -LedgerEntryPath $ledgerPath
+    
+if ($LASTEXITCODE -ne 0) {
+  Fail "append_ledger.ps1 failed with exit code $LASTEXITCODE"
+}Write-Host "OK: runtime ledger appended (PAYGOD_LEDGER_PATH set)."
+  } else {
+    Fail "PAYGOD_LEDGER_PATH is set but tools/append_ledger.ps1 is missing."
+  }
+} else {
+  Write-Host "OK: runtime ledger disabled (PAYGOD_LEDGER_PATH not set)."
+}
 exit 0
