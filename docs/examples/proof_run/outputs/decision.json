@@ -1,6 +1,6 @@
 {
   "decision": "ALLOW",
-  "reason": "placeholder decision (to be produced by validator in STEP 3)",
+  "reason": "deterministic proof_run: refs-only input accepted",
   "pack": "packs/core/bap-output-validator-guard",
-  "timestamp": "1970-01-01T00:00:00Z"
+  "timestamp": "2026-02-05T16:54:09Z"
 }
