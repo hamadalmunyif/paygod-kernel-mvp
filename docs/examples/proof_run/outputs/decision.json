@@ -2,5 +2,5 @@
   "decision": "ALLOW",
   "reason": "deterministic proof_run: refs-only input accepted",
   "pack": "packs/core/bap-output-validator-guard",
-  "timestamp": "2026-02-05T16:54:09Z"
+  "timestamp": "1970-01-01T00:00:00Z"
 }
