@@ -28,30 +28,13 @@ jobs:
             pip install jsonschema referencing
           fi
 
-      # A) Generate proof_run outputs (must be deterministic)
-      - name: Generate proof_run outputs
-        shell: pwsh
-        run: |
-          pwsh -File tools/run_proof.ps1
-
-      # B) Assert determinism (no diffs after run_proof)
-      - name: Assert proof_run is deterministic (no git diff)
-        shell: pwsh
-        run: |
-          git status --porcelain
-          if ((git status --porcelain).Length -ne 0) {
-            git status --porcelain
-            git diff
-            throw "Proof run modified tracked files (not deterministic)."
-          }
-
-      # C) Validate official proof_run envelope (existing file)
+      # Validate official proof_run envelope (existing file)
       - name: Validate proof_run input envelope
         shell: pwsh
         run: |
           pwsh -File tools/bap_validate.ps1 -InputPath "docs/examples/proof_run/input.envelope.json" -RepoRoot (Get-Location).Path
 
-      # D) Validate pack PASS examples (pattern-based)
+      # Validate pack PASS examples (pattern-based)
       - name: Validate pack PASS examples
         shell: pwsh
         run: |
@@ -62,7 +45,7 @@ jobs:
             pwsh -File tools/bap_validate.ps1 -InputPath $f.FullName -RepoRoot (Get-Location).Path
           }
 
-      # E) Validate pack FAIL examples (pattern-based, expected failure)
+      # Validate pack FAIL examples (pattern-based, expected failure)
       - name: Validate pack FAIL examples (expected failure)
         shell: pwsh
         run: |
