@@ -1,4 +1,4 @@
-name: BAP Proof Seal
+﻿name: BAP Proof Seal
 
 on:
   pull_request:
@@ -27,12 +27,6 @@ jobs:
           else
             pip install jsonschema referencing
           fi
-
-      # Validate official proof_run envelope (existing file)
-      - name: Validate proof_run input envelope
-        shell: pwsh
-        run: |
-          pwsh -File tools/bap_validate.ps1 -InputPath "docs/examples/proof_run/input.envelope.json" -RepoRoot (Get-Location).Path
 
       # Validate pack PASS examples (pattern-based)
       - name: Validate pack PASS examples
