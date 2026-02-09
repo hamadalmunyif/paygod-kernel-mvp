@@ -28,7 +28,6 @@ jobs:
             pip install jsonschema referencing
           fi
 
-      # Validate pack PASS examples (pattern-based)
       - name: Validate pack PASS examples
         shell: pwsh
         run: |
@@ -36,24 +35,29 @@ jobs:
           $pass = Get-ChildItem $root -Filter "pass*.json" -File
           if (-not $pass) { throw "No PASS examples found in $root" }
           foreach ($f in $pass) {
-            pwsh -File tools/bap_validate.ps1 -InputPath $f.FullName -RepoRoot (Get-Location).Path
+            pwsh -File tools/bap_validate.ps1 `
+              -InputPath $f.FullName `
+              -RepoRoot (Get-Location).Path
+            if ($LASTEXITCODE -ne 0) {
+              throw "PASS example failed validation: $($f.Name)"
+            }
           }
 
-      # Validate pack FAIL examples (pattern-based, expected failure)
-      - name: Validate pack FAIL examples (expected failure)
+      - name: Validate pack FAIL examples
         shell: pwsh
         run: |
           $root = "packs/core/bap-output-validator-guard/examples"
           $fail = Get-ChildItem $root -Filter "fail*.json" -File
           if (-not $fail) { throw "No FAIL examples found in $root" }
           foreach ($f in $fail) {
-            pwsh -File tools/bap_validate.ps1 -InputPath $f.FullName -RepoRoot (Get-Location).Path
+            pwsh -File tools/bap_validate.ps1 `
+              -InputPath $f.FullName `
+              -RepoRoot (Get-Location).Path
             if ($LASTEXITCODE -eq 0) {
               throw "Validator unexpectedly PASSED fail example: $($f.Name)"
-            } else {
-              Write-Host "OK rejected: $($f.Name)"
             }
           }
+          $global:LASTEXITCODE = 0
 
       - name: Upload proof artifacts
         if: always()
