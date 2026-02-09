@@ -28,93 +28,53 @@ jobs:
             pip install jsonschema referencing
           fi
 
-      # 1) Generate deterministic proof_run outputs (raw outputs)
+      # A) Generate proof_run outputs (must be deterministic)
       - name: Generate proof_run outputs
         shell: pwsh
         run: |
           pwsh -File tools/run_proof.ps1
 
-      # 2) Wrap outputs into BAP envelopes (temp) + validate via tools/bap_validate.ps1
-      - name: Seal proof_run outputs (BAP envelopes)
+      # B) Assert determinism (no diffs after run_proof)
+      - name: Assert proof_run is deterministic (no git diff)
         shell: pwsh
         run: |
-          Set-StrictMode -Version Latest
-          $ErrorActionPreference = "Stop"
-
-          $outDir = "docs/examples/proof_run/outputs"
-          if (-not (Test-Path $outDir)) { throw "Missing outputs dir: $outDir" }
-
-          $tmp = Join-Path $env:RUNNER_TEMP "bap-proof-seal"
-          New-Item -ItemType Directory -Force -Path $tmp | Out-Null
-
-          function Write-Utf8NoBom([string]$path, [string]$text) {
-            $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-            [System.IO.File]::WriteAllText($path, $text + "`n", $utf8NoBom)
+          git status --porcelain
+          if ((git status --porcelain).Length -ne 0) {
+            git status --porcelain
+            git diff
+            throw "Proof run modified tracked files (not deterministic)."
           }
 
-          function New-Envelope([string]$kind, [string]$schemaRef, [object]$dataObj, [string]$ts) {
-            [ordered]@{
-              kind          = $kind
-              schema_version= "1.0.0"
-              schema_ref    = $schemaRef
-              timestamp     = $ts
-              producer      = @{ name="proof-seal-ci"; version="1.0.0" }
-              correlation_id= "proof_run_ci"
-              data          = $dataObj
-            }
-          }
+      # C) Validate official proof_run envelope (existing file)
+      - name: Validate proof_run input envelope
+        shell: pwsh
+        run: |
+          pwsh -File tools/bap_validate.ps1 -InputPath "docs/examples/proof_run/input.envelope.json" -RepoRoot (Get-Location).Path
 
-          # Use deterministic timestamp from decision output
-          $dec = Get-Content (Join-Path $outDir "decision.json") -Raw | ConvertFrom-Json
-          $ts  = $dec.timestamp
-          if (-not $ts) { $ts = "1970-01-01T00:00:00Z" }
-
-          $map = @(
-            @{ kind="decision";     schema="contracts/schemas/decision.schema.json";     file=(Join-Path $outDir "decision.json") },
-            @{ kind="evidence";     schema="contracts/schemas/evidence.schema.json";     file=(Join-Path $outDir "evidence.json") },
-            @{ kind="ledger_entry"; schema="contracts/schemas/ledger_entry.schema.json"; file=(Join-Path $outDir "ledger_entry.json") }
-          )
-
-          foreach ($m in $map) {
-            $dataObj = Get-Content $m.file -Raw | ConvertFrom-Json
-            $envObj  = New-Envelope $m.kind $m.schema $dataObj $ts
-            $envJson = ($envObj | ConvertTo-Json -Depth 50)
-            $envPath = Join-Path $tmp ("proof_run." + $m.kind + ".envelope.json")
-            Write-Utf8NoBom $envPath $envJson
-
-            pwsh -File tools/bap_validate.ps1 -InputPath $envPath -RepoRoot (Get-Location).Path
-          }
-
-      # 3) Validate pack examples: PASS must pass
+      # D) Validate pack PASS examples (pattern-based)
       - name: Validate pack PASS examples
         shell: pwsh
         run: |
-          Set-StrictMode -Version Latest
-          $ErrorActionPreference = "Stop"
-          $pass = @(
-            "packs/core/bap-output-validator-guard/examples/pass.decision.json",
-            "packs/core/bap-output-validator-guard/examples/pass.evidence.json"
-          )
-          foreach ($p in $pass) {
-            pwsh -File tools/bap_validate.ps1 -InputPath $p -RepoRoot (Get-Location).Path
+          $root = "packs/core/bap-output-validator-guard/examples"
+          $pass = Get-ChildItem $root -Filter "pass*.json" -File
+          if (-not $pass) { throw "No PASS examples found in $root" }
+          foreach ($f in $pass) {
+            pwsh -File tools/bap_validate.ps1 -InputPath $f.FullName -RepoRoot (Get-Location).Path
           }
 
-      # 4) Validate pack FAIL examples: failure is expected
+      # E) Validate pack FAIL examples (pattern-based, expected failure)
       - name: Validate pack FAIL examples (expected failure)
         shell: pwsh
         run: |
-          Set-StrictMode -Version Latest
-          $ErrorActionPreference = "Stop"
-          $fail = @(
-            "packs/core/bap-output-validator-guard/examples/fail.bad_schema_version.json",
-            "packs/core/bap-output-validator-guard/examples/fail.evidence_raw_payload.json"
-          )
-          foreach ($p in $fail) {
-            pwsh -File tools/bap_validate.ps1 -InputPath $p -RepoRoot (Get-Location).Path
+          $root = "packs/core/bap-output-validator-guard/examples"
+          $fail = Get-ChildItem $root -Filter "fail*.json" -File
+          if (-not $fail) { throw "No FAIL examples found in $root" }
+          foreach ($f in $fail) {
+            pwsh -File tools/bap_validate.ps1 -InputPath $f.FullName -RepoRoot (Get-Location).Path
             if ($LASTEXITCODE -eq 0) {
-              throw "❌ Validator unexpectedly PASSED fail example: $p"
+              throw "Validator unexpectedly PASSED fail example: $($f.Name)"
             } else {
-              Write-Host "✅ Validator correctly rejected: $p"
+              Write-Host "OK rejected: $($f.Name)"
             }
           }
 
@@ -125,3 +85,4 @@ jobs:
           name: bap-proof-seal-artifacts
           path: |
             docs/examples/proof_run
+            packs/core/bap-output-validator-guard/examples
