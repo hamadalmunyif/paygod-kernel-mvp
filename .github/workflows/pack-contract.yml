@@ -1,0 +1,33 @@
+﻿name: Pack Contract Gate
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  pack-contract:
+    name: Pack Contract (paygod/v1)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f tools/requirements.txt ]; then
+            pip install -r tools/requirements.txt
+          else
+            pip install jsonschema referencing pyyaml
+          fi
+
+      - name: Validate packs against Pack Contract schema
+        run: |
+          python tools/pack_validate.py
