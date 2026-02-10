@@ -1,0 +1,37 @@
+﻿api_version: paygod/v1
+kind: Pack
+
+metadata:
+  name: bap-output-validator-guard
+  version: 0.1.0
+  description: "Validates BAP artifacts using PASS/FAIL examples to enforce output contract boundaries."
+  maintainer: "paygod-kernel-mvp"
+  tags:
+    - bap
+    - output
+    - validator
+    - guard
+    - contract
+
+spec:
+  policy:
+    rules:
+      - name: require-pass-examples-present
+        condition: "examples.pass.present == true"
+        decision: deny
+        reason: "Pack must include at least one pass*.json example under examples/."
+
+      - name: require-fail-examples-present
+        condition: "examples.fail.present == true"
+        decision: deny
+        reason: "Pack must include at least one fail*.json example under examples/."
+
+      - name: pass-examples-must-validate
+        condition: "examples.pass.all_valid == true"
+        decision: deny
+        reason: "All pass*.json examples must validate successfully."
+
+      - name: fail-examples-must-reject
+        condition: "examples.fail.all_rejected == true"
+        decision: deny
+        reason: "All fail*.json examples must be rejected by the validator."
