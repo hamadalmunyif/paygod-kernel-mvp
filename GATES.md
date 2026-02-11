@@ -23,3 +23,6 @@ To merge into `main`, the following must pass:
 
 - **Pack Contract Gate** (GitHub Actions)
   - All pack.yaml under packs/** (excluding _drafts) must validate against contracts/schemas/pack.schema.json.
+
+- **Repository Entry Point**
+  - START_HERE.md is the canonical onboarding document for developers.
