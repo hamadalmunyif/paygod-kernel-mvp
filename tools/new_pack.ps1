@@ -27,10 +27,15 @@ if (Test-Path $dest) {
   Write-Error "Destination already exists: $dest"
 }
 
-Copy-Item -Recurse -Force $template $dest
+# Copy entire template folder as new pack folder
+Copy-Item -Recurse -Force -Path $template -Destination $dest
 
-# Replace template name in pack.yaml
 $packPath = Join-Path $dest "pack.yaml"
+
+if (!(Test-Path $packPath)) {
+  Write-Error "pack.yaml not found after copy: $packPath"
+}
+
 $content = Get-Content $packPath -Raw -Encoding UTF8
 $content = $content -replace "name:\s*pack-name-here", ("name: " + $Name)
 Set-Content -Path $packPath -Value $content -Encoding UTF8
