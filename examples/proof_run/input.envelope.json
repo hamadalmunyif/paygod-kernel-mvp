@@ -1,0 +1,12 @@
+{
+  "artifact_type": "bap.proof_run.input",
+  "schema_version": "v0",
+  "timestamp": "1970-01-01T00:00:00Z",
+  "subject": { "ref": "urn:example:subject:demo" },
+  "evidence_refs": [
+    {
+      "ref": "urn:example:evidence:sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "note": "refs-only placeholder; no raw payload"
+    }
+  ]
+}
