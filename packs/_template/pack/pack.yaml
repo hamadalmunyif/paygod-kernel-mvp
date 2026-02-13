@@ -1,0 +1,17 @@
+﻿api_version: paygod/v1
+kind: Pack
+
+metadata:
+  name: pack-name-here
+  version: 0.1.0
+  description: "Template pack. Copy this folder to create a new pack."
+  maintainer: "paygod-kernel-mvp"
+  tags: []
+
+spec:
+  policy:
+    rules:
+      - name: example-rule
+        condition: "true == true"
+        decision: allow
+        reason: "Template rule. Replace with real policy logic."

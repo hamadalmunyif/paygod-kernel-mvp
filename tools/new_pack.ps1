@@ -1,5 +1,6 @@
 ﻿param(
   [Parameter(Mandatory=$true)]
+  [ValidateNotNullOrEmpty()]
   [string]$Name,
 
   [ValidateSet("core","providers","drafts")]
@@ -8,8 +9,8 @@
 
 $ErrorActionPreference = "Stop"
 
-$repoRoot = (Resolve-Path ".").Path
-$template = Join-Path $repoRoot "packs\_template\pack"
+$repoRoot  = (Resolve-Path ".").Path
+$template  = Join-Path $repoRoot "packs\_template\pack"
 
 if (!(Test-Path $template)) {
   Write-Error "Template not found: $template"
@@ -21,17 +22,18 @@ switch ($Category) {
   "drafts"    { $destRoot = Join-Path $repoRoot "packs\_drafts" }
 }
 
-$dest = Join-Path $destRoot $Name
+New-Item -ItemType Directory -Force $destRoot | Out-Null
 
+$dest = Join-Path $destRoot $Name
 if (Test-Path $dest) {
   Write-Error "Destination already exists: $dest"
 }
 
-# Copy entire template folder as new pack folder
-Copy-Item -Recurse -Force -Path $template -Destination $dest
+New-Item -ItemType Directory -Force $dest | Out-Null
+
+Copy-Item -Path (Join-Path $template "*") -Destination $dest -Recurse -Force
 
 $packPath = Join-Path $dest "pack.yaml"
-
 if (!(Test-Path $packPath)) {
   Write-Error "pack.yaml not found after copy: $packPath"
 }
