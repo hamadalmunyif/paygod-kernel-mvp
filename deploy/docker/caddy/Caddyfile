@@ -1,0 +1,11 @@
+﻿:8080 {
+  route /api/* {
+    reverse_proxy api:8080
+  }
+
+  route /health {
+    reverse_proxy api:8080
+  }
+
+  respond "PayGod Dev Edge (Caddy) - try /api/run" 200
+}
