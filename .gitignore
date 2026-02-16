@@ -25,3 +25,8 @@ sample.json
 # paygod runtime ledger (outside git)
 paygod_runtime_ledger.jsonl
 *_runtime_ledger.jsonl
+# --- local runtime outputs ---
+_witness_tmp/
+_dev_out/
+artifacts.zip
+artifacts_out/

@@ -1,0 +1,22 @@
+﻿services:
+  api:
+    image: paygod/api:dev
+    container_name: paygod-api
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+    volumes:
+      - ../../:/work:ro
+      - ../../packs:/packs:ro
+      - ../../_dev_out:/out
+    expose:
+      - "8080"
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: paygod-edge
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - api
