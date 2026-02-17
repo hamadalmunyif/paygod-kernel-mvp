@@ -28,6 +28,9 @@ jobs:
       - name: Build Runner Image
         run: docker build -f deploy/docker/runner/Dockerfile -t paygod/runner:ci .
 
+
+      - name: Tag Runner Image as dev (for witness script)
+        run: docker tag paygod/runner:ci paygod/runner:dev
       - name: Run deterministic witness
         shell: pwsh
         run: pwsh ./tools/phase4_docker_witness.ps1
@@ -44,3 +47,4 @@ jobs:
       - name: Verify bundle
         shell: pwsh
         run: pwsh ./tools/verify_bundle.ps1 -BundlePath ./ci_out
+
