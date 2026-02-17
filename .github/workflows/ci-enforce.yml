@@ -25,7 +25,6 @@ jobs:
       - name: Setup Docker
         uses: docker/setup-buildx-action@v3
 
-           
       - name: Build Runner Image
         run: docker buildx build --load -f deploy/docker/runner/Dockerfile -t paygod/runner:ci .
 
@@ -53,6 +52,7 @@ jobs:
       - name: Verify bundle
         shell: pwsh
         run: pwsh ./tools/verify_bundle.ps1 -BundlePath ./ci_out
+
 
 
 
