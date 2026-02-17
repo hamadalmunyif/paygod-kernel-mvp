@@ -150,8 +150,8 @@ $userArgs = @()
 if ($IsLinux) {
   $uid = (& /usr/bin/id -u).Trim()
   $gid = (& /usr/bin/id -g).Trim()
-  $userArgs = @("--user", "$uid:$gid")
-  Write-Host "==> Linux runner detected; using container user: $uid:$gid"
+  $userArgs = @("--user", "${uid}:${gid}")   # <-- FIX: PowerShell-safe interpolation
+  Write-Host "==> Linux runner detected; using container user: ${uid}:${gid}"
 }
 
 function Invoke-Run([string]$OutDir) {
