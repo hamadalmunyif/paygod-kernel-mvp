@@ -148,8 +148,8 @@ $inputMount = "$((Resolve-Path $inputJsonPath).Path):/input/input.json:ro"
 # Linux CI: run container as host runner user so it can write mounted /out
 $userArgs = @()
 if ($IsLinux) {
-  $uid = (id -u).Trim()
-  $gid = (id -g).Trim()
+  $uid = (& /usr/bin/id -u).Trim()
+  $gid = (& /usr/bin/id -g).Trim()
   $userArgs = @("--user", "$uid:$gid")
   Write-Host "==> Linux runner detected; using container user: $uid:$gid"
 }
@@ -158,9 +158,12 @@ function Invoke-Run([string]$OutDir) {
   $outHostPath = (Resolve-Path $OutDir).Path
 
   # Ensure host out dir is writable in Linux runners
-  if ($IsLinux) { & chmod -R 777 $outHostPath 2>$null | Out-Null }
+  if ($IsLinux) {
+    & chmod -R 777 $outHostPath 2>$null | Out-Null
+  }
 
-  $outMount = "$outHostPath:/out"
+  # Force rw bind mount for clarity (Docker accepts :rw)
+  $outMount = "$outHostPath:/out:rw"
 
   $help = docker run --rm $ImageName run --help 2>&1 | Out-String
   $supportsClock = ($help -match "--clock")
