@@ -186,3 +186,4 @@ Write-Host ("==> out2 digest: {0}" -f $d2.digest)
 
 if ($d1.digest -ne $d2.digest) { throw "WITNESS FAIL" }
 Write-Host "==> PASS: deterministic outputs match"
+
