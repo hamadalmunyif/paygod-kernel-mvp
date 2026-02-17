@@ -25,7 +25,7 @@ jobs:
       - name: Setup Docker
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Runner Image
+            - name: Build Runner Image
         run: docker buildx build --load -f deploy/docker/runner/Dockerfile -t paygod/runner:ci .
 
       - name: Tag Runner Image as dev (for witness script)
@@ -40,18 +40,19 @@ jobs:
       - name: Run deterministic witness
         shell: pwsh
         run: pwsh ./tools/phase4_docker_witness.ps1
-- name: Generate bundle (CLI run)
+
+      - name: Generate bundle (CLI run)
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path ci_out | Out-Null
-          dotnet run --project ./src/PayGod.Cli/PayGod.Cli.csproj -- run `
-            --pack ./packs/core/secrets-in-repo-guard `
-            --input ./_witness_tmp/input/input.json `
+          dotnet run --project ./src/PayGod.Cli/PayGod.Cli.csproj -- run 
+            --pack ./packs/core/secrets-in-repo-guard 
+            --input ./_witness_tmp/input/input.json 
             --out ./ci_out
-
       - name: Verify bundle
         shell: pwsh
         run: pwsh ./tools/verify_bundle.ps1 -BundlePath ./ci_out
+
 
 
 
