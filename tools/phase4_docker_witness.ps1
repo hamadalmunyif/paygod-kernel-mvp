@@ -29,11 +29,9 @@ function Should-IgnorePath([string]$RelPath) {
   return $false
 }
 
-# PS5.1: ConvertFrom-Json returns PSCustomObject => must handle [psobject]
 function Normalize-JsonObject($obj) {
   if ($null -eq $obj) { return $null }
 
-  # Arrays / lists
   if ($obj -is [System.Collections.IList]) {
     for ($i=0; $i -lt $obj.Count; $i++) {
       $obj[$i] = Normalize-JsonObject $obj[$i]
@@ -41,7 +39,6 @@ function Normalize-JsonObject($obj) {
     return $obj
   }
 
-  # Hashtable / Dictionary
   if ($obj -is [System.Collections.IDictionary]) {
     foreach ($k in @("generated_at","timestamp","record_hash")) {
       if ($obj.Contains($k)) { $obj.Remove($k) }
@@ -52,7 +49,6 @@ function Normalize-JsonObject($obj) {
     return $obj
   }
 
-  # PSCustomObject / PSObject
   if ($obj -is [psobject]) {
     foreach ($k in @("generated_at","timestamp","record_hash")) {
       $p = $obj.PSObject.Properties[$k]
@@ -150,20 +146,19 @@ $userArgs = @()
 if ($IsLinux) {
   $uid = (& /usr/bin/id -u).Trim()
   $gid = (& /usr/bin/id -g).Trim()
-  $userArgs = @("--user", "${uid}:${gid}")   # <-- FIX: PowerShell-safe interpolation
+  $userArgs = @("--user", "${uid}:${gid}")   # <-- FIX: ${} to avoid PowerShell parsing : as scope
   Write-Host "==> Linux runner detected; using container user: ${uid}:${gid}"
 }
 
 function Invoke-Run([string]$OutDir) {
   $outHostPath = (Resolve-Path $OutDir).Path
 
-  # Ensure host out dir is writable in Linux runners
   if ($IsLinux) {
-    & chmod -R 777 $outHostPath 2>$null | Out-Null
+    & /bin/chmod -R 777 $outHostPath 2>$null | Out-Null
   }
 
-  # Force rw bind mount for clarity (Docker accepts :rw)
-  $outMount = "$outHostPath:/out:rw"
+  # FIX: wrap variable before :/out:rw
+  $outMount = "${outHostPath}:/out:rw"
 
   $help = docker run --rm $ImageName run --help 2>&1 | Out-String
   $supportsClock = ($help -match "--clock")
