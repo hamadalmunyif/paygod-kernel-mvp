@@ -145,14 +145,27 @@ $workMount  = "$($repoRoot.Path):/work:ro"
 $packMount  = "$((Resolve-Path (Join-Path $repoRoot $PackPath)).Path):/pack:ro"
 $inputMount = "$((Resolve-Path $inputJsonPath).Path):/input/input.json:ro"
 
+# Linux CI: run container as host runner user so it can write mounted /out
+$userArgs = @()
+if ($IsLinux) {
+  $uid = (id -u).Trim()
+  $gid = (id -g).Trim()
+  $userArgs = @("--user", "$uid:$gid")
+  Write-Host "==> Linux runner detected; using container user: $uid:$gid"
+}
+
 function Invoke-Run([string]$OutDir) {
-  $outMount = "$((Resolve-Path $OutDir).Path):/out"
+  $outHostPath = (Resolve-Path $OutDir).Path
+
+  # Ensure host out dir is writable in Linux runners
+  if ($IsLinux) { & chmod -R 777 $outHostPath 2>$null | Out-Null }
+
+  $outMount = "$outHostPath:/out"
 
   $help = docker run --rm $ImageName run --help 2>&1 | Out-String
   $supportsClock = ($help -match "--clock")
 
-  $cmd = @(
-    "run","--rm","--network","none",
+  $cmd = @("run","--rm","--network","none") + $userArgs + @(
     "-v",$workMount,
     "-v",$packMount,
     "-v",$inputMount,
@@ -186,4 +199,3 @@ Write-Host ("==> out2 digest: {0}" -f $d2.digest)
 
 if ($d1.digest -ne $d2.digest) { throw "WITNESS FAIL" }
 Write-Host "==> PASS: deterministic outputs match"
-
