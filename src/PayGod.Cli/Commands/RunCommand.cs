@@ -1,4 +1,4 @@
-using System.CommandLine;
+﻿using System.CommandLine;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -158,7 +158,7 @@ public static class RunCommand
         var manifestPath = Path.Combine(outDir.FullName, "manifest.json");
         WriteJson(manifestPath, manifest);
 
-        Console.WriteLine("✅ Run complete.");
+        Console.WriteLine("âœ… Run complete.");
     }
 
     private static void AppendLedger(
@@ -264,8 +264,9 @@ public static class RunCommand
 
     private static void Fail(string msg)
     {
-        Console.Error.WriteLine($"❌ {msg}");
+        Console.Error.WriteLine($"â‌Œ {msg}");
         Environment.Exit(2);
     }
 }
+
 
