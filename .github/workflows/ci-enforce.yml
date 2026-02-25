@@ -12,8 +12,8 @@ jobs:
 
     env:
       PAYGOD_CLOCK: 2026-02-15T00:00:00Z
-      SOURCE_DATE_EPOCH: 0
-      PAYGOD_STRICT: 1
+      SOURCE_DATE_EPOCH: "0"
+      PAYGOD_STRICT: "1"
 
     steps:
       - name: Checkout
@@ -25,26 +25,16 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Build CLI
-        shell: pwsh
         run: dotnet build ./src/PayGod.Cli/PayGod.Cli.csproj --configuration Release
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Build Runner Image
-        shell: pwsh
         run: docker buildx build --load -f deploy/docker/runner/Dockerfile -t paygod/runner:ci .
 
       - name: Tag Runner Image as dev (for witness script)
-        shell: pwsh
         run: docker tag paygod/runner:ci paygod/runner:dev
-
-      - name: Debug docker images
-        shell: pwsh
-        run: |
-          docker images
-          docker image inspect paygod/runner:ci
-          docker image inspect paygod/runner:dev
 
       - name: Run deterministic witness
         shell: pwsh
