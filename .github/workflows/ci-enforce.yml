@@ -36,6 +36,12 @@ jobs:
       - name: Tag Runner Image as dev (for witness script)
         run: docker tag paygod/runner:ci paygod/runner:dev
 
+      - name: Debug tools directory (case-sensitive on Linux)
+        shell: pwsh
+        run: |
+          Get-Location
+          Get-ChildItem -Force ./tools | Sort-Object Name | Format-Table -AutoSize Name,Length
+
       - name: Run deterministic witness
         shell: pwsh
         run: pwsh -NoProfile -File ./tools/phase4_docker_witness.ps1
