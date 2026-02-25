@@ -41,7 +41,7 @@ public static class RunCommand
         var inputJson = JsonNode.Parse(File.ReadAllText(input.FullName)) ?? throw new InvalidOperationException("Invalid input JSON.");
 
         // One run timestamp for the whole bundle (important for determinism)
-        var runTs = DateTimeOffset.UtcNow.ToString("o");
+        var runTs = PaygodClock.UtcNowOffset.ToString("o");
 
         var inputHash = Hasher.ComputeHash(inputJson);
         var packDigest = Sha256Hex(File.ReadAllBytes(packPath));
@@ -268,3 +268,4 @@ public static class RunCommand
         Environment.Exit(2);
     }
 }
+

@@ -10,6 +10,10 @@ jobs:
   enforce:
     runs-on: ubuntu-latest
 
+    env:
+      PAYGOD_CLOCK: 2026-02-15T00:00:00Z
+      SOURCE_DATE_EPOCH: 0
+      PAYGOD_STRICT: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,9 +27,12 @@ jobs:
         shell: pwsh
         run: dotnet build ./src/PayGod.Cli/PayGod.Cli.csproj --configuration Release
 
+      - name: Setup Docker
+        uses: docker/setup-buildx-action@v3
+
       - name: Build Runner Image
         shell: pwsh
-        run: docker build --no-cache -f deploy/docker/runner/Dockerfile -t paygod/runner:ci .
+        run: docker buildx build --load -f deploy/docker/runner/Dockerfile -t paygod/runner:ci .
 
       - name: Tag Runner Image as dev (for witness script)
         shell: pwsh
@@ -51,4 +58,7 @@ jobs:
       - name: Verify bundle
         shell: pwsh
         run: pwsh ./tools/verify_bundle.ps1 -BundlePath ./ci_out
+
+
+
 
