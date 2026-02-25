@@ -1,5 +1,7 @@
-Param(
-  [string]$ImageName = "paygod/runner:dev",
+﻿Param(
+  [ValidateSet("strict","canonical")]
+  [string]$Mode = "strict",
+[string]$ImageName = "paygod/runner:dev",
   [string]$PackPath  = "packs/core/secrets-in-repo-guard",
   [string]$Clock     = "2026-02-15T00:00:00Z"
 )
@@ -281,15 +283,18 @@ function Invoke-Run([string]$OutDir) {
   $supportsClock = ($help -match "--clock")
 
   $cmd = @("run","--rm","--network","none") + $userArgs + @(
-    "-v",$workMount,
-    "-v",$packMount,
-    "-v",$inputMount,
-    "-v",$outMount,
-    $ImageName,
-    "run","--pack","/pack","--input","/input/input.json","--out","/out"
-  )
+  "-e","PAYGOD_CLOCK=$Clock",
+  "-e","PAYGOD_STRICT=1",
+  "-e","SOURCE_DATE_EPOCH=0",
+  "-v",$workMount,
+  "-v",$packMount,
+  "-v",$inputMount,
+  "-v",$outMount,
+  $ImageName,
+  "run","--pack","/pack","--input","/input/input.json","--out","/out"
+)
 
-  if ($supportsClock) { $cmd += @("--clock",$Clock) }
+if ($supportsClock) { $cmd += @("--clock",$Clock) } { $cmd += @("--clock",$Clock) }
 
   Write-Host "==> docker $($cmd -join ' ')"
   docker @cmd
@@ -303,6 +308,28 @@ Write-Host "==> Run #2"
 Invoke-Run $out2Dir
 
 Write-Host "==> Hashing outputs (with exclusions + canonical JSON)"
+# -------- CANONICAL MODE BRANCH --------
+if ($Mode -eq "canonical") {
+  Write-Host "==> Hashing outputs (canonical semantics; ignores runner manifest.json)"
+  $d1c = Get-CanonicalWitness $out1Dir
+  $d2c = Get-CanonicalWitness $out2Dir
+
+  Write-Host ("==> canonical out1 hash: {0}" -f $d1c.canon_manifest_hash)
+  Write-Host ("==> canonical out2 hash: {0}" -f $d2c.canon_manifest_hash)
+
+  if ($d1c.canon_manifest_hash -ne $d2c.canon_manifest_hash) {
+    Write-Host "==> WITNESS FAIL: canonical semantics differ."
+    Write-Host "----- out1 canonical manifest -----"
+    Write-Host $d1c.canon_manifest_json
+    Write-Host "----- out2 canonical manifest -----"
+    Write-Host $d2c.canon_manifest_json
+    throw "WITNESS FAIL"
+  }
+
+  Write-Host "==> PASS: deterministic outputs match (canonical semantics)"
+  exit 0
+}
+# -------- END CANONICAL MODE BRANCH --------
 $d1 = Get-OutDigest $out1Dir
 $d2 = Get-OutDigest $out2Dir
 
@@ -318,3 +345,173 @@ if ($d1.digest -ne $d2.digest) {
 }
 
 Write-Host "==> PASS: deterministic outputs match"
+
+# ===================== BEGIN CANONICAL WITNESS HELPERS =====================
+function Canonicalize-JsonValue($value) {
+  if ($null -eq $value) { return $null }
+
+  if ($value -is [System.Collections.IEnumerable] -and -not ($value -is [string]) -and -not ($value -is [System.Collections.IDictionary])) {
+    $arr = @()
+    foreach ($item in $value) { $arr += (Canonicalize-JsonValue $item) }
+    return ,$arr
+  }
+
+  if ($value -is [System.Collections.IDictionary]) {
+    $out = [ordered]@{}
+    $keys = @($value.Keys) | ForEach-Object { "$_" } | Sort-Object
+    foreach ($k in $keys) { $out[$k] = Canonicalize-JsonValue $value[$k] }
+    return $out
+  }
+
+  if ($value -is [psobject] -and -not ($value -is [string])) {
+    $out = [ordered]@{}
+    $props = @($value.PSObject.Properties.Name) | Sort-Object
+    foreach ($name in $props) { $out[$name] = Canonicalize-JsonValue $value.$name }
+    return $out
+  }
+
+  return $value
+}
+
+function Normalize-JsonObject($obj) {
+  if ($null -eq $obj) { return $null }
+
+  if ($obj -is [System.Collections.IDictionary]) {
+    foreach ($k in @("generated_at","timestamp","record_hash")) {
+      if ($obj.ContainsKey($k)) { $obj.Remove($k) }
+    }
+    foreach ($k in @($obj.Keys)) { $obj[$k] = Normalize-JsonObject $obj[$k] }
+    return $obj
+  }
+
+  if ($obj -is [psobject] -and -not ($obj -is [string])) {
+    foreach ($k in @("generated_at","timestamp","record_hash")) {
+      $p = $obj.PSObject.Properties[$k]
+      if ($null -ne $p) { $obj.PSObject.Properties.Remove($k) }
+    }
+    foreach ($p in @($obj.PSObject.Properties)) {
+      $obj.($p.Name) = Normalize-JsonObject $p.Value
+    }
+    return $obj
+  }
+
+  if ($obj -is [System.Collections.IEnumerable] -and -not ($obj -is [string])) {
+    for ($i=0; $i -lt $obj.Count; $i++) { $obj[$i] = Normalize-JsonObject $obj[$i] }
+    return $obj
+  }
+
+  return $obj
+}
+
+function ConvertTo-CanonicalJson([string]$RawJson) {
+  try { $obj = $RawJson | ConvertFrom-Json -AsHashtable } catch { $obj = $RawJson | ConvertFrom-Json }
+  $obj = Normalize-JsonObject $obj
+  $canon = Canonicalize-JsonValue $obj
+  return ($canon | ConvertTo-Json -Compress -Depth 100)
+}
+
+function Get-TextSha256([string]$Text) {
+  $bytes = [System.Text.Encoding]::UTF8.GetBytes($Text)
+  $sha = [System.Security.Cryptography.SHA256]::Create()
+  return (($sha.ComputeHash($bytes) | ForEach-Object { $_.ToString("x2") }) -join "")
+}
+
+function Get-NormalizedFileText([string]$FilePath, [string]$RelPath) {
+  $rp = $RelPath.Replace('\','/').ToLowerInvariant()
+
+  if ($rp.EndsWith(".json")) {
+    $raw = Get-Content -Raw -Path $FilePath -Encoding UTF8
+    return (ConvertTo-CanonicalJson $raw)
+  }
+
+  if ($rp.EndsWith(".jsonl")) {
+    $lines = Get-Content -Path $FilePath -Encoding UTF8
+    $outLines = foreach ($line in $lines) {
+      if ([string]::IsNullOrWhiteSpace($line)) { continue }
+      (ConvertTo-CanonicalJson $line)
+    }
+    return ($outLines -join "
+")
+  }
+
+  return (Get-Content -Raw -Path $FilePath -Encoding UTF8)
+}
+
+function Get-CanonicalWitness([string]$OutDir) {
+  # assumes Get-RelativePath + Should-IgnorePath already exist in the witness script
+  $files = Get-ChildItem -Path $OutDir -Recurse -File | Sort-Object FullName
+  $map = @{}
+
+  foreach ($f in $files) {
+    $rel = Get-RelativePath $OutDir $f.FullName
+    if (Should-IgnorePath $rel) { continue }
+
+    # Ignore runner's manifest.json entirely in canonical mode
+    if ($rel.ToLowerInvariant() -eq "manifest.json") { continue }
+
+    $text = Get-NormalizedFileText $f.FullName $rel
+    $h = Get-TextSha256 $text
+    $map[$rel] = @{
+      hash  = $h
+      text  = $text
+      bytes = ([System.Text.Encoding]::UTF8.GetByteCount($text))
+    }
+  }
+
+  if (-not $map.ContainsKey("plan.json")) { throw "Missing plan.json in $OutDir" }
+  $plan = $map["plan.json"].text | ConvertFrom-Json
+  $pack = $plan.pack
+  $inputCanon = $plan.input.canonical_hash
+
+  $expected = @("findings.json","ledger.jsonl","plan.json")
+  foreach ($e in $expected) { if (-not $map.ContainsKey($e)) { throw "Missing expected file: $e" } }
+
+  $fileEntries = @()
+  foreach ($name in $expected) {
+    $fileEntries += [ordered]@{
+      name  = $name
+      bytes = $map[$name].bytes
+      sha256 = $map[$name].hash
+    }
+  }
+
+  $sorted = $fileEntries | Sort-Object name
+  $lines = $sorted | ForEach-Object { "$($_.name)=$($_.sha256)" }
+  $bundleJoined = ($lines -join "
+")
+  $bundleDigest = Get-TextSha256 $bundleJoined
+
+  $canonManifest = [ordered]@{
+    api_version = "paygod/v1"
+    kind = "Manifest"
+    input = [ordered]@{ canonical_hash = $inputCanon }
+    pack  = [ordered]@{
+      name = $pack.name
+      version = $pack.version
+      path = $pack.path
+      digest_sha256 = $pack.digest_sha256
+    }
+    files = $sorted
+    bundle = [ordered]@{
+      algorithm = "sha256"
+      file_count = $sorted.Count
+      digest_method = "sha256(join_lines(name='name=sha256' sorted by name))"
+      bundle_digest = $bundleDigest
+    }
+  }
+
+  $canonJson = ($canonManifest | ConvertTo-Json -Compress -Depth 100)
+  $canonHash = Get-TextSha256 $canonJson
+
+  return @{
+    outDir = $OutDir
+    canon_manifest_hash = $canonHash
+    canon_manifest_json = $canonJson
+    map = $map
+  }
+}
+# ===================== END CANONICAL WITNESS HELPERS =====================
+
+
+
+
