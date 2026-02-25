@@ -54,4 +54,5 @@ jobs:
 
       - name: Verify bundle
         shell: pwsh
-        run: pwsh -NoProfile -File ./tools/verify_bundle.ps1 -BundlePath ./ci_out
+        run: pwsh -NoProfile -File ./tools/run_proof.ps1 -BundlePath ./ci_out
+
