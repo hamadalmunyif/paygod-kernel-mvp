@@ -14,7 +14,7 @@ Paygod Kernel is a deterministic execution core built on contracts-first + evide
 3) CI-enforced safety gates  
 
 ## Local Quickstart
-
+Start here: START_HERE.md
 Build CLI:
 dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -o out
 
