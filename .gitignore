@@ -30,3 +30,7 @@ _witness_tmp/
 _dev_out/
 artifacts.zip
 artifacts_out/
+
+# local artifacts
+_repo_map.txt
+
