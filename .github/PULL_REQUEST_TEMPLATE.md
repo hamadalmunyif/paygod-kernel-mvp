@@ -1,38 +1,39 @@
-# Description
+﻿# Pull Request
 
-Please include a summary of the changes and the related issue. Please also include relevant motivation and context.
+## Summary
+What does this change do and why?
 
-Fixes # (issue)
+## Motivation
+What problem does this solve? Any risk to determinism, artifacts, or CI enforcement?
 
 ## Type of change
+- [ ] Determinism-related change
+- [ ] Pack logic update
+- [ ] Contract / Schema change
+- [ ] CI enforcement update
+- [ ] Documentation only
+- [ ] Refactor (no functional change)
 
-Please delete options that are not relevant.
+## Determinism impact
+- [ ] Preserves bit-for-bit determinism
+- [ ] Changes canonicalization logic
+- [ ] Alters artifact structure
+- [ ] Requires witness update
 
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] This change requires a documentation update
+Explain any digest behavior change (if any).
 
-## How Has This Been Tested?
+## Evidence / artifact impact
+- [ ] No artifact format changes
+- [ ] Artifact envelope updated
+- [ ] Schema version bumped (SemVer): ____
 
-Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce. Please also list any relevant details for your test configuration
+## Testing
+- [ ] Witness double-run PASS (strict)
+- [ ] Pack contract gate PASS
+- [ ] CI checks PASS
 
-- [ ] Test A
-- [ ] Test B
-
-**Test Configuration**:
-* .NET version:
-* OS:
-* Toolchain:
-
-## Checklist:
-
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
-- [ ] Any dependent changes have been merged and published in downstream modules
-- [ ] I have signed the Developer Certificate of Origin (DCO)
+**Env**
+.NET:
+OS:
+Docker:
+PowerShell:
