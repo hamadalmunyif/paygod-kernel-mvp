@@ -158,7 +158,8 @@ public static class RunCommand
         var manifestPath = Path.Combine(outDir.FullName, "manifest.json");
         WriteJson(manifestPath, manifest);
 
-        Console.WriteLine("âœ… Run complete.");
+        // ASCII-only output to avoid encoding issues across hosts/terminals.
+        Console.WriteLine("OK: Run complete.");
     }
 
     private static void AppendLedger(
@@ -264,9 +265,8 @@ public static class RunCommand
 
     private static void Fail(string msg)
     {
-        Console.Error.WriteLine($"â‌Œ {msg}");
+        // ASCII-only error prefix to avoid encoding issues across hosts/terminals.
+        Console.Error.WriteLine($"ERROR: {msg}");
         Environment.Exit(2);
     }
 }
-
-
