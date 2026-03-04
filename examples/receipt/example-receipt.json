@@ -1,0 +1,45 @@
+{
+  "api_version": "paygod/v1",
+  "kind": "Receipt",
+  "spec_version": "0.1.0",
+  "generated_at": "2026-02-15T00:00:00Z",
+  "clock": {
+    "value": "2026-02-15T00:00:00Z",
+    "source": "env:PAYGOD_CLOCK"
+  },
+  "canonicalization": {
+    "json": "rfc8785",
+    "schema_manifest_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "runner": {
+    "image": "paygod/runner:dev",
+    "image_digest": "unknown"
+  },
+  "pack": {
+    "name": "ghg-scope-1-2-guard",
+    "version": "0.0.0",
+    "path": "packs/core/ghg-scope-1-2-guard",
+    "digest_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "input": {
+    "canonical_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "bundle": {
+    "bundle_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "manifest_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "files": [
+      { "name": "plan.json", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "bytes": 0 },
+      { "name": "findings.json", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "bytes": 0 },
+      { "name": "ledger.jsonl", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "bytes": 0 },
+      { "name": "manifest.json", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "bytes": 0 }
+    ]
+  },
+  "verdict": {
+    "value": "allow",
+    "rule_name": "example",
+    "reason": "example receipt for schema validation"
+  },
+  "replay": {
+    "command": "docker run --rm -e PAYGOD_CLOCK=2026-02-15T00:00:00Z -e PAYGOD_STRICT=1 -v \"<PACK_DIR>:/pack:ro\" -v \"<INPUT_DIR>:/input:ro\" -v \"<OUT_DIR>:/out:rw\" paygod/runner:dev run --pack /pack --input /input/input.json --out /out"
+  }
+}
