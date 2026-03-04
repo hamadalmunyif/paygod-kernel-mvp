@@ -1,0 +1,69 @@
+﻿name: BAP Proof Seal
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  proof-seal:
+    name: BAP Proof Seal
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps for schema validation
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f tools/requirements.txt ]; then
+            pip install -r tools/requirements.txt
+          else
+            pip install jsonschema referencing
+          fi
+
+      - name: Validate pack PASS examples
+        shell: pwsh
+        run: |
+          $root = "packs/core/bap-output-validator-guard/examples"
+          $pass = Get-ChildItem $root -Filter "pass*.json" -File
+          if (-not $pass) { throw "No PASS examples found in $root" }
+          foreach ($f in $pass) {
+            pwsh -File tools/bap_validate.ps1 `
+              -InputPath $f.FullName `
+              -RepoRoot (Get-Location).Path
+            if ($LASTEXITCODE -ne 0) {
+              throw "PASS example failed validation: $($f.Name)"
+            }
+          }
+
+      - name: Validate pack FAIL examples
+        shell: pwsh
+        run: |
+          $root = "packs/core/bap-output-validator-guard/examples"
+          $fail = Get-ChildItem $root -Filter "fail*.json" -File
+          if (-not $fail) { throw "No FAIL examples found in $root" }
+          foreach ($f in $fail) {
+            pwsh -File tools/bap_validate.ps1 `
+              -InputPath $f.FullName `
+              -RepoRoot (Get-Location).Path
+            if ($LASTEXITCODE -eq 0) {
+              throw "Validator unexpectedly PASSED fail example: $($f.Name)"
+            }
+          }
+          $global:LASTEXITCODE = 0
+
+      - name: Upload proof artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bap-proof-seal-artifacts
+          path: |
+            docs/examples/proof_run
+            packs/core/bap-output-validator-guard/examples
