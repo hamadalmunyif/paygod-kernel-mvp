@@ -34,3 +34,6 @@ artifacts_out/
 # local artifacts
 _repo_map.txt
 
+node_modules/
+api/logs/
+runs/*.zip
