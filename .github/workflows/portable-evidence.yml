@@ -1,0 +1,109 @@
+name: Portable Evidence Witness
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/PayGod.Cli/**'
+      - 'tools/verify_portable_evidence.py'
+      - '.github/workflows/portable-evidence.yml'
+      - 'docs/PORTABLE_EVIDENCE_WITNESS.md'
+  push:
+    branches: [ main ]
+
+jobs:
+  producer:
+    name: Producer (Linux)
+    runs-on: ubuntu-latest
+    env:
+      PAYGOD_CLOCK: 2026-02-15T00:00:00Z
+      PAYGOD_STRICT: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Build CLI
+        run: dotnet build ./src/PayGod.Cli/PayGod.Cli.csproj --configuration Release
+      - name: Create isolated input
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path portable_input,portable_out | Out-Null
+          '{"content":"portable-evidence-witness"}' | Set-Content -NoNewline -Encoding utf8 portable_input/input.json
+      - name: Produce evidence
+        run: dotnet run --project ./src/PayGod.Cli/PayGod.Cli.csproj -- run --pack ./packs/core/secrets-in-repo-guard --input ./portable_input/input.json --out ./portable_out
+      - name: Upload evidence only
+        uses: actions/upload-artifact@v4
+        with:
+          name: paygod-portable-evidence
+          path: portable_out/
+          if-no-files-found: error
+          retention-days: 7
+
+  verifier:
+    name: Independent Verifier (Windows)
+    needs: producer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download transferred evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: paygod-portable-evidence
+          path: transferred-evidence
+      - name: Verify artifact without replaying execution
+        shell: pwsh
+        run: python tools/verify_portable_evidence.py transferred-evidence --result verification-result.json
+      - name: Upload verification result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: portable-evidence-verification-result
+          path: verification-result.json
+          if-no-files-found: warn
+
+  tamper-rejection:
+    name: Tamper Rejection (Windows)
+    needs: producer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: paygod-portable-evidence
+          path: tampered-evidence
+      - name: Tamper one byte in an evidence file
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('tampered-evidence/findings.json')
+          b = bytearray(p.read_bytes())
+          if not b:
+              raise SystemExit('findings.json is empty')
+          b[-1] ^= 1
+          p.write_bytes(b)
+      - name: Require verifier to reject tampered artifact
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          python tools/verify_portable_evidence.py tampered-evidence --result tamper-verification-result.json
+          $verifierExit = $LASTEXITCODE
+          if ($verifierExit -eq 0) {
+            Write-Error 'SECURITY FAILURE: tampered evidence was accepted'
+            exit 1
+          }
+          Write-Host "PASS: tampered evidence rejected (verifier exit $verifierExit)"
+          exit 0
+      - name: Upload tamper result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: portable-evidence-tamper-result
+          path: tamper-verification-result.json
+          if-no-files-found: warn
