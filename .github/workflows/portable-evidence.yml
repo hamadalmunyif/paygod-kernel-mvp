@@ -45,7 +45,6 @@ jobs:
     needs: producer
     runs-on: windows-latest
     steps:
-      # Checkout supplies verifier code only. Producer workspace/build/temp state is not shared.
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -92,9 +91,15 @@ jobs:
       - name: Require verifier to reject tampered artifact
         shell: pwsh
         run: |
+          $ErrorActionPreference = 'Continue'
           python tools/verify_portable_evidence.py tampered-evidence --result tamper-verification-result.json
-          if ($LASTEXITCODE -eq 0) { throw 'SECURITY FAILURE: tampered evidence was accepted' }
-          Write-Host 'PASS: tampered evidence rejected'
+          $verifierExit = $LASTEXITCODE
+          if ($verifierExit -eq 0) {
+            Write-Error 'SECURITY FAILURE: tampered evidence was accepted'
+            exit 1
+          }
+          Write-Host "PASS: tampered evidence rejected (verifier exit $verifierExit)"
+          exit 0
       - name: Upload tamper result
         if: always()
         uses: actions/upload-artifact@v4
