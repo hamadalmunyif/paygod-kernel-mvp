@@ -1,0 +1,29 @@
+name: Demo API Smoke
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'api/**'
+      - '.github/workflows/api-smoke.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'api/**'
+      - '.github/workflows/api-smoke.yml'
+
+jobs:
+  api-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
+      - name: Run API regression tests
+        working-directory: api
+        run: npm test
