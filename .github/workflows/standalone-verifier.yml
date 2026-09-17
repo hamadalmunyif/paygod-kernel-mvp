@@ -1,0 +1,173 @@
+name: Standalone Third-Party Verifier Witness
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/verify_portable_evidence.py'
+      - '.github/workflows/standalone-verifier.yml'
+      - 'src/PayGod.Cli/**'
+      - 'packs/**'
+      - 'docs/STANDALONE_VERIFIER.md'
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  package-verifier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Package versioned verifier distribution
+        shell: python
+        run: |
+          import hashlib, json, shutil
+          from pathlib import Path
+          root = Path('verifier-dist')
+          root.mkdir()
+          target = root / 'paygod-verify.py'
+          shutil.copyfile('tools/verify_portable_evidence.py', target)
+          digest = hashlib.sha256(target.read_bytes()).hexdigest()
+          manifest = {
+              'artifact_type': 'paygod/standalone-verifier/v1',
+              'version': '0.1.0',
+              'entrypoint': 'paygod-verify.py',
+              'sha256': digest,
+          }
+          (root / 'verifier-manifest.json').write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paygod-standalone-verifier-v0.1.0
+          path: verifier-dist/
+
+  producer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Build CLI
+        run: dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -o out
+      - name: Produce evidence bundle
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path portable-evidence | Out-Null
+          Set-Content -Path portable-evidence/input.json -Value '{"repo":"paygod-kernel-mvp","mode":"standalone-third-party-witness"}' -Encoding utf8
+          & ./out/PayGod.Cli run packs/core/secrets-in-repo-guard portable-evidence/input.json --clock 2026-02-15T00:00:00Z --out portable-evidence
+          if ($LASTEXITCODE -ne 0) { throw "producer failed: $LASTEXITCODE" }
+          Remove-Item portable-evidence/input.json -ErrorAction SilentlyContinue
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paygod-third-party-evidence
+          path: portable-evidence/
+
+  third-party-verifier:
+    needs: [package-verifier, producer]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert repository is absent
+        shell: pwsh
+        run: |
+          foreach ($path in @('.git', 'src', 'tools', 'packs')) {
+            if (Test-Path $path) { throw "repository material unexpectedly present: $path" }
+          }
+      - uses: actions/download-artifact@v4
+        with:
+          name: paygod-standalone-verifier-v0.1.0
+          path: verifier
+      - uses: actions/download-artifact@v4
+        with:
+          name: paygod-third-party-evidence
+          path: evidence
+      - name: Validate verifier distribution identity
+        shell: python
+        run: |
+          import hashlib, json
+          from pathlib import Path
+          root = Path('verifier')
+          manifest = json.loads((root / 'verifier-manifest.json').read_text(encoding='utf-8'))
+          assert manifest['artifact_type'] == 'paygod/standalone-verifier/v1'
+          assert manifest['version'] == '0.1.0'
+          target = root / manifest['entrypoint']
+          actual = hashlib.sha256(target.read_bytes()).hexdigest()
+          if actual != manifest['sha256']:
+              raise SystemExit('verifier distribution sha256 mismatch')
+      - name: Verify clean evidence without checkout or replay
+        run: python verifier/paygod-verify.py evidence --result verification-result.json
+      - name: Assert machine-readable VALID result
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          result = json.loads(Path('verification-result.json').read_text(encoding='utf-8'))
+          assert result['status'] == 'valid'
+          assert result['portable'] is True
+          assert result['verifier_version'] == '0.1.0'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: standalone-third-party-verification-result
+          path: verification-result.json
+
+  tamper-rejection:
+    needs: [package-verifier, producer]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert repository is absent
+        shell: pwsh
+        run: |
+          foreach ($path in @('.git', 'src', 'tools', 'packs')) {
+            if (Test-Path $path) { throw "repository material unexpectedly present: $path" }
+          }
+      - uses: actions/download-artifact@v4
+        with:
+          name: paygod-standalone-verifier-v0.1.0
+          path: verifier
+      - uses: actions/download-artifact@v4
+        with:
+          name: paygod-third-party-evidence
+          path: evidence
+      - name: Validate verifier distribution identity
+        shell: python
+        run: |
+          import hashlib, json
+          from pathlib import Path
+          root = Path('verifier')
+          manifest = json.loads((root / 'verifier-manifest.json').read_text(encoding='utf-8'))
+          target = root / manifest['entrypoint']
+          if hashlib.sha256(target.read_bytes()).hexdigest() != manifest['sha256']:
+              raise SystemExit('verifier distribution sha256 mismatch')
+      - name: Tamper one byte
+        shell: python
+        run: |
+          from pathlib import Path
+          target = Path('evidence/findings.json')
+          data = bytearray(target.read_bytes())
+          if not data:
+              raise SystemExit('findings.json is empty')
+          data[-1] ^= 1
+          target.write_bytes(data)
+      - name: Require fail-closed INVALID result
+        shell: pwsh
+        run: |
+          python verifier/paygod-verify.py evidence --result tamper-result.json
+          $code = $LASTEXITCODE
+          if ($code -eq 0) { throw 'tampered evidence was incorrectly accepted' }
+          $result = Get-Content tamper-result.json -Raw | ConvertFrom-Json
+          if ($result.status -ne 'invalid') { throw 'tamper result was not INVALID' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: standalone-third-party-tamper-result
+          path: tamper-result.json
