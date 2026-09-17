@@ -167,12 +167,14 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Continue'
-          python verifier/paygod-verify.py evidence --result tamper-result.json
+          $output = & python verifier/paygod-verify.py evidence --result tamper-result.json 2>&1
           $code = $LASTEXITCODE
+          $output | ForEach-Object { Write-Host $_ }
           if ($code -eq 0) { throw 'tampered evidence was incorrectly accepted' }
           $result = Get-Content tamper-result.json -Raw | ConvertFrom-Json
           if ($result.status -ne 'invalid') { throw 'tamper result was not INVALID' }
           Write-Host "PASS: tampered evidence rejected (verifier exit $code)"
+          exit 0
       - uses: actions/upload-artifact@v4
         with:
           name: standalone-third-party-tamper-result
