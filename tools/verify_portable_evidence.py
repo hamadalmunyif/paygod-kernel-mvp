@@ -12,6 +12,8 @@ import json
 from pathlib import Path
 import sys
 
+VERIFIER_VERSION = "0.1.0"
+
 
 def sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -22,7 +24,6 @@ def sha256_file(path: Path) -> str:
 
 
 def canonical_json(value) -> str:
-    # Matches the subset used by the current ledger records: sorted keys, compact UTF-8 JSON.
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
@@ -63,13 +64,13 @@ def verify(bundle: Path) -> dict:
         if not required.is_file():
             errors.append(f"missing {required.name}")
     if errors:
-        return {"status": "invalid", "portable": False, "errors": errors}
+        return {"status": "invalid", "portable": False, "verifier_version": VERIFIER_VERSION, "errors": errors}
 
     try:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
         receipt = json.loads(receipt_path.read_text(encoding="utf-8-sig"))
     except Exception as exc:
-        return {"status": "invalid", "portable": False, "errors": [f"invalid control JSON: {exc}"]}
+        return {"status": "invalid", "portable": False, "verifier_version": VERIFIER_VERSION, "errors": [f"invalid control JSON: {exc}"]}
 
     entries = manifest.get("files") or []
     digest_lines: list[str] = []
@@ -98,8 +99,6 @@ def verify(bundle: Path) -> dict:
         errors.append("receipt bundle_digest does not bind manifest bundle")
     if receipt_bundle.get("manifest_sha256") != sha256_file(manifest_path):
         errors.append("receipt manifest_sha256 mismatch")
-
-    # Receipt repeats the manifest file lock; require exact agreement.
     if receipt_bundle.get("files") != entries:
         errors.append("receipt files do not match manifest files")
 
@@ -108,6 +107,7 @@ def verify(bundle: Path) -> dict:
     return {
         "status": "valid" if not errors else "invalid",
         "portable": not errors,
+        "verifier_version": VERIFIER_VERSION,
         "bundle_digest": manifest_bundle,
         "manifest_sha256": sha256_file(manifest_path),
         "verified_files": len(entries),
@@ -117,6 +117,7 @@ def verify(bundle: Path) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--version", action="version", version=f"%(prog)s {VERIFIER_VERSION}")
     parser.add_argument("bundle", type=Path)
     parser.add_argument("--result", type=Path, default=Path("verification-result.json"))
     args = parser.parse_args()
