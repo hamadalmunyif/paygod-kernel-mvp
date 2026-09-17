@@ -11,23 +11,34 @@ function json(res, status, payload) {
   res.end(body);
 }
 
-const server = http.createServer((req, res) => {
-  const url = new URL(req.url, `http://${req.headers.host}`);
+function getPathname(req) {
+  try {
+    return new URL(req.url, 'http://localhost').pathname;
+  } catch {
+    return null;
+  }
+}
 
-  if (req.method === 'GET' && url.pathname === '/health') {
+const server = http.createServer((req, res) => {
+  const pathname = getPathname(req);
+  if (pathname === null) {
+    return json(res, 400, { error: 'Invalid request URL' });
+  }
+
+  if (req.method === 'GET' && pathname === '/health') {
     return json(res, 200, { status: 'OK' });
   }
 
-  if (req.method === 'POST' && url.pathname === '/run') {
+  if (req.method === 'POST' && pathname === '/run') {
     return json(res, 201, { bundle_digest: 'demo-bundle', status: 'created' });
   }
 
-  const runMatch = url.pathname.match(/^\/runs\/([^/]+)$/);
+  const runMatch = pathname.match(/^\/runs\/([^/]+)$/);
   if (req.method === 'GET' && runMatch) {
     return json(res, 200, { bundle_digest: runMatch[1], status: 'available' });
   }
 
-  const zipMatch = url.pathname.match(/^\/runs\/([^/]+)\/zip$/);
+  const zipMatch = pathname.match(/^\/runs\/([^/]+)\/zip$/);
   if (req.method === 'GET' && zipMatch) {
     res.writeHead(200, {
       'Content-Type': 'application/zip',
