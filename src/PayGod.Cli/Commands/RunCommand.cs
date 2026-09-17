@@ -24,7 +24,9 @@ public static class RunCommand
 
     private static void Run(string packDir, FileInfo input, DirectoryInfo outDir)
     {
-        var packPath = Path.Combine(packDir, "pack.yaml");
+        // Path.Join preserves the supplied base path even if a later segment looks rooted;
+        // all appended artifact names below are fixed trusted leaf names.
+        var packPath = Path.Join(packDir, "pack.yaml");
         if (!File.Exists(packPath)) Fail($"Missing pack.yaml: {packPath}");
         if (!input.Exists) Fail($"Missing input file: {input.FullName}");
         outDir.Create();
@@ -41,7 +43,7 @@ public static class RunCommand
             api_version = "paygod/v1", kind = "PlanReport", generated_at = runTs, pack = packObj,
             input = new { path = input.FullName, canonical_hash = inputHash }, settings = new { }
         };
-        var planPath = Path.Combine(outDir.FullName, "plan.json");
+        var planPath = Path.Join(outDir.FullName, "plan.json");
         WriteJson(planPath, plan);
 
         var result = PolicyEngine.Evaluate(pack, inputJson);
@@ -52,11 +54,11 @@ public static class RunCommand
             findings.Add(new { kind = "flag", severity = "high", code = "EVAL_ERROR", message = result.Decision == "unknown" ? "No policy rules matched." : result.Reason, rule_name = result.RuleName, evidence_refs = Array.Empty<string>() });
 
         var findingsReport = new { api_version = "paygod/v1", kind = "FindingsReport", generated_at = runTs, pack = packObj, findings };
-        var findingsPath = Path.Combine(outDir.FullName, "findings.json");
+        var findingsPath = Path.Join(outDir.FullName, "findings.json");
         WriteJson(findingsPath, findingsReport);
 
         var verdict = result.Decision == "unknown" ? "error" : result.Decision;
-        var ledgerPath = Path.Combine(outDir.FullName, "ledger.jsonl");
+        var ledgerPath = Path.Join(outDir.FullName, "ledger.jsonl");
         if (verdict is "allow" or "deny" or "error") AppendLedger(ledgerPath, packObj, inputHash, verdict, result, runTs);
 
         // The manifest locks the evidence payload. receipt.json is deliberately NOT a
@@ -84,7 +86,7 @@ public static class RunCommand
             },
             files = fileEntries
         };
-        var manifestPath = Path.Combine(outDir.FullName, "manifest.json");
+        var manifestPath = Path.Join(outDir.FullName, "manifest.json");
         WriteJson(manifestPath, manifest);
         var manifestSha = Sha256FileHex(manifestPath);
 
@@ -110,7 +112,7 @@ public static class RunCommand
                           $"{runnerImage} run --pack /pack --input /input/input.json --out /out"
             }
         };
-        WriteJson(Path.Combine(outDir.FullName, "receipt.json"), receipt);
+        WriteJson(Path.Join(outDir.FullName, "receipt.json"), receipt);
         Console.WriteLine("OK: Run complete.");
     }
 
@@ -133,8 +135,7 @@ public static class RunCommand
     private static (string prevHash, int nextIndex) ReadLedgerTail(string ledgerPath, string genesis)
     {
         if (!File.Exists(ledgerPath)) return (genesis, 0);
-        string? lastLine = null;
-        foreach (var line in File.ReadLines(ledgerPath)) if (!string.IsNullOrWhiteSpace(line)) lastLine = line;
+        var lastLine = File.ReadLines(ledgerPath).Where(line => !string.IsNullOrWhiteSpace(line)).LastOrDefault();
         if (lastLine is null) return (genesis, 0);
         using var doc = JsonDocument.Parse(lastLine);
         var root = doc.RootElement;
