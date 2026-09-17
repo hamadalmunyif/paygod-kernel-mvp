@@ -47,6 +47,9 @@ jobs:
 
   producer:
     runs-on: ubuntu-latest
+    env:
+      PAYGOD_CLOCK: 2026-02-15T00:00:00Z
+      PAYGOD_STRICT: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -58,15 +61,16 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          New-Item -ItemType Directory -Force -Path portable-evidence | Out-Null
-          Set-Content -Path portable-evidence/input.json -Value '{"repo":"paygod-kernel-mvp","mode":"standalone-third-party-witness"}' -Encoding utf8
-          & ./out/PayGod.Cli run packs/core/secrets-in-repo-guard portable-evidence/input.json --clock 2026-02-15T00:00:00Z --out portable-evidence
+          New-Item -ItemType Directory -Force -Path portable-input,portable-evidence | Out-Null
+          '{"content":"standalone-third-party-witness"}' | Set-Content -NoNewline -Encoding utf8 portable-input/input.json
+          & ./out/PayGod.Cli run --pack ./packs/core/secrets-in-repo-guard --input ./portable-input/input.json --out ./portable-evidence
           if ($LASTEXITCODE -ne 0) { throw "producer failed: $LASTEXITCODE" }
-          Remove-Item portable-evidence/input.json -ErrorAction SilentlyContinue
       - uses: actions/upload-artifact@v4
         with:
           name: paygod-third-party-evidence
           path: portable-evidence/
+          if-no-files-found: error
+          retention-days: 7
 
   third-party-verifier:
     needs: [package-verifier, producer]
@@ -162,11 +166,13 @@ jobs:
       - name: Require fail-closed INVALID result
         shell: pwsh
         run: |
+          $ErrorActionPreference = 'Continue'
           python verifier/paygod-verify.py evidence --result tamper-result.json
           $code = $LASTEXITCODE
           if ($code -eq 0) { throw 'tampered evidence was incorrectly accepted' }
           $result = Get-Content tamper-result.json -Raw | ConvertFrom-Json
           if ($result.status -ne 'invalid') { throw 'tamper result was not INVALID' }
+          Write-Host "PASS: tampered evidence rejected (verifier exit $code)"
       - uses: actions/upload-artifact@v4
         with:
           name: standalone-third-party-tamper-result
