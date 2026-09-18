@@ -115,3 +115,7 @@ invoice + PO + facility state + collateral/evidence + policy
 ```
 
 See [ROADMAP.md](ROADMAP.md).
+
+## README contract
+
+`README.md` is the public contract. Any merged architectural change that materially changes what Paygod is, a proven guarantee, the canonical trust path, required gates, or the supported developer workflow must update this file in the same change and distinguish **proven guarantees** from **roadmap claims**.
