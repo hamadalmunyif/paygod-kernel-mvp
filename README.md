@@ -1,57 +1,82 @@
-Paygod Kernel MVP
+# Paygod Kernel MVP
 
-![badges]
+Paygod Kernel is a deterministic policy-execution core built on **contracts-first + evidence-first** principles.
 
-Paygod Kernel is a deterministic execution core built on contracts-first + evidence-first principles.
+It produces portable decision evidence that can be independently verified without replaying the original decision.
 
-It enforces deterministic execution and independently verifiable evidence at CI level.
+## What is proven
 
-Why this matters
+Repository witnesses currently prove deterministic execution, schema-governed evidence, receipt/manifest/bundle binding, tamper-evident ledger verification where present, artifact-only handoff, Linux-producer to Windows verification, standalone/no-checkout verification inside CI, clean evidence -> `VALID`, and one-byte mutation -> `INVALID`.
 
-Deterministic runs eliminate ambiguity.
+The standalone witness is a **CI-level portability proof**. It is not yet a claim of a published/signed external verifier trust root or of real-world evidence truth.
 
-Evidence bundles remove trust assumptions.
+## Canonical trust path
 
-CI-level enforcement prevents configuration drift.
+```text
+External fact/source
+        ↓
+Evidence / provenance
+        ↓
+Contract + Policy Pack
+        ↓
+Deterministic Kernel
+        ↓
+Decision Artifact
+        ↓
+Manifest + Receipt + Ledger
+        ↓
+Portable Evidence Bundle
+        ↓
+Independent Verifier
+```
 
-Guarantees (MVP)
+Execution rails such as a bank, PSP, agent, or external API are downstream consumers. They are not part of the kernel trust primitive.
 
-Bit-for-bit deterministic execution
+## Architecture
 
-Evidence-first artifact outputs (schema-governed)
+```text
+CLI -> Canonicalization -> Pack Evaluation -> Artifact Envelope
+    -> Manifest / Receipt / Ledger -> Portable Evidence -> Independent Verifier
+```
 
-CI-enforced safety gates (nothing lands on main if checks fail)
+Domain logic should enter through contracts, packs, and adapters before any change to kernel semantics.
 
-Architecture (at a glance)
+See [docs/ARCHITECTURE_AUDIT.md](docs/ARCHITECTURE_AUDIT.md) for the post-#53 KEEP / FREEZE / REVIEW / MISSING audit.
 
-CLI → Canonicalization → Pack Evaluation → Artifact Envelope → Witness → CI Gate
+## Quickstart
 
-Example Artifact
-{
-  "artifact_type": "decision",
-  "input_digest": "sha256:...",
-  "pack_digest": "sha256:...",
-  "bundle_digest": "sha256:..."
-}
-Quickstart (Local)
+Developer onboarding: [START_HERE.md](START_HERE.md)
 
-Start here: START_HERE.md
-
-Build the CLI
+```bash
 dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -o out
-Run deterministic witness
+```
+
+```powershell
 pwsh -NoProfile -File ./tools/phase4_docker_witness.ps1
+```
 
-Expected: PASS (strict) and matching digests.
+Expected: `PASS` with matching digests.
 
-What is enforced on main
+## Main-branch enforcement
 
-Required checks must pass before merging to main:
+Required CI gates protect kernel build/test, deterministic enforcement, security, and pack contracts. See [GATES.md](GATES.md). Portability workflows additionally test transferred evidence and standalone verification behavior.
 
-Paygod Kernel CI
+## Current non-claims
 
-Paygod CI Enforcement
+Paygod does **not yet prove** external real-world fact truth, a published/signed external verifier trust root, a live bank/PSP conditional-release integration, autonomous authority over money movement, institutional adoption, or willingness to pay.
 
-Security Gate
+## Next boundary
 
-Pack Contract Gate
+```text
+External verifier distribution
+ -> Evidence Provenance Contract
+ -> One real domain pack
+ -> Shadow pilot
+ -> Conditional-release pilot
+```
+
+Generic feature expansion stops until a real workflow demonstrates a need for it.
+
+## README contract
+
+This README is the public entry point. Any merged architectural change that materially changes what Paygod is, what has been proven, the trust path, required gates, or the supported developer workflow must update this file and distinguish **proven guarantees** from **roadmap claims**.
