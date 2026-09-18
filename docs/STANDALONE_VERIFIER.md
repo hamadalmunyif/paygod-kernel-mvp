@@ -1,66 +1,43 @@
 # Standalone Third-Party Verifier Witness
 
-## Objective
+Status: **standalone/no-checkout CI witness passed and merged via PR #53**.
 
-Prove that a party outside the Paygod producer environment can verify a transferred Paygod evidence bundle without checking out `paygod-kernel-mvp`, rebuilding the kernel, re-running the pack, or possessing producer-local state.
+## Proven boundary
 
-This is the next portability boundary after PR #52 proved artifact-only cross-OS verification inside CI.
+Inside CI, a recipient can verify a transferred Paygod evidence bundle using a versioned standalone verifier artifact without checking out `paygod-kernel-mvp`, rebuilding the kernel, re-running the pack, or possessing producer-local state.
 
-## Trust boundary
-
-The verifier receives only:
-
-1. an evidence bundle produced by Paygod; and
-2. a standalone verifier distribution whose integrity/version can be identified independently.
-
-It MUST NOT require:
-
-- a checkout of `paygod-kernel-mvp`;
-- the producer workspace or temporary files;
-- Docker;
-- the .NET SDK;
-- re-execution of the original pack or decision;
-- Paygod secrets or hidden configuration.
-
-## Verification contract
-
-For an untampered bundle the verifier must return `VALID` and machine-readable results covering, where present:
+The verifier checks, where present:
 
 - manifest integrity;
 - artifact SHA-256 digests;
-- bundle digest binding;
+- bundle-digest binding;
 - receipt-to-manifest binding;
 - ledger hash-chain integrity.
 
-For a bundle changed after production, verification must return `INVALID` with a non-zero process result or an equivalent fail-closed browser result.
+Acceptance requires clean evidence -> `VALID`, one-byte tamper -> `INVALID`, fail-closed behavior, and machine-readable results.
 
-## Distribution target
+## Trust boundary
 
-The first implementation should be a self-contained verifier artifact. A browser/client-side verifier is the preferred follow-on distribution because it can run on an iPad and later be served from a surface such as `verify.paygod.net` without making that domain the source of trust.
+The recipient receives only:
 
-The verifier must remain useful if the web surface is unavailable: the evidence format and verification rules are the trust primitive, not the hosting domain.
+1. an evidence bundle produced by Paygod; and
+2. a standalone verifier distribution whose version/integrity metadata can be checked.
 
-## Acceptance witness
+The recipient witness does not require repository checkout, producer workspace state, Docker, the .NET SDK, original pack replay, Paygod secrets, or hidden producer configuration.
 
-```text
-Paygod producer
-      |
-      v
- evidence bundle
-      |
-      +------------------------+
-                               |
-                    standalone verifier
-                               |
-                               v
-                      VALID / INVALID
-```
+## Next distribution boundary
 
-Acceptance requires both:
+The next gate is to package and test the verifier **outside repository CI** on an independent device/environment with published integrity/version metadata.
 
-1. clean evidence -> `VALID`;
-2. one-byte tamper -> `INVALID`.
+A browser/client-side verifier may follow for iPad use and a future surface such as `verify.paygod.net`, but the hosting domain must not become the source of trust.
 
 ## Non-claims
 
-PR #52 established a Linux-producer to Windows-verifier artifact-only CI witness. This work does not claim third-party/P4 verification until the standalone distribution is built and the acceptance witness passes without repository checkout.
+PR #53 establishes a CI-level standalone/no-checkout verification witness. It does **not** yet establish:
+
+- a published/signed external verifier trust root;
+- a truly external device/party witness;
+- truth or provenance of external evidence;
+- institutional adoption or a live financial release workflow.
+
+Do not describe this boundary as full external P4 until the external distribution witness passes.
