@@ -36,3 +36,5 @@ jobs:
         run: python3 tools/check_repository_boundary.py --contract tests/boundary/alternate-authority.json --expect reject
       - name: Inspect actual repository adapters
         run: python3 tools/check_repository_boundary.py --scan-current
+      - name: Negative witness - mutate actual adapters
+        run: python3 tools/check_repository_boundary.py --mutation-witness
