@@ -1,24 +1,45 @@
 #!/usr/bin/env python3
 """Repository Boundary Closure v0.1 enforcement.
 
-This is intentionally a capability/ownership gate first, with source-pattern
-checks only as defense in depth. It does not define kernel semantics.
+The gate inventories real repository-hosted adapters and verifies their
+authority boundary. Fixtures prove that the policy itself rejects an explicit
+alternate-authority claim; actual adapter inspection prevents fixtures from
+being the only witness.
 """
 from __future__ import annotations
 import argparse, json, pathlib, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-KERNEL_ONLY = {
-    "originate_decision",
-    "originate_verdict",
-    "originate_artifacts",
-    "originate_manifest",
-    "originate_receipt",
-    "originate_bundle_identity",
-    "evaluate_policy",
-}
 ADAPTER_ALLOWED = {"submit", "invoke", "transport", "store", "expose"}
 VERIFIER_ALLOWED = {"verify"}
+
+# Every execution-facing adapter in this repository must be explicitly listed.
+# Adding another adapter requires updating this inventory and its inspection.
+ADAPTERS = {
+    "api/server.js": {
+        "mode": "fail_closed",
+        "required": [r"canonical-kernel-required"],
+        "forbidden": [
+            r"bundle_digest\s*[:=]\s*['\"]",
+            r"createHash\s*\(",
+            r"pseudo[-_ ]?zip",
+        ],
+    },
+    "deploy/docker/api/app/Program.cs": {
+        "mode": "delegate",
+        "required": [
+            r"/runner/PayGod\.Cli\.dll",
+            r""run"",
+            r"Process\.Start\s*\(",
+        ],
+        "forbidden": [
+            r"bundle_digest\s*[:=]",
+            r"SHA(?:1|256|384|512)",
+            r"HashData\s*\(",
+            r"pseudo[-_ ]?zip",
+        ],
+    },
+}
 
 def validate_contract(path: pathlib.Path) -> tuple[bool, str]:
     data = json.loads(path.read_text(encoding="utf-8"))
@@ -34,17 +55,21 @@ def validate_contract(path: pathlib.Path) -> tuple[bool, str]:
         return (not bad, "verifier verifies only" if not bad else f"verifier claims forbidden capabilities: {sorted(bad)}")
     return False, f"unknown role: {role!r}"
 
-# Defense in depth for repository-hosted adapters. These are indicators, not
-# the authority proof; the capability contract above is the primary rule.
-FORBIDDEN_SOURCE = [
-    (re.compile(r"bundle_digest\s*[:=]\s*['\"]demo-bundle"), "fabricated demo bundle identity"),
-    (re.compile(r"createHash\s*\([^)]*\).*bundle", re.S), "adapter-created bundle hash"),
-    (re.compile(r"pseudo[-_ ]?zip", re.I), "pseudo evidence archive"),
-]
-
-def scan_adapter_source(path: pathlib.Path) -> list[str]:
-    text = path.read_text(encoding="utf-8")
-    return [reason for pattern, reason in FORBIDDEN_SOURCE if pattern.search(text)]
+def inspect_actual_adapters() -> list[str]:
+    failures: list[str] = []
+    for rel, rules in ADAPTERS.items():
+        path = ROOT / rel
+        if not path.is_file():
+            failures.append(f"{rel}: registered adapter missing")
+            continue
+        text = path.read_text(encoding="utf-8-sig")
+        for pattern in rules["required"]:
+            if not re.search(pattern, text, re.I | re.S):
+                failures.append(f"{rel}: missing required {rules['mode']} boundary marker: {pattern}")
+        for pattern in rules["forbidden"]:
+            if re.search(pattern, text, re.I | re.S):
+                failures.append(f"{rel}: forbidden alternate-authority construction: {pattern}")
+    return failures
 
 def main() -> int:
     ap = argparse.ArgumentParser()
@@ -63,16 +88,11 @@ def main() -> int:
         return 0 if ok else 1
 
     if args.scan_current:
-        failures = []
-        for rel in ("api/server.js",):
-            path = ROOT / rel
-            if path.exists():
-                for reason in scan_adapter_source(path):
-                    failures.append(f"{rel}: {reason}")
+        failures = inspect_actual_adapters()
         if failures:
             print("\n".join(failures), file=sys.stderr)
             return 1
-        print("PASS: repository-hosted adapter surfaces do not originate known alternate authority")
+        print("PASS: all registered repository-hosted adapters preserve the canonical authority boundary")
         return 0
 
     ap.error("choose --contract or --scan-current")
