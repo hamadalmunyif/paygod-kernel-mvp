@@ -1,0 +1,5 @@
+{
+  "name": "invalid-alternate-authority",
+  "role": "adapter",
+  "capabilities": ["submit", "invoke", "originate_bundle_identity", "originate_verdict"]
+}
