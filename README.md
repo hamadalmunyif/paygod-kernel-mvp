@@ -1,57 +1,121 @@
-Paygod Kernel MVP
+# Paygod Kernel MVP
 
-![badges]
+Paygod Kernel is a deterministic policy-execution core built on **contracts-first + evidence-first** principles.
 
-Paygod Kernel is a deterministic execution core built on contracts-first + evidence-first principles.
+It produces schema-governed decision evidence that can be transferred and independently verified without replaying the original decision.
 
-It enforces deterministic execution and independently verifiable evidence at CI level.
+## What is proven
 
-Why this matters
+The repository currently has CI witnesses for:
+- bit-for-bit deterministic execution;
+- schema-governed evidence artifacts;
+- receipt-to-manifest and bundle-digest binding;
+- CI-enforced contract, determinism, and security gates;
+- artifact-only evidence handoff across environments;
+- Linux-producer to Windows-verifier portability;
+- standalone/no-checkout verification inside CI;
+- fail-closed rejection after a one-byte evidence mutation.
 
-Deterministic runs eliminate ambiguity.
+The standalone verifier checks manifest integrity, artifact SHA-256 digests, bundle-digest binding, receipt binding, and ledger hash-chain integrity where present.
 
-Evidence bundles remove trust assumptions.
+## What is not yet proven
 
-CI-level enforcement prevents configuration drift.
+The repository does **not** yet prove:
+- that an external real-world fact or claimed evidence issuer is truthful;
+- a published/signed external verifier trust root;
+- an external-device/party verification witness outside repository CI;
+- a live bank/PSP release integration;
+- autonomous authority over money movement;
+- institutional adoption or willingness to pay.
 
-Guarantees (MVP)
+**Integrity is not provenance.**
 
-Bit-for-bit deterministic execution
+## Canonical trust path
 
-Evidence-first artifact outputs (schema-governed)
+```text
+External fact/source
+        |
+        v
+Evidence / provenance
+        |
+        v
+Contract + Policy Pack
+        |
+        v
+Deterministic Kernel
+        |
+        v
+Decision Artifact
+        |
+        v
+Manifest + Receipt + Ledger
+        |
+        v
+Portable Evidence Bundle
+        |
+        v
+Independent Verifier
+```
 
-CI-enforced safety gates (nothing lands on main if checks fail)
+Execution rails such as a bank, PSP, agent, or API are downstream consumers; they are not part of the kernel trust primitive.
 
-Architecture (at a glance)
+## Architecture
 
-CLI → Canonicalization → Pack Evaluation → Artifact Envelope → Witness → CI Gate
+```text
+CLI -> Canonicalization -> Pack Evaluation -> Artifact Envelope -> Receipt/Ledger -> Witness -> CI Gate
+```
 
-Example Artifact
-{
-  "artifact_type": "decision",
-  "input_digest": "sha256:...",
-  "pack_digest": "sha256:...",
-  "bundle_digest": "sha256:..."
-}
-Quickstart (Local)
+Domain logic should enter through contracts, packs, or adapters before changing kernel semantics.
 
-Start here: START_HERE.md
+See [Architecture Audit](docs/ARCHITECTURE_AUDIT.md).
 
-Build the CLI
+## Quickstart
+
+Canonical developer onboarding: [START_HERE.md](START_HERE.md).
+
+```bash
 dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -o out
-Run deterministic witness
+```
+
+```powershell
 pwsh -NoProfile -File ./tools/phase4_docker_witness.ps1
+```
 
-Expected: PASS (strict) and matching digests.
+Expected: `PASS` (strict) with matching digests.
 
-What is enforced on main
+## Portable verification
 
-Required checks must pass before merging to main:
+- `.github/workflows/portable-evidence.yml` — artifact handoff and cross-OS independent verification.
+- `.github/workflows/standalone-verifier.yml` — versioned standalone verifier artifact, no repository checkout in recipient jobs, clean evidence -> `VALID`, one-byte tamper -> `INVALID`.
 
-Paygod Kernel CI
+See [Standalone Verifier](docs/STANDALONE_VERIFIER.md).
 
-Paygod CI Enforcement
+## Main-branch enforcement
 
-Security Gate
+See [GATES.md](GATES.md). Core merge gates include Paygod Kernel CI, Paygod CI Enforcement, Security Gate, and Pack Contract Gate. Portability workflows provide additional architectural witnesses and regression protection.
 
-Pack Contract Gate
+## Next boundary
+
+1. Package and test the verifier outside repository CI.
+2. Define Evidence Provenance Contract v0.1.
+3. Implement one bounded real-domain authority pack.
+4. Stop generic feature development.
+5. Run a shadow pilot against real human decisions.
+
+First candidate:
+
+```text
+invoice + PO + facility state + collateral/evidence + policy
+                         |
+                         v
+              RELEASE / REDUCE / HOLD
+                         |
+                         v
+                       receipt
+```
+
+See [ROADMAP.md](ROADMAP.md).
+
+## README contract
+
+`README.md` is the public contract. Any merged architectural change that materially changes what Paygod is, a proven guarantee, the canonical trust path, required gates, or the supported developer workflow must update this file in the same change and distinguish **proven guarantees** from **roadmap claims**.
