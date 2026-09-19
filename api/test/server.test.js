@@ -9,15 +9,16 @@ const child = spawn(process.execPath, ['server.js'], {
   stdio: ['ignore', 'pipe', 'pipe']
 });
 
-function request(options) {
+function request(options, body) {
   return new Promise((resolve, reject) => {
     const req = http.request({ host: '127.0.0.1', port: PORT, ...options }, (res) => {
-      let body = '';
+      let responseBody = '';
       res.setEncoding('utf8');
-      res.on('data', (chunk) => { body += chunk; });
-      res.on('end', () => resolve({ statusCode: res.statusCode, body }));
+      res.on('data', (chunk) => { responseBody += chunk; });
+      res.on('end', () => resolve({ statusCode: res.statusCode, body: responseBody }));
     });
     req.on('error', reject);
+    if (body) req.write(body);
     req.end();
   });
 }
@@ -48,9 +49,19 @@ async function waitForServer() {
     });
     assert.strictEqual(malformedHost.statusCode, 200);
     assert.deepStrictEqual(JSON.parse(malformedHost.body), { status: 'OK' });
-
     assert.strictEqual(child.exitCode, null, 'server exited after malformed Host header');
-    console.log('PASS: API remains healthy with malformed Host header');
+
+    const run = await request(
+      { method: 'POST', path: '/run', headers: { 'Content-Type': 'application/json' } },
+      '{"demo":"must-not-create-authority"}'
+    );
+    assert.strictEqual(run.statusCode, 410);
+    const payload = JSON.parse(run.body);
+    assert.strictEqual(payload.authority, 'canonical-kernel-required');
+    assert.strictEqual(payload.bundle_digest, undefined);
+    assert.strictEqual(payload.status, undefined);
+
+    console.log('PASS: demo API fails closed and does not originate execution truth');
   } finally {
     child.kill();
   }
