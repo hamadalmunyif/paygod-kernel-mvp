@@ -1,73 +1,50 @@
 # API Reference
 
-This service exposes four HTTP endpoints for health checks and run bundle retrieval.
+This document describes the small Node demo surface under `api/`.
+
+## Boundary status
+
+Under Repository Boundary Closure v0.1 this demo server is **not** an execution authority. It does not run packs, create decisions, create receipts, or originate bundle identity. Until it is replaced by a thin adapter to the Canonical Kernel, execution-like routes fail closed.
 
 Base URL (local): `http://localhost:3000`
 
 ## GET /health
+
 Returns service liveness.
 
-### curl
 ```bash
 curl -s http://localhost:3000/health
 ```
 
-### PowerShell
-```powershell
-Invoke-RestMethod -Method GET -Uri "http://localhost:3000/health"
-```
-
 Expected response:
+
 ```json
 {"status":"OK"}
 ```
 
-## POST /run
-Starts a run and returns metadata including a `bundle_digest` used for retrieval.
+## POST /run — deprecated / fail closed
 
-### curl
-```bash
-curl -s -X POST http://localhost:3000/run \
-  -H "Content-Type: application/json" \
-  -d '{"input":"demo"}'
-```
+This route no longer fabricates a demo run or `bundle_digest`.
 
-### PowerShell
-```powershell
-$body = @{ input = "demo" } | ConvertTo-Json
-Invoke-RestMethod -Method POST -Uri "http://localhost:3000/run" -ContentType "application/json" -Body $body
-```
+Expected status: **410 Gone**.
 
-Example response:
 ```json
 {
-  "bundle_digest":"demo-bundle",
-  "status":"created"
+  "error": "Demo execution endpoint deprecated",
+  "authority": "canonical-kernel-required"
 }
 ```
 
-## GET /runs/:bundle_digest
-Fetches JSON metadata for a specific bundle digest.
+## GET /runs/:bundle_digest — deprecated / fail closed
 
-### curl
-```bash
-curl -s http://localhost:3000/runs/demo-bundle
-```
+Expected status: **410 Gone**. The demo server does not maintain an authoritative run store.
 
-### PowerShell
-```powershell
-Invoke-RestMethod -Method GET -Uri "http://localhost:3000/runs/demo-bundle"
-```
+## GET /runs/:bundle_digest/zip — deprecated / fail closed
 
-## GET /runs/:bundle_digest/zip
-Downloads the zip artifact for a specific bundle digest.
+Expected status: **410 Gone**. The demo server does not construct or expose pseudo evidence bundles.
 
-### curl
-```bash
-curl -L -o demo-bundle.zip http://localhost:3000/runs/demo-bundle/zip
-```
+## Canonical execution adapter
 
-### PowerShell
-```powershell
-Invoke-WebRequest -Method GET -Uri "http://localhost:3000/runs/demo-bundle/zip" -OutFile "demo-bundle.zip"
-```
+The repository also contains `deploy/docker/api/app/Program.cs`. That HTTP adapter delegates execution to `/runner/PayGod.Cli.dll run` and returns the artifacts produced by that canonical path. It may transport/package those outputs; it must not independently invent decision, receipt, manifest, or canonical bundle identity semantics.
+
+See `docs/REPOSITORY_BOUNDARY.md`.
