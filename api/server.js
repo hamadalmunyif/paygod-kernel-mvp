@@ -29,22 +29,30 @@ const server = http.createServer((req, res) => {
     return json(res, 200, { status: 'OK' });
   }
 
+  // Repository Boundary Closure v0.1: this demo server is not an execution
+  // authority. Until it delegates to the canonical kernel, execution-like
+  // routes fail closed instead of fabricating decisions or evidence.
   if (req.method === 'POST' && pathname === '/run') {
-    return json(res, 201, { bundle_digest: 'demo-bundle', status: 'created' });
+    return json(res, 410, {
+      error: 'Demo execution endpoint deprecated',
+      authority: 'canonical-kernel-required'
+    });
   }
 
   const runMatch = pathname.match(/^\/runs\/([^/]+)$/);
   if (req.method === 'GET' && runMatch) {
-    return json(res, 200, { bundle_digest: runMatch[1], status: 'available' });
+    return json(res, 410, {
+      error: 'Demo run store deprecated',
+      authority: 'canonical-kernel-required'
+    });
   }
 
   const zipMatch = pathname.match(/^\/runs\/([^/]+)\/zip$/);
   if (req.method === 'GET' && zipMatch) {
-    res.writeHead(200, {
-      'Content-Type': 'application/zip',
-      'Content-Disposition': `attachment; filename="${zipMatch[1]}.zip"`
+    return json(res, 410, {
+      error: 'Demo bundle endpoint deprecated',
+      authority: 'canonical-kernel-required'
     });
-    return res.end('');
   }
 
   return json(res, 404, { error: 'Not found' });

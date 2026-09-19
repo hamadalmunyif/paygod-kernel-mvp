@@ -1,0 +1,5 @@
+{
+  "name": "valid-thin-adapter",
+  "role": "adapter",
+  "capabilities": ["submit", "invoke", "transport", "store", "expose"]
+}

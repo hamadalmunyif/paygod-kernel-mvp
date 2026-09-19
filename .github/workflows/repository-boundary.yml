@@ -1,0 +1,40 @@
+name: Repository Boundary Gate
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'api/**'
+      - 'deploy/docker/api/app/**'
+      - 'tools/check_repository_boundary.py'
+      - 'tests/boundary/**'
+      - 'docs/REPOSITORY_BOUNDARY.md'
+      - 'docs/API.md'
+      - 'docs/WORKFLOW.md'
+      - '.github/workflows/repository-boundary.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'api/**'
+      - 'deploy/docker/api/app/**'
+      - 'tools/check_repository_boundary.py'
+      - 'tests/boundary/**'
+      - 'docs/REPOSITORY_BOUNDARY.md'
+      - 'docs/API.md'
+      - 'docs/WORKFLOW.md'
+      - '.github/workflows/repository-boundary.yml'
+
+jobs:
+  boundary:
+    name: Repository Boundary Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Positive witness - thin adapter accepted
+        run: python3 tools/check_repository_boundary.py --contract tests/boundary/valid-adapter.json --expect pass
+      - name: Negative witness - alternate authority rejected
+        run: python3 tools/check_repository_boundary.py --contract tests/boundary/alternate-authority.json --expect reject
+      - name: Inspect actual repository adapters
+        run: python3 tools/check_repository_boundary.py --scan-current
+      - name: Negative witness - mutate actual adapters
+        run: python3 tools/check_repository_boundary.py --mutation-witness
