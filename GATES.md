@@ -24,6 +24,16 @@ Inside CI, a recipient consumes a transferred, versioned verifier artifact and e
 
 These are CI-level witnesses, not an external-party/device trust-root proof.
 
+## Repository Boundary Gate
+
+`.github/workflows/repository-boundary.yml`
+
+This gate enforces **Proof of Single Authority**. A delegation-only adapter fixture must pass; an alternate-authority fixture that claims kernel-owned decision/bundle capabilities must be rejected. Repository-hosted adapter surfaces are also checked for known local authority constructions as defense in depth.
+
+Canonical execution truth may originate only in the kernel. APIs and cloud components may submit, invoke, transport, store, or expose canonical outputs; verifiers may verify only.
+
+See [Repository Boundary Closure v0.1](docs/REPOSITORY_BOUNDARY.md).
+
 ## Architecture gate
 The invariants in `docs/ARCHITECTURE_AUDIT.md` are the baseline. Before changing a frozen kernel primitive, explain why contracts, packs, or adapters are insufficient and preserve or explicitly version the affected verification contract.
 
