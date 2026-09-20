@@ -14,9 +14,12 @@ The repository currently has CI witnesses for:
 - artifact-only evidence handoff across environments;
 - Linux-producer to Windows-verifier portability;
 - standalone/no-checkout verification inside CI;
-- fail-closed rejection after a one-byte evidence mutation.
+- fail-closed rejection after a one-byte evidence mutation;
+- single-authority enforcement for registered repository-hosted adapters, including rejection of injected verdict, receipt, and bundle-identity authority.
 
 The standalone verifier checks manifest integrity, artifact SHA-256 digests, bundle-digest binding, receipt binding, and ledger hash-chain integrity where present.
+
+The single-authority witness is deliberately scoped: it covers adapters registered in `tools/check_repository_boundary.py`. New execution-facing surfaces must be registered and covered by the same boundary witness.
 
 ## What is not yet proven
 
@@ -92,13 +95,14 @@ See [Standalone Verifier](docs/STANDALONE_VERIFIER.md).
 
 ## Main-branch enforcement
 
-See [GATES.md](GATES.md). Core merge gates include Paygod Kernel CI, Paygod CI Enforcement, Security Gate, and Pack Contract Gate. Portability workflows provide additional architectural witnesses and regression protection.
+See [GATES.md](GATES.md). The governance contract defines stable required check contexts for kernel CI, security, deterministic enforcement, pack contracts, and repository-boundary enforcement. The GitHub ruleset must remain aligned with those contexts.
 
 ## Next boundary
 
+0. Complete main-ruleset alignment with the stable required check contexts in `GATES.md`.
 1. Package and test the verifier outside repository CI.
-2. Define Evidence Provenance Contract v0.1.
-3. Implement one bounded real-domain authority pack.
+2. Select one bounded real-domain workflow and derive the minimum evidence-provenance contract it actually requires.
+3. Implement that domain authority pack without changing frozen kernel semantics.
 4. Stop generic feature development.
 5. Run a shadow pilot against real human decisions.
 
