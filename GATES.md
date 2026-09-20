@@ -12,6 +12,8 @@ The main branch governance contract is that every pull request to `main` reports
 - **Pack Contract (paygod/v1)** — non-draft `pack.yaml` files validate against the pack contract.
 - **Repository Boundary Gate** — registered repository-hosted adapters preserve the canonical single-authority boundary.
 
+During migration, the CI-enforcement workflow also emits a temporary legacy `enforce` compatibility context because the current branch protection still requires that historical name. Remove that compatibility job only after the repository ruleset/protection is updated to require `Paygod CI Enforcement`.
+
 A gate that is intended to be required must run on every pull request to `main`; path-filtered required checks can otherwise leave unrelated pull requests waiting for a check that never starts.
 
 The GitHub ruleset must be kept aligned with these stable contexts. Ruleset drift is a governance defect, even when the underlying workflows remain green.

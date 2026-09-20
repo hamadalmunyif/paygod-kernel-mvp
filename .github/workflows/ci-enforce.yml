@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  enforce:
+  enforce-core:
     name: Paygod CI Enforcement
     runs-on: ubuntu-latest
 
@@ -56,3 +56,11 @@ jobs:
       - name: Verify bundle
         shell: pwsh
         run: pwsh -NoProfile -File ./tools/run_proof.ps1 -BundlePath ./ci_out
+
+  enforce:
+    name: enforce
+    needs: [enforce-core]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Legacy required-check compatibility
+        run: echo "Compatibility context for current main protection. Remove after ruleset migration."
