@@ -1,10 +1,10 @@
 # Repository Boundary Closure v0.1
 
-Status: proposed architecture gate. This document defines the witness required before Paygod may claim Proof of Single Authority.
+Status: **PROVEN IN CI for registered repository-hosted adapters.** PR #57 passed the merge-candidate witness, merged to `main`, and the same boundary witness passed again on merge commit `2b9be60d94eb624c16e4b05e27f92f973385680f`.
 
 ## Purpose
 
-This gate proves that Paygod has one execution authority. It does not forbid multiple APIs, cloud services, or adapters. It forbids any non-canonical component from originating independent execution truth.
+This gate establishes one canonical execution authority for the repository-hosted adapters that are explicitly registered in the boundary inventory. It does not forbid multiple APIs, cloud services, or adapters. It forbids registered non-canonical components from originating independent execution truth.
 
 ## Trust invariant
 
@@ -56,62 +56,89 @@ An API inside this repository is not a violation by location. It is a violation 
 
 ## Enforcement model
 
-The gate has two layers:
+The gate has three layers:
 
 1. **Capability contract**: an adapter declares only allowed capabilities. Canonical-origin capabilities are rejected outside the kernel.
-2. **Implementation guard**: adapter source is checked for known alternate-authority constructions as defense in depth. This guard is not the trust proof by itself.
+2. **Actual adapter inspection**: every registered repository-hosted adapter must preserve its declared fail-closed or delegation boundary.
+3. **Mutation witness**: copies of the actual registered adapters are injected with local verdict, receipt, and bundle-identity authority; each mutation must be rejected.
 
-The negative fixture deliberately requests an authority-owned capability and MUST be rejected. The positive fixture declares delegation-only capabilities and MUST pass.
+Source-level patterns remain defense in depth. They do not prove that arbitrary unregistered future code can never become an alternate authority.
+
+## Current registered adapters
+
+- `api/server.js` — fail closed for execution-like routes.
+- `deploy/docker/api/app/Program.cs` — delegates execution to `/runner/PayGod.Cli.dll run`.
+
+Any new execution-facing adapter must be registered in `tools/check_repository_boundary.py` and covered by the mutation witness in the same change.
 
 ## Required witness
 
 ```text
-alternate authority introduced
+registered actual adapter unchanged
         |
         v
 architecture enforcement
         |
         v
-CI FAIL (fixture is rejected)
+PASS
 
-valid adapter delegates to Canonical Kernel
+same adapter + invented verdict
+same adapter + local receipt
+same adapter + local bundle identity
         |
         v
-CI PASS
+architecture enforcement
+        |
+        v
+REJECT
 ```
 
-The CI job succeeds only when both observations occur: valid adapter accepted; alternate-authority fixture rejected.
+The CI job also requires the delegation-only capability fixture to pass and the alternate-authority capability fixture to be rejected.
 
 ## Acceptance condition
 
-Repository Boundary Closure is complete only when:
+Repository Boundary Closure v0.1 is complete for the registered adapters when:
 
-- valid adapter -> PASS;
-- alternate authority -> REJECTED;
+- valid adapter capability -> PASS;
+- alternate authority capability -> REJECTED;
+- current registered adapters -> PASS;
+- verdict mutation -> REJECTED;
+- receipt mutation -> REJECTED;
+- bundle-identity mutation -> REJECTED;
 - current public/demo APIs do not present locally invented execution truth as canonical output;
 - existing kernel determinism, artifact integrity, ledger, receipt, and verifier semantics remain unchanged;
 - the boundary witness passes on the merge candidate and again on `main`.
 
-Documentation-only changes, a submodule bump, manual review, removing `Date.now()`, or renaming demo endpoints are insufficient.
+Those conditions passed for PR #57 and again on `main` at merge commit `2b9be60d94eb624c16e4b05e27f92f973385680f`.
+
+## Scope limitation
+
+This witness does **not** automatically discover every possible future execution-facing file. It is an enforcement boundary for the adapters registered in the inventory. Adding an unregistered adapter would be a governance defect and must be prevented through PR review/template requirements plus always-running boundary checks.
+
+Documentation-only changes, a submodule bump, manual review, removing `Date.now()`, or renaming demo endpoints are insufficient substitutes for the witness.
 
 ## Repository implications
 
 - `paygod-kernel-mvp` remains the owner of canonical execution truth.
 - `paygod-cloud-starter` must not originate decision/evidence semantics. Its March 2026 pseudo-execution PR is superseded by this boundary.
-- `api/server.js` is currently a demo/deprecation candidate. Until a real canonical adapter is implemented, its execution-like endpoints must fail closed rather than fabricate canonical outputs.
+- `api/server.js` remains fail closed for execution-like routes until it is replaced or made a real canonical adapter.
 - Updating a cloud kernel reference does not by itself prove boundary closure.
 
 ## Completion statement
 
-Only after the witness passes may the project claim:
+For the registered repository-hosted adapters, the project may claim:
 
-> Paygod has one execution authority. External interfaces delegate to it, and CI rejects alternate authorities.
+> Paygod has one canonical execution authority. Registered repository-hosted adapters delegate to it or fail closed, and CI rejects tested alternate-authority mutations.
 
-That claim is **Proof of Single Authority**.
+That claim is the scoped **Proof of Single Authority** established by Repository Boundary Closure v0.1.
 
-## Governance rule
+## Governance rules
 
 > No next trust claim without a witness for the current one.
+
+> No broader claim than the witness actually proves.
+
+> No generic infrastructure before a real workflow demands it.
 
 Trust sequence:
 
@@ -137,4 +164,4 @@ Proof of Decision Authority
 Proof of Economic Value
 ```
 
-External Verifier distribution, Provenance, and real domain authority work remain downstream of this gate.
+External Verifier distribution, domain-driven Provenance, and real domain authority work remain downstream of this gate.
