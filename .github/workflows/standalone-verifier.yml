@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'tools/verify_portable_evidence.py'
+      - 'tools/test_verify_portable_evidence.py'
       - '.github/workflows/standalone-verifier.yml'
       - 'src/PayGod.Cli/**'
       - 'packs/**'
@@ -23,6 +24,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Run verifier regression tests
+        run: python tools/test_verify_portable_evidence.py
       - name: Package versioned verifier distribution
         shell: python
         run: |
