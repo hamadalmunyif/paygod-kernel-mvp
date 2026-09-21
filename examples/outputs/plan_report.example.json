@@ -1,0 +1,16 @@
+{
+  "api_version": "paygod/v1",
+  "kind": "PlanReport",
+  "generated_at": "2026-01-29T00:00:00Z",
+  "pack": {
+    "name": "iso27001-policy-review-a5-1",
+    "version": "1.0.0",
+    "path": "packs/standards/iso27001-policy-review",
+    "digest_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "input": {
+    "path": "sample.json",
+    "canonical_hash": "1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  "settings": {}
+}
