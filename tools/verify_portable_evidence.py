@@ -178,7 +178,8 @@ def _validate_receipt_semantics(
     ledger_entry: dict | None,
     manifest_sha: str,
     errors: list[str],
-) -> None:
+    allow_unbound_clock: bool,
+) -> str:
     if receipt.get("api_version") != "paygod/v1":
         errors.append("receipt api_version mismatch")
     if receipt.get("kind") != "Receipt":
@@ -226,12 +227,12 @@ def _validate_receipt_semantics(
 
     if ledger_entry is None:
         errors.append("missing ledger entry for receipt decision binding")
-        return
+        return "invalid"
 
     ledger_data = ledger_entry.get("data")
     if not isinstance(ledger_data, dict):
         errors.append("ledger data must be an object")
-        return
+        return "invalid"
 
     if verdict.get("value") != ledger_data.get("verdict"):
         errors.append("receipt verdict does not match locked ledger verdict")
@@ -255,15 +256,23 @@ def _validate_receipt_semantics(
         errors.append("manifest and locked ledger decision time mismatch")
 
     clock_value = clock.get("value")
-    if clock_value != "unset":
-        receipt_time = _parse_instant(clock_value)
-        if receipt_time is None:
-            errors.append("invalid or timezone-naive injected receipt clock")
-        elif manifest_time is not None and receipt_time != manifest_time:
-            errors.append("receipt clock does not match locked manifest/ledger time")
+    if clock_value == "unset":
+        if not allow_unbound_clock:
+            errors.append("unbound receipt clock requires explicit --allow-unbound-clock")
+            return "unbound-rejected"
+        return "unbound-opt-in"
+
+    receipt_time = _parse_instant(clock_value)
+    if receipt_time is None:
+        errors.append("invalid or timezone-naive injected receipt clock")
+        return "invalid"
+    if manifest_time is not None and receipt_time != manifest_time:
+        errors.append("receipt clock does not match locked manifest/ledger time")
+        return "invalid"
+    return "injected"
 
 
-def verify(bundle: Path) -> dict:
+def verify(bundle: Path, allow_unbound_clock: bool = False) -> dict:
     errors: list[str] = []
     manifest_path = bundle / "manifest.json"
     receipt_path = bundle / "receipt.json"
@@ -350,7 +359,9 @@ def verify(bundle: Path) -> dict:
 
     ledger_entry = verify_ledger(bundle / "ledger.jsonl", errors)
     manifest_sha = sha256_file(manifest_path)
-    _validate_receipt_semantics(manifest, receipt, ledger_entry, manifest_sha, errors)
+    clock_binding = _validate_receipt_semantics(
+        manifest, receipt, ledger_entry, manifest_sha, errors, allow_unbound_clock
+    )
 
     return {
         "status": "valid" if not errors else "invalid",
@@ -359,6 +370,7 @@ def verify(bundle: Path) -> dict:
         "bundle_digest": manifest_bundle,
         "manifest_sha256": manifest_sha,
         "verified_files": len(entries),
+        "clock_binding": clock_binding,
         "errors": errors,
     }
 
@@ -367,11 +379,16 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--version", action="version", version=f"%(prog)s {VERIFIER_VERSION}")
     parser.add_argument("bundle", type=Path)
+    parser.add_argument(
+        "--allow-unbound-clock",
+        action="store_true",
+        help="Explicitly accept legacy/local bundles whose receipt clock is 'unset'.",
+    )
     parser.add_argument("--result", type=Path, default=Path("verification-result.json"))
     args = parser.parse_args()
 
     try:
-        result = verify(args.bundle)
+        result = verify(args.bundle, allow_unbound_clock=args.allow_unbound_clock)
     except Exception as exc:
         result = _invalid([f"verifier failure: {type(exc).__name__}: {exc}"])
 
