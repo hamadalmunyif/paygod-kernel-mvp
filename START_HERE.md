@@ -42,7 +42,7 @@ See:
 These prove integrity and portability within the stated test boundaries. They do not prove external-source truth.
 
 ## 6. Main-branch gates
-See [GATES.md](GATES.md). Core required checks include Paygod Kernel CI, Paygod CI Enforcement, Security Gate, and Pack Contract Gate.
+See [GATES.md](GATES.md). The canonical required contexts are `Paygod Kernel CI`, `security-gate`, `Paygod CI Enforcement`, `Pack Contract (paygod/v1)`, `Repository Boundary Gate`, and `Verifier Integrity Gate`. The active GitHub ruleset must require all six; workflow success alone is not governance closure.
 
 ## 7. Where to look next
 - `docs/ARCHITECTURE_AUDIT.md`

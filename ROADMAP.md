@@ -14,7 +14,7 @@ This roadmap distinguishes **proven repository capabilities** from future produc
 - schema-governed evidence artifacts;
 - ledger append/verification and hash chaining;
 - manifest and bundle-digest binding;
-- deterministic receipt artifact.
+- deterministic receipt artifact under the injected-clock witness; the supported non-strict local path does not claim deterministic-time binding.
 
 ### v0.3 — Portable evidence verification — PROVEN IN CI
 - artifact-only producer -> verifier handoff;
@@ -26,8 +26,11 @@ This roadmap distinguishes **proven repository capabilities** from future produc
 - versioned standalone verifier artifact;
 - recipient jobs do not check out the repository;
 - clean evidence -> VALID;
-- tampered evidence -> INVALID;
-- machine-readable verification result.
+- payload and decision-critical receipt tamper -> INVALID;
+- exactly one manifest-locked decision ledger is required;
+- malformed control data -> machine-readable INVALID;
+- Unicode ledger canonicalization parity is regression-tested;
+- supported default-clock output remains verifiable only through explicit `--allow-unbound-clock` opt-in and is labeled as unbound; silent strict-to-unbound downgrade is rejected.
 
 ## Next gates
 

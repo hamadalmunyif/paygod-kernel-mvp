@@ -63,6 +63,21 @@ def main() -> int:
     failed = False
     count = 0
 
+    actual_schema_names = sorted(
+        p.name for p in SCHEMAS_DIR.glob("*.json") if p.is_file()
+    )
+    manifest_schema_names = sorted(schemas.keys())
+
+    missing_from_manifest = sorted(set(actual_schema_names) - set(manifest_schema_names))
+    stale_in_manifest = sorted(set(manifest_schema_names) - set(actual_schema_names))
+
+    if missing_from_manifest:
+        print("❌ Schemas missing from manifest: " + ", ".join(missing_from_manifest))
+        failed = True
+    if stale_in_manifest:
+        print("❌ Manifest entries without schema files: " + ", ".join(stale_in_manifest))
+        failed = True
+
     for name, meta in schemas.items():
         count += 1
         expected = (meta or {}).get("sha256")
@@ -96,7 +111,7 @@ def main() -> int:
         print("ℹ️ If schema changes are intentional, run: python tools/update_schema_manifest.py")
         return 1
 
-    print(f"✅ Schema manifest matches ({count} schemas)")
+    print(f"✅ Schema manifest matches ({count} schemas; complete file set)")
     return 0
 
 

@@ -59,7 +59,7 @@ public static class RunCommand
 
         var verdict = result.Decision == "unknown" ? "error" : result.Decision;
         var ledgerPath = Path.Join(outDir.FullName, "ledger.jsonl");
-        if (verdict is "allow" or "deny" or "error") AppendLedger(ledgerPath, packObj, inputHash, verdict, result, runTs);
+        if (verdict is "allow" or "deny" or "flag" or "error") AppendLedger(ledgerPath, packObj, inputHash, verdict, result, runTs);
 
         // The manifest locks the evidence payload. receipt.json is deliberately NOT a
         // manifest member: the receipt binds to the finalized manifest. Including the

@@ -78,7 +78,7 @@ These are not marked for deletion. They require justification against the curren
 The standalone verifier has a CI-level no-checkout witness. A packaged, versioned verifier still needs an external-device/party witness outside the repository CI context.
 
 ### 2. Evidence provenance
-Integrity is not provenance. The current verifier can prove that evidence used by a decision has not changed; it does not by itself prove that an external fact is true or that a claimed issuer supplied it.
+Integrity is not provenance. The current verifier proves internal bundle consistency and detects tested mutations relative to the transferred manifest/ledger bindings. Without an external publisher signature/trust anchor, it does not by itself prove that a coordinated re-authored bundle is the originally issued bundle, that an external fact is true, or that a claimed issuer supplied it.
 
 Minimum provenance contract should eventually bind:
 - source identifier;
@@ -128,7 +128,7 @@ Do not add tokenization, agent-payment rails, an Open Banking aggregator, AI und
 
 1. Align README, START_HERE, ROADMAP, GATES, and verifier documentation with the architecture actually on `main`.
 2. Declare the kernel invariants/freeze boundary.
-3. Package verifier v0.1.0 and run an external portability witness.
+3. Package verifier v0.2.0 and run an external portability/trust-root witness.
 4. Define Evidence Provenance Contract v0.1.
 5. Implement one Conditional Invoice Release Pack v0.1.
 6. Stop coding and run a 20–50 case shadow pilot.

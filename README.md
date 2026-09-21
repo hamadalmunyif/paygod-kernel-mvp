@@ -17,7 +17,7 @@ The repository currently has CI witnesses for:
 - fail-closed rejection after a one-byte evidence mutation;
 - single-authority enforcement for registered repository-hosted adapters, including rejection of injected verdict, receipt, and bundle-identity authority.
 
-The standalone verifier checks manifest integrity, artifact SHA-256 digests, bundle-digest binding, receipt binding, and ledger hash-chain integrity where present.
+The standalone verifier checks manifest integrity, artifact SHA-256 digests and byte counts, bundle-digest binding, exactly one manifest-locked `ledger.jsonl`, decision-critical receipt claims against that locked ledger, and ledger hash-chain integrity. All canonical verdicts in the current decision contract (`allow`, `deny`, `flag`, `error`) are ledger-bound. Verifier v0.2 also mirrors the producer's Unicode canonicalization, rejects silent injected-clock -> `unset` downgrades, and emits machine-readable `INVALID` results for malformed control shapes. Legacy/local unbound-clock verification requires explicit `--allow-unbound-clock` opt-in and is labeled `clock_binding: unbound-opt-in`. These checks establish bundle consistency/tamper evidence within the documented trust boundary; they do not authenticate the evidence publisher.
 
 The single-authority witness is deliberately scoped: it covers adapters registered in `tools/check_repository_boundary.py`. New execution-facing surfaces must be registered and covered by the same boundary witness.
 
@@ -95,7 +95,7 @@ See [Standalone Verifier](docs/STANDALONE_VERIFIER.md).
 
 ## Main-branch enforcement
 
-See [GATES.md](GATES.md). The governance contract defines stable required check contexts for kernel CI, security, deterministic enforcement, pack contracts, and repository-boundary enforcement. The GitHub ruleset must remain aligned with those contexts.
+See [GATES.md](GATES.md). The governance contract defines stable required check contexts for kernel CI, security, deterministic enforcement, pack contracts, repository-boundary enforcement, and verifier integrity. The GitHub ruleset must remain aligned with those contexts.
 
 ## Next boundary
 

@@ -43,6 +43,9 @@
     },
     "truth_ledger_entry.schema.json": {
       "sha256": "d96361d61dd9b449ae95df7131de4021ac50217bf677d901db7ce14390956a96"
+    },
+    "receipt.schema.json": {
+      "sha256": "5410bc2589707b412a072a644880d5b85aee44df61e66bdbe5952c810b5b134c"
     }
   }
 }

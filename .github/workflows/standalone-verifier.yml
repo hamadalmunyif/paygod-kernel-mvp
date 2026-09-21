@@ -3,12 +3,6 @@ name: Standalone Third-Party Verifier Witness
 on:
   pull_request:
     branches: [main]
-    paths:
-      - 'tools/verify_portable_evidence.py'
-      - '.github/workflows/standalone-verifier.yml'
-      - 'src/PayGod.Cli/**'
-      - 'packs/**'
-      - 'docs/STANDALONE_VERIFIER.md'
   push:
     branches: [main]
 
@@ -23,6 +17,20 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Run verifier regression tests
+        run: python tools/test_verify_portable_evidence.py
+      - name: Assert canonical verdict contract alignment
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          decision = json.loads(Path('contracts/schemas/decision.schema.json').read_text(encoding='utf-8'))
+          receipt = json.loads(Path('contracts/schemas/receipt.schema.json').read_text(encoding='utf-8'))
+          decision_values = set(decision['properties']['verdict']['enum'])
+          receipt_values = set(receipt['properties']['verdict']['properties']['value']['enum'])
+          expected = {'allow', 'deny', 'flag', 'error'}
+          assert decision_values == expected, decision_values
+          assert receipt_values == expected, receipt_values
       - name: Package versioned verifier distribution
         shell: python
         run: |
@@ -35,14 +43,14 @@ jobs:
           digest = hashlib.sha256(target.read_bytes()).hexdigest()
           manifest = {
               'artifact_type': 'paygod/standalone-verifier/v1',
-              'version': '0.1.0',
+              'version': '0.2.0',
               'entrypoint': 'paygod-verify.py',
               'sha256': digest,
           }
           (root / 'verifier-manifest.json').write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n', encoding='utf-8')
       - uses: actions/upload-artifact@v4
         with:
-          name: paygod-standalone-verifier-v0.1.0
+          name: paygod-standalone-verifier-v0.2.0
           path: verifier-dist/
 
   producer:
@@ -61,14 +69,41 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          New-Item -ItemType Directory -Force -Path portable-input,portable-evidence | Out-Null
+          New-Item -ItemType Directory -Force -Path portable-input,portable-evidence,default-clock-evidence,flag-evidence | Out-Null
           '{"content":"standalone-third-party-witness"}' | Set-Content -NoNewline -Encoding utf8 portable-input/input.json
           & ./out/PayGod.Cli run --pack ./packs/core/secrets-in-repo-guard --input ./portable-input/input.json --out ./portable-evidence
-          if ($LASTEXITCODE -ne 0) { throw "producer failed: $LASTEXITCODE" }
+          if ($LASTEXITCODE -ne 0) { throw "strict producer failed: $LASTEXITCODE" }
+
+          $savedClock = $env:PAYGOD_CLOCK
+          $savedStrict = $env:PAYGOD_STRICT
+          Remove-Item Env:PAYGOD_CLOCK -ErrorAction SilentlyContinue
+          Remove-Item Env:PAYGOD_STRICT -ErrorAction SilentlyContinue
+          & ./out/PayGod.Cli run --pack ./packs/core/secrets-in-repo-guard --input ./portable-input/input.json --out ./default-clock-evidence
+          if ($LASTEXITCODE -ne 0) { throw "default-clock producer failed: $LASTEXITCODE" }
+          $env:PAYGOD_CLOCK = $savedClock
+          $env:PAYGOD_STRICT = $savedStrict
+
+          @'
+          {"ghg_report":{"reporting_year":2025,"scope1_tco2e":100.0,"scope2_tco2e":50.0,"methodology_ref":"ref:methodology/v1","evidence_refs":["ref:evidence/ghg/2025-01"]}}
+          '@ | Set-Content -NoNewline -Encoding utf8 portable-input/flag-input.json
+          & ./out/PayGod.Cli run --pack ./packs/core/ghg-scope-1-2-guard --input ./portable-input/flag-input.json --out ./flag-evidence
+          if ($LASTEXITCODE -ne 0) { throw "flag producer failed: $LASTEXITCODE" }
       - uses: actions/upload-artifact@v4
         with:
           name: paygod-third-party-evidence
           path: portable-evidence/
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paygod-default-clock-evidence
+          path: default-clock-evidence/
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paygod-flag-evidence
+          path: flag-evidence/
           if-no-files-found: error
           retention-days: 7
 
@@ -87,7 +122,7 @@ jobs:
           }
       - uses: actions/download-artifact@v4
         with:
-          name: paygod-standalone-verifier-v0.1.0
+          name: paygod-standalone-verifier-v0.2.0
           path: verifier
       - uses: actions/download-artifact@v4
         with:
@@ -101,7 +136,7 @@ jobs:
           root = Path('verifier')
           manifest = json.loads((root / 'verifier-manifest.json').read_text(encoding='utf-8'))
           assert manifest['artifact_type'] == 'paygod/standalone-verifier/v1'
-          assert manifest['version'] == '0.1.0'
+          assert manifest['version'] == '0.2.0'
           target = root / manifest['entrypoint']
           actual = hashlib.sha256(target.read_bytes()).hexdigest()
           if actual != manifest['sha256']:
@@ -116,11 +151,48 @@ jobs:
           result = json.loads(Path('verification-result.json').read_text(encoding='utf-8'))
           assert result['status'] == 'valid'
           assert result['portable'] is True
-          assert result['verifier_version'] == '0.1.0'
+          assert result['verifier_version'] == '0.2.0'
+      - uses: actions/download-artifact@v4
+        with:
+          name: paygod-default-clock-evidence
+          path: default-clock-evidence
+      - name: Verify supported default-clock producer output with explicit opt-in
+        run: python verifier/paygod-verify.py default-clock-evidence --allow-unbound-clock --result default-clock-result.json
+      - name: Assert default-clock result is VALID without injected-time claim
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          receipt = json.loads(Path('default-clock-evidence/receipt.json').read_text(encoding='utf-8'))
+          result = json.loads(Path('default-clock-result.json').read_text(encoding='utf-8'))
+          assert receipt['clock']['value'] == 'unset'
+          assert result['status'] == 'valid'
+          assert result['clock_binding'] == 'unbound-opt-in'
+      - uses: actions/download-artifact@v4
+        with:
+          name: paygod-flag-evidence
+          path: flag-evidence
+      - name: Verify canonical flag decision is ledger-bound
+        run: python verifier/paygod-verify.py flag-evidence --result flag-result.json
+      - name: Assert flag decision remains canonical and valid
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          receipt = json.loads(Path('flag-evidence/receipt.json').read_text(encoding='utf-8'))
+          ledger_lines = [line for line in Path('flag-evidence/ledger.jsonl').read_text(encoding='utf-8').splitlines() if line.strip()]
+          ledger = json.loads(ledger_lines[-1])
+          result = json.loads(Path('flag-result.json').read_text(encoding='utf-8'))
+          assert receipt['verdict']['value'] == 'flag'
+          assert ledger['data']['verdict'] == 'flag'
+          assert result['status'] == 'valid'
+          assert result['clock_binding'] == 'injected'
       - uses: actions/upload-artifact@v4
         with:
           name: standalone-third-party-verification-result
-          path: verification-result.json
+          path: |
+            verification-result.json
+            flag-result.json
 
   tamper-rejection:
     needs: [package-verifier, producer]
@@ -137,7 +209,7 @@ jobs:
           }
       - uses: actions/download-artifact@v4
         with:
-          name: paygod-standalone-verifier-v0.1.0
+          name: paygod-standalone-verifier-v0.2.0
           path: verifier
       - uses: actions/download-artifact@v4
         with:
@@ -175,7 +247,214 @@ jobs:
           if ($result.status -ne 'invalid') { throw 'tamper result was not INVALID' }
           Write-Host "PASS: tampered evidence rejected (verifier exit $code)"
           exit 0
+      - name: Download fresh evidence for receipt tamper
+        uses: actions/download-artifact@v4
+        with:
+          name: paygod-third-party-evidence
+          path: receipt-tampered-evidence
+      - name: Tamper decision-critical receipt verdict
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          target = Path('receipt-tampered-evidence/receipt.json')
+          receipt = json.loads(target.read_text(encoding='utf-8'))
+          original = receipt['verdict']['value']
+          receipt['verdict']['value'] = 'deny' if original != 'deny' else 'allow'
+          target.write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
+      - name: Require receipt tamper rejection
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $output = & python verifier/paygod-verify.py receipt-tampered-evidence --result receipt-tamper-result.json 2>&1
+          $code = $LASTEXITCODE
+          $output | ForEach-Object { Write-Host $_ }
+          if ($code -eq 0) { throw 'tampered receipt verdict was incorrectly accepted' }
+          $result = Get-Content receipt-tamper-result.json -Raw | ConvertFrom-Json
+          if ($result.status -ne 'invalid') { throw 'receipt tamper result was not INVALID' }
+          if (-not (($result.errors -join ' ') -match 'locked ledger verdict')) { throw 'receipt tamper was not rejected by decision binding' }
+          exit 0
+
+      - name: Download fresh evidence for missing-decision-fields test
+        uses: actions/download-artifact@v4
+        with:
+          name: paygod-third-party-evidence
+          path: missing-decision-evidence
+      - name: Remove decision fields coherently from receipt and locked ledger
+        shell: python
+        run: |
+          import hashlib, importlib.util, json
+          from pathlib import Path
+          root = Path('missing-decision-evidence')
+          ledger_path = root / 'ledger.jsonl'
+          manifest_path = root / 'manifest.json'
+          receipt_path = root / 'receipt.json'
+
+          ledger = json.loads(ledger_path.read_text(encoding='utf-8').strip())
+          ledger['data'].pop('verdict', None)
+          ledger['data'].pop('rule_name', None)
+          ledger['data'].pop('reason', None)
+
+          spec = importlib.util.spec_from_file_location('pv', 'verifier/paygod-verify.py')
+          pv = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(pv)
+          payload = {
+              'previous_hash': ledger['previous_hash'],
+              'timestamp': ledger['timestamp'],
+              'data': ledger['data'],
+          }
+          ledger['record_hash'] = pv.sha256_bytes(pv.canonical_json(payload).encode('utf-8'))
+          ledger_path.write_text(json.dumps(ledger, separators=(',', ':')) + '\n', encoding='utf-8')
+
+          manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+          for entry in manifest['files']:
+              if entry['name'] == 'ledger.jsonl':
+                  entry['sha256'] = hashlib.sha256(ledger_path.read_bytes()).hexdigest()
+                  entry['bytes'] = ledger_path.stat().st_size
+          lines = [f"{x['name']}={x['sha256']}\n" for x in sorted(manifest['files'], key=lambda x: x['name'])]
+          manifest['bundle']['bundle_digest'] = hashlib.sha256(''.join(lines).encode()).hexdigest()
+          manifest_path.write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+
+          receipt = json.loads(receipt_path.read_text(encoding='utf-8'))
+          receipt['verdict'] = {}
+          receipt['bundle']['files'] = manifest['files']
+          receipt['bundle']['bundle_digest'] = manifest['bundle']['bundle_digest']
+          receipt['bundle']['manifest_sha256'] = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+          receipt_path.write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
+      - name: Require missing decision fields rejection
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $output = & python verifier/paygod-verify.py missing-decision-evidence --result missing-decision-result.json 2>&1
+          $code = $LASTEXITCODE
+          $output | ForEach-Object { Write-Host $_ }
+          if ($code -eq 0) { throw 'bundle with missing decision fields was incorrectly accepted' }
+          $result = Get-Content missing-decision-result.json -Raw | ConvertFrom-Json
+          if ($result.status -ne 'invalid') { throw 'missing-decision result was not INVALID' }
+          if (-not (($result.errors -join ' ') -match 'verdict value|rule_name|reason')) { throw 'missing decision fields were not explicitly rejected' }
+          exit 0
+
+      - name: Download fresh evidence for clock-downgrade test
+        uses: actions/download-artifact@v4
+        with:
+          name: paygod-third-party-evidence
+          path: clock-downgrade-evidence
+      - name: Downgrade strict receipt clock to unset
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          target = Path('clock-downgrade-evidence/receipt.json')
+          receipt = json.loads(target.read_text(encoding='utf-8'))
+          receipt['clock']['value'] = 'unset'
+          receipt['generated_at'] = 'unset'
+          target.write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
+      - name: Require explicit rejection of silent clock downgrade
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $output = & python verifier/paygod-verify.py clock-downgrade-evidence --result clock-downgrade-result.json 2>&1
+          $code = $LASTEXITCODE
+          $output | ForEach-Object { Write-Host $_ }
+          if ($code -eq 0) { throw 'strict receipt was silently downgraded to an unbound clock' }
+          $result = Get-Content clock-downgrade-result.json -Raw | ConvertFrom-Json
+          if (-not (($result.errors -join ' ') -match 'explicit --allow-unbound-clock')) { throw 'clock downgrade was not rejected by explicit opt-in policy' }
+          exit 0
+
+      - name: Download fresh evidence for ledger-lock test
+        uses: actions/download-artifact@v4
+        with:
+          name: paygod-third-party-evidence
+          path: ledger-unlocked-evidence
+      - name: Remove ledger from manifest and rebind receipt
+        shell: python
+        run: |
+          import hashlib, json
+          from pathlib import Path
+          root = Path('ledger-unlocked-evidence')
+          manifest_path = root / 'manifest.json'
+          receipt_path = root / 'receipt.json'
+          manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+          manifest['files'] = [x for x in manifest['files'] if x['name'] != 'ledger.jsonl']
+          lines = [f"{x['name']}={x['sha256']}\n" for x in sorted(manifest['files'], key=lambda x: x['name'])]
+          manifest['bundle']['file_count'] = len(manifest['files'])
+          manifest['bundle']['bundle_digest'] = hashlib.sha256(''.join(lines).encode()).hexdigest()
+          manifest_path.write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+          receipt = json.loads(receipt_path.read_text(encoding='utf-8'))
+          receipt['bundle']['files'] = manifest['files']
+          receipt['bundle']['bundle_digest'] = manifest['bundle']['bundle_digest']
+          receipt['bundle']['manifest_sha256'] = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+          receipt_path.write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
+      - name: Require manifest-locked ledger
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $output = & python verifier/paygod-verify.py ledger-unlocked-evidence --result ledger-lock-result.json 2>&1
+          $code = $LASTEXITCODE
+          $output | ForEach-Object { Write-Host $_ }
+          if ($code -eq 0) { throw 'bundle without manifest-locked ledger was incorrectly accepted' }
+          $result = Get-Content ledger-lock-result.json -Raw | ConvertFrom-Json
+          if (-not (($result.errors -join ' ') -match 'ledger.jsonl must appear exactly once')) { throw 'ledger lock invariant was not enforced' }
+          exit 0
+
+      - name: Download fresh evidence for malformed control test
+        uses: actions/download-artifact@v4
+        with:
+          name: paygod-third-party-evidence
+          path: malformed-evidence
+      - name: Malform manifest shape
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          target = Path('malformed-evidence/manifest.json')
+          manifest = json.loads(target.read_text(encoding='utf-8'))
+          manifest['files'] = 1
+          target.write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+      - name: Require machine-readable INVALID for malformed control JSON
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $output = & python verifier/paygod-verify.py malformed-evidence --result malformed-result.json 2>&1
+          $code = $LASTEXITCODE
+          $output | ForEach-Object { Write-Host $_ }
+          if ($code -eq 0) { throw 'malformed manifest was incorrectly accepted' }
+          if (-not (Test-Path malformed-result.json)) { throw 'verifier did not emit malformed-result.json' }
+          $result = Get-Content malformed-result.json -Raw | ConvertFrom-Json
+          if ($result.status -ne 'invalid') { throw 'malformed result was not INVALID' }
+          exit 0
+
       - uses: actions/upload-artifact@v4
         with:
-          name: standalone-third-party-tamper-result
-          path: tamper-result.json
+          name: standalone-third-party-tamper-results
+          path: |
+            tamper-result.json
+            receipt-tamper-result.json
+            missing-decision-result.json
+            clock-downgrade-result.json
+            ledger-lock-result.json
+            malformed-result.json
+
+  verifier-integrity-gate:
+    name: Verifier Integrity Gate
+    if: always()
+    needs: [package-verifier, producer, third-party-verifier, tamper-rejection]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Propagate verifier witness failures
+        shell: bash
+        run: |
+          echo "package-verifier=${{ needs.package-verifier.result }}"
+          echo "producer=${{ needs.producer.result }}"
+          echo "third-party-verifier=${{ needs.third-party-verifier.result }}"
+          echo "tamper-rejection=${{ needs.tamper-rejection.result }}"
+
+          if [[ "${{ needs.package-verifier.result }}" != "success" || \
+                "${{ needs.producer.result }}" != "success" || \
+                "${{ needs.third-party-verifier.result }}" != "success" || \
+                "${{ needs.tamper-rejection.result }}" != "success" ]]; then
+            echo "Verifier Integrity Gate: one or more required verifier witnesses did not succeed."
+            exit 1
+          fi
+
+          echo "Verifier Integrity Gate passed."
