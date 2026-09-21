@@ -197,8 +197,9 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Continue'
-          & python verifier/paygod-verify.py receipt-tampered-evidence --result receipt-tamper-result.json
+          $output = & python verifier/paygod-verify.py receipt-tampered-evidence --result receipt-tamper-result.json 2>&1
           $code = $LASTEXITCODE
+          $output | ForEach-Object { Write-Host $_ }
           if ($code -eq 0) { throw 'tampered receipt verdict was incorrectly accepted' }
           $result = Get-Content receipt-tamper-result.json -Raw | ConvertFrom-Json
           if ($result.status -ne 'invalid') { throw 'receipt tamper result was not INVALID' }
@@ -222,8 +223,9 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Continue'
-          & python verifier/paygod-verify.py malformed-evidence --result malformed-result.json
+          $output = & python verifier/paygod-verify.py malformed-evidence --result malformed-result.json 2>&1
           $code = $LASTEXITCODE
+          $output | ForEach-Object { Write-Host $_ }
           if ($code -eq 0) { throw 'malformed manifest was incorrectly accepted' }
           if (-not (Test-Path malformed-result.json)) { throw 'verifier did not emit malformed-result.json' }
           $result = Get-Content malformed-result.json -Raw | ConvertFrom-Json
