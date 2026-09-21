@@ -263,6 +263,65 @@ jobs:
           if (-not (($result.errors -join ' ') -match 'locked ledger verdict')) { throw 'receipt tamper was not rejected by decision binding' }
           exit 0
 
+      - name: Download fresh evidence for missing-decision-fields test
+        uses: actions/download-artifact@v4
+        with:
+          name: paygod-third-party-evidence
+          path: missing-decision-evidence
+      - name: Remove decision fields coherently from receipt and locked ledger
+        shell: python
+        run: |
+          import hashlib, importlib.util, json
+          from pathlib import Path
+          root = Path('missing-decision-evidence')
+          ledger_path = root / 'ledger.jsonl'
+          manifest_path = root / 'manifest.json'
+          receipt_path = root / 'receipt.json'
+
+          ledger = json.loads(ledger_path.read_text(encoding='utf-8').strip())
+          ledger['data'].pop('verdict', None)
+          ledger['data'].pop('rule_name', None)
+          ledger['data'].pop('reason', None)
+
+          spec = importlib.util.spec_from_file_location('pv', 'verifier/paygod-verify.py')
+          pv = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(pv)
+          payload = {
+              'previous_hash': ledger['previous_hash'],
+              'timestamp': ledger['timestamp'],
+              'data': ledger['data'],
+          }
+          ledger['record_hash'] = pv.sha256_bytes(pv.canonical_json(payload).encode('utf-8'))
+          ledger_path.write_text(json.dumps(ledger, separators=(',', ':')) + '\n', encoding='utf-8')
+
+          manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+          for entry in manifest['files']:
+              if entry['name'] == 'ledger.jsonl':
+                  entry['sha256'] = hashlib.sha256(ledger_path.read_bytes()).hexdigest()
+                  entry['bytes'] = ledger_path.stat().st_size
+          lines = [f"{x['name']}={x['sha256']}\n" for x in sorted(manifest['files'], key=lambda x: x['name'])]
+          manifest['bundle']['bundle_digest'] = hashlib.sha256(''.join(lines).encode()).hexdigest()
+          manifest_path.write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+
+          receipt = json.loads(receipt_path.read_text(encoding='utf-8'))
+          receipt['verdict'] = {}
+          receipt['bundle']['files'] = manifest['files']
+          receipt['bundle']['bundle_digest'] = manifest['bundle']['bundle_digest']
+          receipt['bundle']['manifest_sha256'] = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+          receipt_path.write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
+      - name: Require missing decision fields rejection
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $output = & python verifier/paygod-verify.py missing-decision-evidence --result missing-decision-result.json 2>&1
+          $code = $LASTEXITCODE
+          $output | ForEach-Object { Write-Host $_ }
+          if ($code -eq 0) { throw 'bundle with missing decision fields was incorrectly accepted' }
+          $result = Get-Content missing-decision-result.json -Raw | ConvertFrom-Json
+          if ($result.status -ne 'invalid') { throw 'missing-decision result was not INVALID' }
+          if (-not (($result.errors -join ' ') -match 'verdict value|rule_name|reason')) { throw 'missing decision fields were not explicitly rejected' }
+          exit 0
+
       - name: Download fresh evidence for clock-downgrade test
         uses: actions/download-artifact@v4
         with:
@@ -359,6 +418,7 @@ jobs:
           path: |
             tamper-result.json
             receipt-tamper-result.json
+            missing-decision-result.json
             clock-downgrade-result.json
             ledger-lock-result.json
             malformed-result.json
