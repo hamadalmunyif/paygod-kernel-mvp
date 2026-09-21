@@ -234,6 +234,7 @@ jobs:
           $result = Get-Content receipt-tamper-result.json -Raw | ConvertFrom-Json
           if ($result.status -ne 'invalid') { throw 'receipt tamper result was not INVALID' }
           if (-not (($result.errors -join ' ') -match 'locked ledger verdict')) { throw 'receipt tamper was not rejected by decision binding' }
+          exit 0
 
       - name: Download fresh evidence for ledger-lock test
         uses: actions/download-artifact@v4
@@ -269,6 +270,7 @@ jobs:
           if ($code -eq 0) { throw 'bundle without manifest-locked ledger was incorrectly accepted' }
           $result = Get-Content ledger-lock-result.json -Raw | ConvertFrom-Json
           if (-not (($result.errors -join ' ') -match 'ledger.jsonl must appear exactly once')) { throw 'ledger lock invariant was not enforced' }
+          exit 0
 
       - name: Download fresh evidence for malformed control test
         uses: actions/download-artifact@v4
@@ -295,6 +297,7 @@ jobs:
           if (-not (Test-Path malformed-result.json)) { throw 'verifier did not emit malformed-result.json' }
           $result = Get-Content malformed-result.json -Raw | ConvertFrom-Json
           if ($result.status -ne 'invalid') { throw 'malformed result was not INVALID' }
+          exit 0
 
       - uses: actions/upload-artifact@v4
         with:
