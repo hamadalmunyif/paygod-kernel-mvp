@@ -95,7 +95,7 @@ See [Standalone Verifier](docs/STANDALONE_VERIFIER.md).
 
 ## Main-branch enforcement
 
-See [GATES.md](GATES.md). The governance contract defines stable required check contexts for kernel CI, security, deterministic enforcement, pack contracts, and repository-boundary enforcement. The GitHub ruleset must remain aligned with those contexts.
+See [GATES.md](GATES.md). The governance contract defines stable required check contexts for kernel CI, security, deterministic enforcement, pack contracts, repository-boundary enforcement, and verifier integrity. The GitHub ruleset must remain aligned with those contexts.
 
 ## Next boundary
 
