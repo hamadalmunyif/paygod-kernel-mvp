@@ -14,7 +14,8 @@ The verifier checks:
 - exactly one manifest-locked `ledger.jsonl`;
 - receipt-to-manifest binding;
 - ledger hash-chain integrity;
-- decision-critical receipt claims against the locked ledger.
+- decision-critical receipt claims against the locked ledger;
+- canonical `allow`, `deny`, `flag`, and `error` verdicts are ledger-bound.
 
 Acceptance requires clean evidence -> `VALID`, payload tamper -> `INVALID`, decision-critical receipt tamper -> `INVALID`, a missing manifest-locked ledger -> `INVALID`, fail-closed behavior, and machine-readable results. Verifier v0.2 cross-checks receipt verdict/rule/reason, pack, input hash, and, when `PAYGOD_CLOCK` is injected, decision time against the locked manifest/ledger. For the supported non-strict local path where the receipt clock is `unset`, acceptance requires the verifier operator to pass `--allow-unbound-clock` explicitly. The result records `clock_binding: unbound-opt-in`; default verification rejects `unset`, preventing a receipt-only downgrade from an injected clock to an unbound clock. Manifest/ledger time consistency is still checked.
 
