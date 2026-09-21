@@ -64,14 +64,29 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          New-Item -ItemType Directory -Force -Path portable-input,portable-evidence | Out-Null
+          New-Item -ItemType Directory -Force -Path portable-input,portable-evidence,default-clock-evidence | Out-Null
           '{"content":"standalone-third-party-witness"}' | Set-Content -NoNewline -Encoding utf8 portable-input/input.json
           & ./out/PayGod.Cli run --pack ./packs/core/secrets-in-repo-guard --input ./portable-input/input.json --out ./portable-evidence
-          if ($LASTEXITCODE -ne 0) { throw "producer failed: $LASTEXITCODE" }
+          if ($LASTEXITCODE -ne 0) { throw "strict producer failed: $LASTEXITCODE" }
+
+          $savedClock = $env:PAYGOD_CLOCK
+          $savedStrict = $env:PAYGOD_STRICT
+          Remove-Item Env:PAYGOD_CLOCK -ErrorAction SilentlyContinue
+          Remove-Item Env:PAYGOD_STRICT -ErrorAction SilentlyContinue
+          & ./out/PayGod.Cli run --pack ./packs/core/secrets-in-repo-guard --input ./portable-input/input.json --out ./default-clock-evidence
+          if ($LASTEXITCODE -ne 0) { throw "default-clock producer failed: $LASTEXITCODE" }
+          $env:PAYGOD_CLOCK = $savedClock
+          $env:PAYGOD_STRICT = $savedStrict
       - uses: actions/upload-artifact@v4
         with:
           name: paygod-third-party-evidence
           path: portable-evidence/
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paygod-default-clock-evidence
+          path: default-clock-evidence/
           if-no-files-found: error
           retention-days: 7
 
@@ -120,6 +135,21 @@ jobs:
           assert result['status'] == 'valid'
           assert result['portable'] is True
           assert result['verifier_version'] == '0.2.0'
+      - uses: actions/download-artifact@v4
+        with:
+          name: paygod-default-clock-evidence
+          path: default-clock-evidence
+      - name: Verify supported default-clock producer output
+        run: python verifier/paygod-verify.py default-clock-evidence --result default-clock-result.json
+      - name: Assert default-clock result is VALID without injected-time claim
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          receipt = json.loads(Path('default-clock-evidence/receipt.json').read_text(encoding='utf-8'))
+          result = json.loads(Path('default-clock-result.json').read_text(encoding='utf-8'))
+          assert receipt['clock']['value'] == 'unset'
+          assert result['status'] == 'valid'
       - uses: actions/upload-artifact@v4
         with:
           name: standalone-third-party-verification-result
@@ -205,6 +235,41 @@ jobs:
           if ($result.status -ne 'invalid') { throw 'receipt tamper result was not INVALID' }
           if (-not (($result.errors -join ' ') -match 'locked ledger verdict')) { throw 'receipt tamper was not rejected by decision binding' }
 
+      - name: Download fresh evidence for ledger-lock test
+        uses: actions/download-artifact@v4
+        with:
+          name: paygod-third-party-evidence
+          path: ledger-unlocked-evidence
+      - name: Remove ledger from manifest and rebind receipt
+        shell: python
+        run: |
+          import hashlib, json
+          from pathlib import Path
+          root = Path('ledger-unlocked-evidence')
+          manifest_path = root / 'manifest.json'
+          receipt_path = root / 'receipt.json'
+          manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+          manifest['files'] = [x for x in manifest['files'] if x['name'] != 'ledger.jsonl']
+          lines = [f"{x['name']}={x['sha256']}\n" for x in sorted(manifest['files'], key=lambda x: x['name'])]
+          manifest['bundle']['file_count'] = len(manifest['files'])
+          manifest['bundle']['bundle_digest'] = hashlib.sha256(''.join(lines).encode()).hexdigest()
+          manifest_path.write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+          receipt = json.loads(receipt_path.read_text(encoding='utf-8'))
+          receipt['bundle']['files'] = manifest['files']
+          receipt['bundle']['bundle_digest'] = manifest['bundle']['bundle_digest']
+          receipt['bundle']['manifest_sha256'] = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+          receipt_path.write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
+      - name: Require manifest-locked ledger
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $output = & python verifier/paygod-verify.py ledger-unlocked-evidence --result ledger-lock-result.json 2>&1
+          $code = $LASTEXITCODE
+          $output | ForEach-Object { Write-Host $_ }
+          if ($code -eq 0) { throw 'bundle without manifest-locked ledger was incorrectly accepted' }
+          $result = Get-Content ledger-lock-result.json -Raw | ConvertFrom-Json
+          if (-not (($result.errors -join ' ') -match 'ledger.jsonl must appear exactly once')) { throw 'ledger lock invariant was not enforced' }
+
       - name: Download fresh evidence for malformed control test
         uses: actions/download-artifact@v4
         with:
@@ -237,4 +302,5 @@ jobs:
           path: |
             tamper-result.json
             receipt-tamper-result.json
+            ledger-lock-result.json
             malformed-result.json
