@@ -19,6 +19,7 @@ import unicodedata
 
 VERIFIER_VERSION = "0.2.0"
 _HEX64 = re.compile(r"^[a-f0-9]{64}$")
+_CANONICAL_VERDICTS = {"allow", "deny", "flag", "error"}
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -225,6 +226,34 @@ def _validate_receipt_semantics(
         errors.append("receipt verdict must be an object")
         verdict = {}
 
+    verdict_value = verdict.get("value")
+    verdict_rule = verdict.get("rule_name")
+    verdict_reason = verdict.get("reason")
+    if verdict_value not in _CANONICAL_VERDICTS:
+        errors.append("receipt verdict value must be one of allow/deny/flag/error")
+    if not isinstance(verdict_rule, str) or not verdict_rule:
+        errors.append("receipt verdict rule_name must be a non-empty string")
+    if not isinstance(verdict_reason, str) or not verdict_reason:
+        errors.append("receipt verdict reason must be a non-empty string")
+
+    receipt_pack = receipt.get("pack")
+    if not isinstance(receipt_pack, dict):
+        errors.append("receipt pack must be an object")
+        receipt_pack = {}
+    for key in ("name", "version", "path", "digest_sha256"):
+        if not isinstance(receipt_pack.get(key), str) or not receipt_pack.get(key):
+            errors.append(f"receipt pack {key} must be a non-empty string")
+    if isinstance(receipt_pack.get("digest_sha256"), str) and not _HEX64.fullmatch(receipt_pack["digest_sha256"]):
+        errors.append("receipt pack digest_sha256 must be 64 lowercase hex characters")
+
+    receipt_input = receipt.get("input")
+    if not isinstance(receipt_input, dict):
+        errors.append("receipt input must be an object")
+        receipt_input = {}
+    receipt_input_hash = receipt_input.get("canonical_hash")
+    if not isinstance(receipt_input_hash, str) or not _HEX64.fullmatch(receipt_input_hash):
+        errors.append("receipt input canonical_hash must be 64 lowercase hex characters")
+
     if ledger_entry is None:
         errors.append("missing ledger entry for receipt decision binding")
         return "invalid"
@@ -234,18 +263,32 @@ def _validate_receipt_semantics(
         errors.append("ledger data must be an object")
         return "invalid"
 
-    if verdict.get("value") != ledger_data.get("verdict"):
-        errors.append("receipt verdict does not match locked ledger verdict")
-    if verdict.get("rule_name") != ledger_data.get("rule_name"):
-        errors.append("receipt rule_name does not match locked ledger")
-    if verdict.get("reason") != ledger_data.get("reason"):
-        errors.append("receipt reason does not match locked ledger")
-    if receipt.get("pack") != ledger_data.get("pack"):
-        errors.append("receipt pack does not match locked ledger")
+    ledger_verdict = ledger_data.get("verdict")
+    ledger_rule = ledger_data.get("rule_name")
+    ledger_reason = ledger_data.get("reason")
+    ledger_pack = ledger_data.get("pack")
+    ledger_input_hash = ledger_data.get("input_hash")
 
-    receipt_input = receipt.get("input")
-    receipt_input_hash = receipt_input.get("canonical_hash") if isinstance(receipt_input, dict) else None
-    if receipt_input_hash != ledger_data.get("input_hash"):
+    if ledger_verdict not in _CANONICAL_VERDICTS:
+        errors.append("locked ledger verdict must be one of allow/deny/flag/error")
+    if not isinstance(ledger_rule, str) or not ledger_rule:
+        errors.append("locked ledger rule_name must be a non-empty string")
+    if not isinstance(ledger_reason, str) or not ledger_reason:
+        errors.append("locked ledger reason must be a non-empty string")
+    if not isinstance(ledger_pack, dict):
+        errors.append("locked ledger pack must be an object")
+    if not isinstance(ledger_input_hash, str) or not _HEX64.fullmatch(ledger_input_hash):
+        errors.append("locked ledger input_hash must be 64 lowercase hex characters")
+
+    if verdict_value != ledger_verdict:
+        errors.append("receipt verdict does not match locked ledger verdict")
+    if verdict_rule != ledger_rule:
+        errors.append("receipt rule_name does not match locked ledger")
+    if verdict_reason != ledger_reason:
+        errors.append("receipt reason does not match locked ledger")
+    if receipt_pack != ledger_pack:
+        errors.append("receipt pack does not match locked ledger")
+    if receipt_input_hash != ledger_input_hash:
         errors.append("receipt input hash does not match locked ledger")
 
     manifest_time = _parse_instant(manifest.get("generated_at"))
