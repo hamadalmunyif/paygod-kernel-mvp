@@ -11,10 +11,11 @@ The main branch governance contract is that every pull request to `main` reports
 - **Paygod CI Enforcement** — deterministic witness/proof enforcement.
 - **Pack Contract (paygod/v1)** — non-draft `pack.yaml` files validate against the pack contract.
 - **Repository Boundary Gate** — registered repository-hosted adapters preserve the canonical single-authority boundary.
+- **Verifier Integrity Gate** — standalone/no-checkout verification, decision-critical receipt binding, manifest-locked ledger, malformed-input fail-closed behavior, and tamper rejection remain intact.
 
 During migration, the CI-enforcement workflow also emits a temporary legacy `enforce` compatibility context. Keep it until any classic branch-protection dependency on that historical name is explicitly verified absent; the readable repository ruleset itself must require `Paygod CI Enforcement`.
 
-A gate that is intended to be required must run on every pull request to `main`; path-filtered required checks can otherwise leave unrelated pull requests waiting for a check that never starts.
+A gate that is intended to be required must run on every pull request to `main`; path-filtered required checks can otherwise leave unrelated pull requests waiting for a check that never starts. `Verifier Integrity Gate` therefore runs its full witness on every pull request rather than relying on path filters.
 
 The GitHub ruleset must be kept aligned with these stable contexts. Ruleset drift is a governance defect, even when the underlying workflows remain green.
 
