@@ -4,7 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from tools.verify_portable_evidence import canonical_json, verify
+from verify_portable_evidence import canonical_json, verify
 
 
 class VerifierRegressionTests(unittest.TestCase):
