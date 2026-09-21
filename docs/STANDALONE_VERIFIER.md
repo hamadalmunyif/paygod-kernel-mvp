@@ -14,7 +14,7 @@ The verifier checks, where present:
 - receipt-to-manifest binding;
 - ledger hash-chain integrity.
 
-Acceptance requires clean evidence -> `VALID`, payload tamper -> `INVALID`, decision-critical receipt tamper -> `INVALID`, fail-closed behavior, and machine-readable results. Verifier v0.2 cross-checks receipt verdict/rule/reason, pack, input hash, and decision time against the locked manifest/ledger and mirrors the producer's Unicode ledger canonicalization.
+Acceptance requires clean evidence -> `VALID`, payload tamper -> `INVALID`, decision-critical receipt tamper -> `INVALID`, a missing manifest-locked ledger -> `INVALID`, fail-closed behavior, and machine-readable results. Verifier v0.2 cross-checks receipt verdict/rule/reason, pack, input hash, and, when `PAYGOD_CLOCK` is injected, decision time against the locked manifest/ledger. For the supported non-strict local path where the receipt clock is `unset`, it verifies manifest/ledger time consistency without claiming an injected deterministic-clock binding.
 
 ## Trust boundary
 
