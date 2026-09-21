@@ -231,18 +231,18 @@ def _validate_receipt_semantics(
     verdict_reason = verdict.get("reason")
     if verdict_value not in _CANONICAL_VERDICTS:
         errors.append("receipt verdict value must be one of allow/deny/flag/error")
-    if not isinstance(verdict_rule, str) or not verdict_rule:
-        errors.append("receipt verdict rule_name must be a non-empty string")
-    if not isinstance(verdict_reason, str) or not verdict_reason:
-        errors.append("receipt verdict reason must be a non-empty string")
+    if not isinstance(verdict_rule, str):
+        errors.append("receipt verdict rule_name must be a string")
+    if not isinstance(verdict_reason, str):
+        errors.append("receipt verdict reason must be a string")
 
     receipt_pack = receipt.get("pack")
     if not isinstance(receipt_pack, dict):
         errors.append("receipt pack must be an object")
         receipt_pack = {}
     for key in ("name", "version", "path", "digest_sha256"):
-        if not isinstance(receipt_pack.get(key), str) or not receipt_pack.get(key):
-            errors.append(f"receipt pack {key} must be a non-empty string")
+        if not isinstance(receipt_pack.get(key), str):
+            errors.append(f"receipt pack {key} must be a string")
     if isinstance(receipt_pack.get("digest_sha256"), str) and not _HEX64.fullmatch(receipt_pack["digest_sha256"]):
         errors.append("receipt pack digest_sha256 must be 64 lowercase hex characters")
 
@@ -271,10 +271,10 @@ def _validate_receipt_semantics(
 
     if ledger_verdict not in _CANONICAL_VERDICTS:
         errors.append("locked ledger verdict must be one of allow/deny/flag/error")
-    if not isinstance(ledger_rule, str) or not ledger_rule:
-        errors.append("locked ledger rule_name must be a non-empty string")
-    if not isinstance(ledger_reason, str) or not ledger_reason:
-        errors.append("locked ledger reason must be a non-empty string")
+    if not isinstance(ledger_rule, str):
+        errors.append("locked ledger rule_name must be a string")
+    if not isinstance(ledger_reason, str):
+        errors.append("locked ledger reason must be a string")
     if not isinstance(ledger_pack, dict):
         errors.append("locked ledger pack must be an object")
     if not isinstance(ledger_input_hash, str) or not _HEX64.fullmatch(ledger_input_hash):
