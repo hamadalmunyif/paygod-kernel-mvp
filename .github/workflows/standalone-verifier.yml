@@ -19,6 +19,18 @@ jobs:
           python-version: '3.12'
       - name: Run verifier regression tests
         run: python tools/test_verify_portable_evidence.py
+      - name: Assert canonical verdict contract alignment
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          decision = json.loads(Path('contracts/schemas/decision.schema.json').read_text(encoding='utf-8'))
+          receipt = json.loads(Path('contracts/schemas/receipt.schema.json').read_text(encoding='utf-8'))
+          decision_values = set(decision['properties']['verdict']['enum'])
+          receipt_values = set(receipt['properties']['verdict']['properties']['value']['enum'])
+          expected = {'allow', 'deny', 'flag', 'error'}
+          assert decision_values == expected, decision_values
+          assert receipt_values == expected, receipt_values
       - name: Package versioned verifier distribution
         shell: python
         run: |
