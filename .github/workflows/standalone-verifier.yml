@@ -35,14 +35,14 @@ jobs:
           digest = hashlib.sha256(target.read_bytes()).hexdigest()
           manifest = {
               'artifact_type': 'paygod/standalone-verifier/v1',
-              'version': '0.1.0',
+              'version': '0.2.0',
               'entrypoint': 'paygod-verify.py',
               'sha256': digest,
           }
           (root / 'verifier-manifest.json').write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n', encoding='utf-8')
       - uses: actions/upload-artifact@v4
         with:
-          name: paygod-standalone-verifier-v0.1.0
+          name: paygod-standalone-verifier-v0.2.0
           path: verifier-dist/
 
   producer:
@@ -87,7 +87,7 @@ jobs:
           }
       - uses: actions/download-artifact@v4
         with:
-          name: paygod-standalone-verifier-v0.1.0
+          name: paygod-standalone-verifier-v0.2.0
           path: verifier
       - uses: actions/download-artifact@v4
         with:
@@ -101,7 +101,7 @@ jobs:
           root = Path('verifier')
           manifest = json.loads((root / 'verifier-manifest.json').read_text(encoding='utf-8'))
           assert manifest['artifact_type'] == 'paygod/standalone-verifier/v1'
-          assert manifest['version'] == '0.1.0'
+          assert manifest['version'] == '0.2.0'
           target = root / manifest['entrypoint']
           actual = hashlib.sha256(target.read_bytes()).hexdigest()
           if actual != manifest['sha256']:
@@ -116,7 +116,7 @@ jobs:
           result = json.loads(Path('verification-result.json').read_text(encoding='utf-8'))
           assert result['status'] == 'valid'
           assert result['portable'] is True
-          assert result['verifier_version'] == '0.1.0'
+          assert result['verifier_version'] == '0.2.0'
       - uses: actions/upload-artifact@v4
         with:
           name: standalone-third-party-verification-result
@@ -137,7 +137,7 @@ jobs:
           }
       - uses: actions/download-artifact@v4
         with:
-          name: paygod-standalone-verifier-v0.1.0
+          name: paygod-standalone-verifier-v0.2.0
           path: verifier
       - uses: actions/download-artifact@v4
         with:
@@ -175,7 +175,61 @@ jobs:
           if ($result.status -ne 'invalid') { throw 'tamper result was not INVALID' }
           Write-Host "PASS: tampered evidence rejected (verifier exit $code)"
           exit 0
+      - name: Download fresh evidence for receipt tamper
+        uses: actions/download-artifact@v4
+        with:
+          name: paygod-third-party-evidence
+          path: receipt-tampered-evidence
+      - name: Tamper decision-critical receipt verdict
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          target = Path('receipt-tampered-evidence/receipt.json')
+          receipt = json.loads(target.read_text(encoding='utf-8'))
+          original = receipt['verdict']['value']
+          receipt['verdict']['value'] = 'deny' if original != 'deny' else 'allow'
+          target.write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
+      - name: Require receipt tamper rejection
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          & python verifier/paygod-verify.py receipt-tampered-evidence --result receipt-tamper-result.json
+          $code = $LASTEXITCODE
+          if ($code -eq 0) { throw 'tampered receipt verdict was incorrectly accepted' }
+          $result = Get-Content receipt-tamper-result.json -Raw | ConvertFrom-Json
+          if ($result.status -ne 'invalid') { throw 'receipt tamper result was not INVALID' }
+          if (-not (($result.errors -join ' ') -match 'locked ledger verdict')) { throw 'receipt tamper was not rejected by decision binding' }
+
+      - name: Download fresh evidence for malformed control test
+        uses: actions/download-artifact@v4
+        with:
+          name: paygod-third-party-evidence
+          path: malformed-evidence
+      - name: Malform manifest shape
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          target = Path('malformed-evidence/manifest.json')
+          manifest = json.loads(target.read_text(encoding='utf-8'))
+          manifest['files'] = 1
+          target.write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
+      - name: Require machine-readable INVALID for malformed control JSON
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          & python verifier/paygod-verify.py malformed-evidence --result malformed-result.json
+          $code = $LASTEXITCODE
+          if ($code -eq 0) { throw 'malformed manifest was incorrectly accepted' }
+          if (-not (Test-Path malformed-result.json)) { throw 'verifier did not emit malformed-result.json' }
+          $result = Get-Content malformed-result.json -Raw | ConvertFrom-Json
+          if ($result.status -ne 'invalid') { throw 'malformed result was not INVALID' }
+
       - uses: actions/upload-artifact@v4
         with:
-          name: standalone-third-party-tamper-result
-          path: tamper-result.json
+          name: standalone-third-party-tamper-results
+          path: |
+            tamper-result.json
+            receipt-tamper-result.json
+            malformed-result.json
