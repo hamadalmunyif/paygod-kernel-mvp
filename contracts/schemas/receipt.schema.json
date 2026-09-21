@@ -32,7 +32,7 @@
     },
     "generated_at": {
       "type": "string",
-      "description": "Optional. If present, MUST equal the injected deterministic clock value (PAYGOD_CLOCK), not wall time."
+      "description": "Optional. When PAYGOD_CLOCK is injected, this equals that deterministic clock value. The supported non-strict local producer may emit the sentinel \"unset\"; verifier acceptance of that mode requires explicit --allow-unbound-clock opt-in."
     },
     "clock": {
       "type": "object",
@@ -43,7 +43,8 @@
       ],
       "properties": {
         "value": {
-          "type": "string"
+          "type": "string",
+          "description": "Injected PAYGOD_CLOCK value, or the sentinel \"unset\" for the supported non-strict local mode."
         },
         "source": {
           "type": "string",
