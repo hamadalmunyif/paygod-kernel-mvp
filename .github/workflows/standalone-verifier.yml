@@ -57,7 +57,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          New-Item -ItemType Directory -Force -Path portable-input,portable-evidence,default-clock-evidence | Out-Null
+          New-Item -ItemType Directory -Force -Path portable-input,portable-evidence,default-clock-evidence,flag-evidence | Out-Null
           '{"content":"standalone-third-party-witness"}' | Set-Content -NoNewline -Encoding utf8 portable-input/input.json
           & ./out/PayGod.Cli run --pack ./packs/core/secrets-in-repo-guard --input ./portable-input/input.json --out ./portable-evidence
           if ($LASTEXITCODE -ne 0) { throw "strict producer failed: $LASTEXITCODE" }
@@ -70,6 +70,12 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "default-clock producer failed: $LASTEXITCODE" }
           $env:PAYGOD_CLOCK = $savedClock
           $env:PAYGOD_STRICT = $savedStrict
+
+          @'
+          {"ghg_report":{"reporting_year":2025,"scope1_tco2e":100.0,"scope2_tco2e":50.0,"methodology_ref":"ref:methodology/v1","evidence_refs":["ref:evidence/ghg/2025-01"]}}
+          '@ | Set-Content -NoNewline -Encoding utf8 portable-input/flag-input.json
+          & ./out/PayGod.Cli run --pack ./packs/core/ghg-scope-1-2-guard --input ./portable-input/flag-input.json --out ./flag-evidence
+          if ($LASTEXITCODE -ne 0) { throw "flag producer failed: $LASTEXITCODE" }
       - uses: actions/upload-artifact@v4
         with:
           name: paygod-third-party-evidence
@@ -80,6 +86,12 @@ jobs:
         with:
           name: paygod-default-clock-evidence
           path: default-clock-evidence/
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paygod-flag-evidence
+          path: flag-evidence/
           if-no-files-found: error
           retention-days: 7
 
@@ -144,10 +156,31 @@ jobs:
           assert receipt['clock']['value'] == 'unset'
           assert result['status'] == 'valid'
           assert result['clock_binding'] == 'unbound-opt-in'
+      - uses: actions/download-artifact@v4
+        with:
+          name: paygod-flag-evidence
+          path: flag-evidence
+      - name: Verify canonical flag decision is ledger-bound
+        run: python verifier/paygod-verify.py flag-evidence --result flag-result.json
+      - name: Assert flag decision remains canonical and valid
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          receipt = json.loads(Path('flag-evidence/receipt.json').read_text(encoding='utf-8'))
+          ledger_lines = [line for line in Path('flag-evidence/ledger.jsonl').read_text(encoding='utf-8').splitlines() if line.strip()]
+          ledger = json.loads(ledger_lines[-1])
+          result = json.loads(Path('flag-result.json').read_text(encoding='utf-8'))
+          assert receipt['verdict']['value'] == 'flag'
+          assert ledger['data']['verdict'] == 'flag'
+          assert result['status'] == 'valid'
+          assert result['clock_binding'] == 'injected'
       - uses: actions/upload-artifact@v4
         with:
           name: standalone-third-party-verification-result
-          path: verification-result.json
+          path: |
+            verification-result.json
+            flag-result.json
 
   tamper-rejection:
     needs: [package-verifier, producer]
