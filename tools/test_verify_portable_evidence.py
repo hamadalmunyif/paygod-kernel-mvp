@@ -9,10 +9,10 @@ from tools.verify_portable_evidence import canonical_json, verify
 
 class VerifierRegressionTests(unittest.TestCase):
     def test_canonical_json_matches_producer_unicode_behavior(self):
-        value = {"text": "e\\u0301", "arabic": "سلام"}
+        value = {"text": "e\u0301", "arabic": "سلام"}
         self.assertEqual(
             canonical_json(value),
-            '{"arabic":"\\\\u0633\\\\u0644\\\\u0627\\\\u0645","text":"\\\\u00e9"}',
+            '{"arabic":"\\u0633\\u0644\\u0627\\u0645","text":"\\u00e9"}',
         )
 
     def test_malformed_manifest_returns_machine_readable_invalid(self):
