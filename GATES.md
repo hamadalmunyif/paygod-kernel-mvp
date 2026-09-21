@@ -28,7 +28,7 @@ Inside CI, evidence is produced, transferred as an artifact, and independently v
 ### Standalone Third-Party Verifier Witness
 `.github/workflows/standalone-verifier.yml`
 
-Inside CI, a recipient consumes a transferred, versioned verifier artifact and evidence bundle without repository checkout. Acceptance requires clean -> `VALID`, one-byte tamper -> `INVALID`, fail-closed behavior, and a machine-readable result.
+Inside CI, a recipient consumes a transferred, versioned verifier artifact and evidence bundle without repository checkout. Current v0.2 acceptance requires clean -> `VALID`, payload tamper -> `INVALID`, decision-critical receipt tamper -> `INVALID`, a missing manifest-locked ledger -> `INVALID`, malformed control data -> machine-readable `INVALID`, and supported default-clock output to remain verifiable without claiming injected-time binding.
 
 These are CI-level witnesses, not an external-party/device trust-root proof.
 
