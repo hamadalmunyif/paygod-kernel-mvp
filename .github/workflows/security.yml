@@ -98,9 +98,24 @@ jobs:
 
   security-gate:
     name: security-gate
-    if: github.event_name == 'pull_request'
+    if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     needs: [codeql, dependency_review, gitleaks, sbom]
     steps:
-      - name: Gate OK
-        run: echo "security-gate passed."
+      - name: Propagate security job failures
+        shell: bash
+        run: |
+          echo "codeql=${{ needs.codeql.result }}"
+          echo "dependency_review=${{ needs.dependency_review.result }}"
+          echo "gitleaks=${{ needs.gitleaks.result }}"
+          echo "sbom=${{ needs.sbom.result }}"
+
+          if [[ "${{ needs.codeql.result }}" != "success" || \
+                "${{ needs.dependency_review.result }}" != "success" || \
+                "${{ needs.gitleaks.result }}" != "success" || \
+                "${{ needs.sbom.result }}" != "success" ]]; then
+            echo "security-gate: one or more required security jobs did not succeed."
+            exit 1
+          fi
+
+          echo "security-gate passed."
