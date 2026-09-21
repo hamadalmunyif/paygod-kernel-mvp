@@ -249,11 +249,18 @@ def _validate_receipt_semantics(
 
     manifest_time = _parse_instant(manifest.get("generated_at"))
     ledger_time = _parse_instant(ledger_entry.get("timestamp"))
-    receipt_time = _parse_instant(clock.get("value"))
-    if manifest_time is None or ledger_time is None or receipt_time is None:
-        errors.append("invalid or timezone-naive decision timestamp")
-    elif not (manifest_time == ledger_time == receipt_time):
-        errors.append("receipt clock does not match locked manifest/ledger time")
+    if manifest_time is None or ledger_time is None:
+        errors.append("invalid or timezone-naive manifest/ledger timestamp")
+    elif manifest_time != ledger_time:
+        errors.append("manifest and locked ledger decision time mismatch")
+
+    clock_value = clock.get("value")
+    if clock_value != "unset":
+        receipt_time = _parse_instant(clock_value)
+        if receipt_time is None:
+            errors.append("invalid or timezone-naive injected receipt clock")
+        elif manifest_time is not None and receipt_time != manifest_time:
+            errors.append("receipt clock does not match locked manifest/ledger time")
 
 
 def verify(bundle: Path) -> dict:
@@ -333,6 +340,13 @@ def verify(bundle: Path) -> dict:
     calculated_bundle = sha256_bytes("".join(sorted(digest_lines)).encode("utf-8"))
     if calculated_bundle != manifest_bundle:
         errors.append("manifest bundle_digest mismatch")
+
+    ledger_members = [
+        entry for entry in entries
+        if isinstance(entry, dict) and entry.get("name") == "ledger.jsonl"
+    ]
+    if len(ledger_members) != 1:
+        errors.append("ledger.jsonl must appear exactly once in manifest files")
 
     ledger_entry = verify_ledger(bundle / "ledger.jsonl", errors)
     manifest_sha = sha256_file(manifest_path)
