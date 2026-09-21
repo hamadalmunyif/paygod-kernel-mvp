@@ -14,7 +14,7 @@ The verifier checks, where present:
 - receipt-to-manifest binding;
 - ledger hash-chain integrity.
 
-Acceptance requires clean evidence -> `VALID`, one-byte tamper -> `INVALID`, fail-closed behavior, and machine-readable results.
+Acceptance requires clean evidence -> `VALID`, payload tamper -> `INVALID`, decision-critical receipt tamper -> `INVALID`, fail-closed behavior, and machine-readable results. Verifier v0.2 cross-checks receipt verdict/rule/reason, pack, input hash, and decision time against the locked manifest/ledger and mirrors the producer's Unicode ledger canonicalization.
 
 ## Trust boundary
 
@@ -27,7 +27,7 @@ The recipient witness does not require repository checkout, producer workspace s
 
 ## Next distribution boundary
 
-The next gate is to package and test the verifier **outside repository CI** on an independent device/environment with published integrity/version metadata.
+The next gate is to package and test the verifier **outside repository CI** on an independent device/environment with published integrity/version metadata. Verifier v0.2 does not authenticate the runner/issuer identity by itself; that remains part of the external trust-root/provenance boundary.
 
 A browser/client-side verifier may follow for iPad use and a future surface such as `verify.paygod.net`, but the hosting domain must not become the source of trust.
 
