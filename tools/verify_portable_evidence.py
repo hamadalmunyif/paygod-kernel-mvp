@@ -87,7 +87,7 @@ def canonical_json(value) -> str:
         if value == 0:
             return "0"
         rendered = format(value, ".17g").replace("E", "e")
-        return re.sub(r"e([+-])0+(\\d+)$", r"e\\1\\2", rendered)
+        return rendered
     raise TypeError(f"unsupported JSON value: {type(value).__name__}")
 
 
@@ -314,7 +314,7 @@ def verify(bundle: Path) -> dict:
             errors.append(f"sha256 mismatch: {name}")
         if path.stat().st_size != expected_bytes:
             errors.append(f"byte count mismatch: {name}")
-        digest_lines.append(f"{name}={expected}\\n")
+        digest_lines.append(f"{name}={expected}\n")
 
     manifest_bundle_obj = manifest.get("bundle")
     if not isinstance(manifest_bundle_obj, dict):
