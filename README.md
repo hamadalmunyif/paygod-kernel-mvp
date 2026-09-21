@@ -17,7 +17,7 @@ The repository currently has CI witnesses for:
 - fail-closed rejection after a one-byte evidence mutation;
 - single-authority enforcement for registered repository-hosted adapters, including rejection of injected verdict, receipt, and bundle-identity authority.
 
-The standalone verifier checks manifest integrity, artifact SHA-256 digests, bundle-digest binding, receipt binding, and ledger hash-chain integrity where present.
+The standalone verifier checks manifest integrity, artifact SHA-256 digests, bundle-digest binding, decision-critical receipt claims against the locked manifest/ledger, and ledger hash-chain integrity where present. Verifier v0.2 also mirrors the producer's Unicode canonicalization and emits machine-readable `INVALID` results for malformed control shapes.
 
 The single-authority witness is deliberately scoped: it covers adapters registered in `tools/check_repository_boundary.py`. New execution-facing surfaces must be registered and covered by the same boundary witness.
 
