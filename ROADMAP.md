@@ -30,7 +30,7 @@ This roadmap distinguishes **proven repository capabilities** from future produc
 - exactly one manifest-locked decision ledger is required;
 - malformed control data -> machine-readable INVALID;
 - Unicode ledger canonicalization parity is regression-tested;
-- supported default-clock output remains verifiable without an injected-time claim.
+- supported default-clock output remains verifiable only through explicit `--allow-unbound-clock` opt-in and is labeled as unbound; silent strict-to-unbound downgrade is rejected.
 
 ## Next gates
 
