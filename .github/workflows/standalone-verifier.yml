@@ -3,13 +3,6 @@ name: Standalone Third-Party Verifier Witness
 on:
   pull_request:
     branches: [main]
-    paths:
-      - 'tools/verify_portable_evidence.py'
-      - 'tools/test_verify_portable_evidence.py'
-      - '.github/workflows/standalone-verifier.yml'
-      - 'src/PayGod.Cli/**'
-      - 'packs/**'
-      - 'docs/STANDALONE_VERIFIER.md'
   push:
     branches: [main]
 
@@ -307,3 +300,27 @@ jobs:
             receipt-tamper-result.json
             ledger-lock-result.json
             malformed-result.json
+
+  verifier-integrity-gate:
+    name: Verifier Integrity Gate
+    if: always()
+    needs: [package-verifier, producer, third-party-verifier, tamper-rejection]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Propagate verifier witness failures
+        shell: bash
+        run: |
+          echo "package-verifier=${{ needs.package-verifier.result }}"
+          echo "producer=${{ needs.producer.result }}"
+          echo "third-party-verifier=${{ needs.third-party-verifier.result }}"
+          echo "tamper-rejection=${{ needs.tamper-rejection.result }}"
+
+          if [[ "${{ needs.package-verifier.result }}" != "success" || \
+                "${{ needs.producer.result }}" != "success" || \
+                "${{ needs.third-party-verifier.result }}" != "success" || \
+                "${{ needs.tamper-rejection.result }}" != "success" ]]; then
+            echo "Verifier Integrity Gate: one or more required verifier witnesses did not succeed."
+            exit 1
+          fi
+
+          echo "Verifier Integrity Gate passed."
