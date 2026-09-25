@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Run verifier regression tests
@@ -111,7 +111,7 @@ jobs:
     needs: [package-verifier, producer]
     runs-on: windows-latest
     steps:
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Assert repository is absent
@@ -198,7 +198,7 @@ jobs:
     needs: [package-verifier, producer]
     runs-on: windows-latest
     steps:
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Assert repository is absent
