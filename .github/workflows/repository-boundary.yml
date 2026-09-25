@@ -11,7 +11,7 @@ jobs:
     name: Repository Boundary Gate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Positive witness - thin adapter accepted
         run: python3 tools/check_repository_boundary.py --contract tests/boundary/valid-adapter.json --expect pass
       - name: Negative witness - alternate authority rejected
