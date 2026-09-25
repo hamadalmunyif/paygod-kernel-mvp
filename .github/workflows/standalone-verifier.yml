@@ -48,7 +48,7 @@ jobs:
               'sha256': digest,
           }
           (root / 'verifier-manifest.json').write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n', encoding='utf-8')
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: paygod-standalone-verifier-v0.2.0
           path: verifier-dist/
@@ -88,19 +88,19 @@ jobs:
           '@ | Set-Content -NoNewline -Encoding utf8 portable-input/flag-input.json
           & ./out/PayGod.Cli run --pack ./packs/core/ghg-scope-1-2-guard --input ./portable-input/flag-input.json --out ./flag-evidence
           if ($LASTEXITCODE -ne 0) { throw "flag producer failed: $LASTEXITCODE" }
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: paygod-third-party-evidence
           path: portable-evidence/
           if-no-files-found: error
           retention-days: 7
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: paygod-default-clock-evidence
           path: default-clock-evidence/
           if-no-files-found: error
           retention-days: 7
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: paygod-flag-evidence
           path: flag-evidence/
@@ -187,7 +187,7 @@ jobs:
           assert ledger['data']['verdict'] == 'flag'
           assert result['status'] == 'valid'
           assert result['clock_binding'] == 'injected'
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: standalone-third-party-verification-result
           path: |
@@ -424,7 +424,7 @@ jobs:
           if ($result.status -ne 'invalid') { throw 'malformed result was not INVALID' }
           exit 0
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: standalone-third-party-tamper-results
           path: |
