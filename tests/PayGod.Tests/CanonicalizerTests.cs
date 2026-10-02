@@ -29,7 +29,7 @@ public class CanonicalizerTests
     public void Canonicalize_SimpleObject_SortsKeys()
     {
         var node = JsonNode.Parse("{\"z\":1,\"a\":2,\"m\":3}");
-        Assert.Equal("{\"a\":1,\"b\":2,\"c\":3}".Replace("\"a\":1,\"b\":2,\"c\":3", "\"a\":2,\"m\":3,\"z\":1"), Canonicalizer.Canonicalize(node));
+        Assert.Equal("{\"a\":2,\"m\":3,\"z\":1}", Canonicalizer.Canonicalize(node));
     }
 
     [Fact]
