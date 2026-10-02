@@ -162,12 +162,6 @@ jobs:
           assert result['verification']['time_authority'] == 'producer_supplied'
           assert len(result['receipt_sha256']) == 64
           assert len(result['ledger_head']) == 64
-          assert result['verification']['integrity'] == 'verified'
-          assert result['verification']['issuer_authenticity'] == 'not_verified'
-          assert result['verification']['replay'] == 'not_performed'
-          assert result['verification']['time_authority'] == 'producer_supplied'
-          assert len(result['receipt_sha256']) == 64
-          assert len(result['ledger_head']) == 64
       - uses: actions/download-artifact@v4
         with:
           name: paygod-default-clock-evidence
@@ -185,7 +179,8 @@ jobs:
           assert result['status'] == 'valid'
           assert result['clock_binding'] == 'unbound-opt-in'
           assert result['verification']['integrity'] == 'verified'
-          assert result['verification']['time_authority'] == 'unbound'
+          assert result['verification']['issuer_authenticity'] == 'not_verified'
+          assert result['verification']['replay'] == 'not_performed'
           assert result['verification']['time_authority'] == 'unbound'
       - uses: actions/download-artifact@v4
         with:
@@ -209,7 +204,7 @@ jobs:
           assert result['verification']['integrity'] == 'verified'
           assert result['verification']['issuer_authenticity'] == 'not_verified'
           assert result['verification']['replay'] == 'not_performed'
-          assert result['verification']['integrity'] == 'verified'
+          assert result['verification']['time_authority'] == 'producer_supplied'
       - uses: actions/upload-artifact@v4
         with:
           name: standalone-third-party-verification-result
