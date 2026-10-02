@@ -8,8 +8,7 @@
     "source": "env:PAYGOD_CLOCK"
   },
   "canonicalization": {
-    "json": "paygod-c14n-v1",
-    "schema_manifest_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    "json": "paygod-c14n-v1"
   },
   "runner": {
     "image": "paygod/runner:dev",
