@@ -35,7 +35,7 @@ integrity verified / failed
 
 ## Non-claims
 
-This CI witness proves portability and integrity within its documented boundary. It does **not** prove:
+This CI witness proves portability and bundle integrity within its documented boundary. A successful integrity result does not imply issuer authenticity, replay, trusted time, or external truth. It does **not** prove:
 
 - truth or authenticity of an external real-world fact;
 - a published/signed external verifier trust root;
