@@ -1,12 +1,15 @@
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Globalization;
 
 namespace PayGod.Cli.Core;
 
 public static class Canonicalizer
 {
+    public const string ProfileName = "paygod-c14n-v1";
+    public const long SafeIntegerMax = 9_007_199_254_740_991L;
+
     public static string Canonicalize(JsonNode? node)
     {
         var sb = new StringBuilder();
@@ -24,14 +27,20 @@ public static class Canonicalizer
 
         if (node is JsonObject obj)
         {
+            foreach (var property in obj)
+            {
+                if (!property.Key.IsNormalized(NormalizationForm.FormC))
+                    throw new InvalidOperationException("JSON object key is not NFC-normalized.");
+            }
+
             sb.Append('{');
             var sortedKeys = obj.Select(x => x.Key).OrderBy(k => k, StringComparer.Ordinal).ToList();
-            
+
             for (int i = 0; i < sortedKeys.Count; i++)
             {
                 if (i > 0) sb.Append(',');
                 var key = sortedKeys[i];
-                WriteJcsString(key, sb);
+                WriteProfileString(key, sb);
                 sb.Append(':');
                 CanonicalizeToBuilder(obj[key], sb);
             }
@@ -53,23 +62,33 @@ public static class Canonicalizer
 
         if (node is JsonValue val)
         {
-            if (val.TryGetValue<double>(out var d))
+            if (val.TryGetValue<JsonElement>(out var element))
             {
-                if (double.IsNaN(d) || double.IsInfinity(d))
-                    throw new InvalidOperationException("Non-finite numbers are not valid JSON.");
-
-                if (d == 0) { sb.Append("0"); return; } // Avoid "-0"
-
-                var numStr = d.ToString("R", CultureInfo.InvariantCulture);
-                numStr = numStr.Replace("E", "e");
-                sb.Append(numStr);
-                return;
+                switch (element.ValueKind)
+                {
+                    case JsonValueKind.Null:
+                        sb.Append("null");
+                        return;
+                    case JsonValueKind.True:
+                        sb.Append("true");
+                        return;
+                    case JsonValueKind.False:
+                        sb.Append("false");
+                        return;
+                    case JsonValueKind.String:
+                        WriteProfileString(element.GetString() ?? string.Empty, sb);
+                        return;
+                    case JsonValueKind.Number:
+                        WriteRestrictedInteger(element.GetRawText(), sb);
+                        return;
+                    default:
+                        throw new InvalidOperationException($"Unsupported JSON value kind: {element.ValueKind}.");
+                }
             }
-            
+
             if (val.TryGetValue<string>(out var s))
             {
-                s = s.Normalize(NormalizationForm.FormC);
-                WriteJcsString(s, sb);
+                WriteProfileString(s, sb);
                 return;
             }
 
@@ -79,12 +98,54 @@ public static class Canonicalizer
                 return;
             }
 
-            sb.Append("null");
+            if (val.TryGetValue<long>(out var l))
+            {
+                WriteSafeInteger(l, sb);
+                return;
+            }
+
+            if (val.TryGetValue<int>(out var i))
+            {
+                WriteSafeInteger(i, sb);
+                return;
+            }
+
+            throw new InvalidOperationException("Unsupported JSON value for paygod-c14n-v1.");
         }
+
+        throw new InvalidOperationException($"Unsupported JSON node type: {node.GetType().Name}.");
     }
 
-    // RFC 8785 Section 3.2.2.2: Strings
-    private static void WriteJcsString(string s, StringBuilder sb)
+    private static void WriteRestrictedInteger(string raw, StringBuilder sb)
+    {
+        if (string.IsNullOrEmpty(raw))
+            throw new InvalidOperationException("Empty JSON number is not allowed.");
+
+        var index = raw[0] == '-' ? 1 : 0;
+        if (index == raw.Length)
+            throw new InvalidOperationException("Invalid integer representation.");
+
+        for (var i = index; i < raw.Length; i++)
+        {
+            if (raw[i] < '0' || raw[i] > '9')
+                throw new InvalidOperationException("Floating-point and exponent numbers are not allowed by paygod-c14n-v1.");
+        }
+
+        if (!long.TryParse(raw, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var value))
+            throw new InvalidOperationException("Integer is outside the supported range.");
+
+        WriteSafeInteger(value, sb);
+    }
+
+    private static void WriteSafeInteger(long value, StringBuilder sb)
+    {
+        if (value < -SafeIntegerMax || value > SafeIntegerMax)
+            throw new InvalidOperationException("Integer is outside the paygod-c14n-v1 safe-integer range.");
+
+        sb.Append(value.ToString(CultureInfo.InvariantCulture));
+    }
+
+    private static void WriteProfileString(string s, StringBuilder sb)
     {
         sb.Append('"');
         foreach (char c in s)
@@ -96,7 +157,7 @@ public static class Canonicalizer
             else if (c == '\n') sb.Append("\\n");
             else if (c == '\r') sb.Append("\\r");
             else if (c == '\t') sb.Append("\\t");
-            else if (c < 0x20 || c > 0x7E) // Control characters and non-ASCII must be escaped
+            else if (c < 0x20 || c > 0x7E)
             {
                 sb.AppendFormat("\\u{0:x4}", (int)c);
             }
