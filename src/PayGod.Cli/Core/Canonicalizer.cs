@@ -140,7 +140,7 @@ public static class Canonicalizer
     private static void WriteSafeInteger(long value, StringBuilder sb)
     {
         if (value < -SafeIntegerMax || value > SafeIntegerMax)
-            throw new InvalidOperationException("Integer is outside the paygod-c14n-v1 safe-integer range.");
+            throw new InvalidOperationException("integer outside paygod-c14n-v1 safe range");
 
         sb.Append(value.ToString(CultureInfo.InvariantCulture));
     }
