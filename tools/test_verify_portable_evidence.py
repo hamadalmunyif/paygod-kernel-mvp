@@ -124,6 +124,10 @@ class VerifierRegressionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "not NFC"):
             canonical_json({"e\u0301": "value"})
 
+    def test_profile_rejects_unpaired_unicode_surrogate(self):
+        with self.assertRaisesRegex(ValueError, "unpaired Unicode surrogate"):
+            canonical_json("\ud800")
+
     def test_valid_bundle_exposes_scoped_verification_dimensions(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
