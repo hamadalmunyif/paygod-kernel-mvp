@@ -125,7 +125,7 @@ public class CanonicalizerTests
     [Fact]
     public void Canonicalize_UnpairedUnicodeSurrogate_FailsClosed()
     {
-        var node = JsonValue.Create(new string('\uD800', 1));
+        var node = JsonValue.Create(new string((char)0xD800, 1));
         Assert.Throws<InvalidOperationException>(() => Canonicalizer.Canonicalize(node));
     }
 
