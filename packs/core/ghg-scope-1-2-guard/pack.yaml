@@ -16,8 +16,8 @@ spec:
         type: "object"
         properties:
           reporting_year: { type: "integer" }
-          scope1_tco2e: { type: "number" }
-          scope2_tco2e: { type: "number" }
+          scope1_kgco2e: { type: "integer" }
+          scope2_kgco2e: { type: "integer" }
           methodology_ref: { type: "string" }
           emission_factor_refs:
             type: "array"
