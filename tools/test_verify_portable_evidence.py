@@ -85,7 +85,6 @@ def _write_valid_bundle(root: Path) -> tuple[str, str]:
         "clock": {"value": run_ts, "source": "env:PAYGOD_CLOCK"},
         "canonicalization": {
             "json": "paygod-c14n-v1",
-            "schema_manifest_sha256": "0" * 64,
         },
         "runner": {"image": "paygod/runner:test", "image_digest": "unknown"},
         "pack": pack,
