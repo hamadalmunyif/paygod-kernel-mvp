@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\PayGod.Cli\PayGod.Cli.csproj" />
     <None Include="..\..\spec\test-vectors\canonical-json.json" Link="canonical-json.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="golden.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
