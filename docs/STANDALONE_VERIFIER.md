@@ -1,47 +1,105 @@
 # Standalone Third-Party Verifier Witness
 
-Status: **standalone/no-checkout baseline originated in PR #53; current verifier v0.2 adds decision-critical receipt, manifest-locked ledger, Unicode, malformed-input, and default-clock compatibility witnesses.**
+Status: **v0.3 verification-contract repair in progress on Issue #67.**
 
-## Proven boundary
+## What the verifier proves
 
-Inside CI, a recipient can verify a transferred Paygod evidence bundle using a versioned standalone verifier artifact without checking out `paygod-kernel-mvp`, rebuilding the kernel, re-running the pack, or possessing producer-local state.
+The standalone verifier can check a transferred Paygod evidence directory without checking out the repository, rebuilding the kernel, or replaying the original decision.
 
-The verifier checks:
-
-- manifest integrity;
+It verifies the **integrity dimension**:
+- manifest structure and declared file set;
 - artifact SHA-256 digests and byte counts;
+- rejection of unexpected regular files and symlinks in the transferred directory;
 - bundle-digest binding;
 - exactly one manifest-locked `ledger.jsonl`;
 - receipt-to-manifest binding;
-- ledger hash-chain integrity;
+- ledger hash-chain integrity under `paygod-c14n-v1`;
 - decision-critical receipt claims against the locked ledger;
-- canonical `allow`, `deny`, `flag`, and `error` verdicts are ledger-bound;
-- required decision fields and their types are validated before equality/binding checks.
+- optional external pinning of `receipt.json` with `--expect-receipt-sha256`.
 
-Acceptance requires clean evidence -> `VALID`, payload tamper -> `INVALID`, decision-critical receipt tamper -> `INVALID`, a missing manifest-locked ledger -> `INVALID`, fail-closed behavior, and machine-readable results. Verifier v0.2 cross-checks receipt verdict/rule/reason, pack, input hash, and, when `PAYGOD_CLOCK` is injected, decision time against the locked manifest/ledger. For the supported non-strict local path where the receipt clock is `unset`, acceptance requires the verifier operator to pass `--allow-unbound-clock` explicitly. The result records `clock_binding: unbound-opt-in`; default verification rejects `unset`, preventing a receipt-only downgrade from an injected clock to an unbound clock. Manifest/ledger time consistency is still checked.
+The result also exposes:
+- `receipt_sha256` — the digest a recipient can pin through another channel;
+- `ledger_head` — the verified last ledger record hash.
 
-## Trust boundary
+## Verification dimensions
 
-The recipient receives only:
+A top-level `status: valid` means **bundle integrity verified within this contract**. It does not mean every trust dimension is verified.
 
-1. an evidence bundle produced by Paygod; and
-2. a standalone verifier distribution whose version/integrity metadata can be checked.
+Example:
 
-The recipient witness does not require repository checkout, producer workspace state, Docker, the .NET SDK, original pack replay, Paygod secrets, or hidden producer configuration.
+```json
+{
+  "status": "valid",
+  "verification": {
+    "integrity": "verified",
+    "issuer_authenticity": "not_verified",
+    "replay": "not_performed",
+    "time_authority": "producer_supplied"
+  }
+}
+```
 
-## Next distribution boundary
+The dimensions are deliberately independent:
 
-The next gate is to package and test the verifier **outside repository CI** on an independent device/environment with published integrity/version metadata. Verifier v0.2 does not authenticate the runner/issuer identity by itself; that remains part of the external trust-root/provenance boundary.
+- **Integrity** — are the transferred artifacts internally consistent and bound as declared?
+- **Issuer authenticity** — is the receipt authenticated to a known issuer key? Not yet implemented in v0.3.
+- **Replay** — was the original input/policy/runner material re-executed and compared? Not performed by this verifier.
+- **Time authority** — the current timestamp is producer-supplied when `PAYGOD_CLOCK` is injected, or explicitly unbound in the supported local mode. It is not a third-party timestamp.
 
-A browser/client-side verifier may follow for iPad use and a future surface such as `verify.paygod.net`, but the hosting domain must not become the source of trust.
+## Canonicalization profile
+
+Receipts MUST declare:
+
+```json
+"canonicalization": { "json": "paygod-c14n-v1" }
+```
+
+`paygod-c14n-v1` is a restricted Paygod profile, not RFC 8785/JCS. It accepts null, booleans, strings, arrays, objects, and safe integers only. Floating-point/decimal/exponent numbers, unsafe integers, non-NFC object keys, and unsupported values fail closed. String values are preserved without silent Unicode normalization.
+
+See `spec/README.md` and `spec/test-vectors/canonical-json.json`.
+
+## External receipt commitment
+
+A relying party that receives the receipt digest through an independent channel can pin it:
+
+```bash
+python paygod-verify.py evidence \
+  --expect-receipt-sha256 <64-lowercase-hex> \
+  --result verification-result.json
+```
+
+A mismatch fails closed.
+
+This authenticates neither the issuer nor the external facts by itself; it only binds verification to the externally supplied digest.
+
+## Clock handling
+
+When the producer injects `PAYGOD_CLOCK`, the verifier checks its consistency with manifest/ledger time and reports:
+
+```text
+time_authority: producer_supplied
+```
+
+For the supported non-strict local path where the receipt clock is `unset`, acceptance requires `--allow-unbound-clock` and reports:
+
+```text
+time_authority: unbound
+```
+
+No current path claims trusted third-party time.
 
 ## Non-claims
 
-PR #53 establishes a CI-level standalone/no-checkout verification witness. It does **not** yet establish:
+The current verifier does **not** prove:
+- truth or provenance of an external real-world fact;
+- issuer identity or possession of an institutional signing key;
+- trusted third-party time;
+- replay of the policy decision;
+- institutional adoption or willingness to pay;
+- a live financial or operational release integration.
 
-- a published/signed external verifier trust root;
-- a truly external device/party witness;
-- truth or provenance of external evidence;
-- institutional adoption or a live financial release workflow.
+**Integrity is not authenticity. Authenticity is not external truth.**
 
-Do not describe this boundary as full external P4 until the external distribution witness passes.
+## Next gate
+
+After v0.5.1 closes, the next engineering activity is an **Internal Rehearsal** designed to attack these boundaries before any external pilot. Issuer signing and real provenance remain separately versioned follow-ups.
