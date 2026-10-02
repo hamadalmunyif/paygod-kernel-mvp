@@ -148,8 +148,24 @@ public static class Canonicalizer
     private static void WriteProfileString(string s, StringBuilder sb)
     {
         sb.Append('"');
-        foreach (char c in s)
+        for (var index = 0; index < s.Length; index++)
         {
+            var c = s[index];
+
+            if (char.IsHighSurrogate(c))
+            {
+                if (index + 1 >= s.Length || !char.IsLowSurrogate(s[index + 1]))
+                    throw new InvalidOperationException("Unpaired Unicode surrogate is not allowed by paygod-c14n-v1.");
+
+                sb.AppendFormat("\\u{0:x4}", (int)c);
+                index++;
+                sb.AppendFormat("\\u{0:x4}", (int)s[index]);
+                continue;
+            }
+
+            if (char.IsLowSurrogate(c))
+                throw new InvalidOperationException("Unpaired Unicode surrogate is not allowed by paygod-c14n-v1.");
+
             if (c == '"') sb.Append("\\\"");
             else if (c == '\\') sb.Append("\\\\");
             else if (c == '\b') sb.Append("\\b");
