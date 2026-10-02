@@ -1,39 +1,24 @@
 # Paygod Specifications & Test Vectors
 
-This directory contains the golden fixtures that define the byte-level behavior of the Paygod Kernel.
+This directory contains the golden fixtures that define `paygod-c14n-v1` behavior.
 
-## Compliance profile
+Every independent implementation MUST produce the same canonical bytes for accepted vectors and the same explicit rejection class for rejected vectors.
 
-Paygod currently uses the restricted profile **`paygod-c14n-v1`**. It is deliberately **not** advertised as RFC 8785/JCS.
+## Canonical profile
 
-Any implementation of Paygod canonicalization MUST produce the same canonical bytes for accepted cases and MUST reject the same invalid cases.
+`paygod-c14n-v1` is a restricted deterministic JSON profile, not RFC 8785.
 
-The profile accepts:
-- JSON `null`, booleans, strings, arrays, and objects;
-- integers only, within `[-9007199254740991, 9007199254740991]`;
-- object/property names that are already NFC-normalized.
-
-The profile rejects:
-- floating-point, decimal, and exponent-form JSON numbers;
-- integers outside the safe-integer range;
-- non-NFC object/property names;
-- unsupported values rather than silently coercing them.
-
-String **values are preserved without Unicode normalization**. Domain packs may derive normalized views for matching, but canonicalization must not silently alter raw evidence semantics.
+It accepts null, booleans, strings, arrays, objects, and safe integers only. It rejects floats/decimals, unsafe integers, and non-NFC property names. String values are preserved without silent Unicode normalization.
 
 ## Contents
 
-- `test-vectors/canonical-json.json` — accepted and rejected `paygod-c14n-v1` cases.
-- `test-vectors/ledger-chaining.json` — ledger payload canonicalization and SHA-256 chaining vectors.
+- `test-vectors/canonical-json.json` — accepted canonical forms plus fail-closed rejection vectors.
+- `test-vectors/ledger-chaining.json` — ledger payload canonicalization and SHA-256 chaining.
 
-## Verify
+## Verification
 
 ```bash
 python3 tools/verify_spec.py
 ```
 
-The Python reference used here is the same restricted canonicalization implementation embedded in the standalone verifier. C# regression tests cover the producer side; CI is responsible for keeping the runtimes aligned.
-
-## Why the restriction exists
-
-Paygod hashes decision-critical JSON across runtimes. Ambiguous floating-point rendering or silent Unicode normalization can create false verification failures or, worse, different commitments for what appears to be the same business input. The restricted profile removes those ambiguities while the project is still pre-pilot.
+The Python verifier implementation is one implementation of the profile. The .NET canonicalizer is separately regression-tested and both must remain byte-compatible.
