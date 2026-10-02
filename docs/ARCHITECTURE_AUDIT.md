@@ -50,14 +50,14 @@ Execution rails (bank, PSP, agent, API) are downstream consumers. They are not p
 
 ## FREEZE
 
-Freeze semantics unless a failing real domain pilot demonstrates a required change:
+Freeze semantics only after known contract defects are repaired in v0.5.1. Thereafter, require an explicit versioned change rather than silent drift.
 
-- canonicalization and digest semantics;
+- the versioned `paygod-c14n-v1` canonicalization and digest semantics;
 - evidence-bundle digest construction;
 - receipt-to-manifest binding;
 - ledger hash-chain rules;
 - deterministic pack evaluation semantics;
-- verifier VALID/INVALID fail-closed behavior;
+- verifier integrity pass/fail behavior and explicit independent trust dimensions;
 - no-checkout verification trust boundary.
 
 A domain feature alone is not sufficient justification to modify these primitives.
@@ -126,13 +126,13 @@ Do not add tokenization, agent-payment rails, an Open Banking aggregator, AI und
 
 ## Proposed sequence
 
-1. Align README, START_HERE, ROADMAP, GATES, and verifier documentation with the architecture actually on `main`.
-2. Declare the kernel invariants/freeze boundary.
-3. Package verifier v0.2.0 and run an external portability/trust-root witness.
-4. Define Evidence Provenance Contract v0.1.
-5. Implement one Conditional Invoice Release Pack v0.1.
-6. Stop coding and run a 20–50 case shadow pilot.
-7. Only after measured value, test conditional release into a downstream execution rail.
+1. Close v0.5.1 verification-contract repair (Issue #67).
+2. Run an Internal Verification Challenge against adversarial cases and relevant open standards/implementations.
+3. Run one bounded Internal Workflow Rehearsal; this is not a market pilot.
+4. Produce a one-page readiness report and evidence inventory.
+5. Only then select a design partner and derive provenance requirements from the partner's real evidence sources.
+6. Run a 20–50 case shadow external pilot where practical.
+7. Add issuer signing, replay material, or conditional execution only when the workflow demonstrates the need.
 
 ## README rule
 

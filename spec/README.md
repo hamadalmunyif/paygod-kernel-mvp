@@ -1,37 +1,24 @@
 # Paygod Specifications & Test Vectors
 
-This directory contains the **Golden Fixtures** that define the exact behavior of the Paygod Kernel.
+This directory contains the golden fixtures that define `paygod-c14n-v1` behavior.
 
-## 🏆 The Compliance Standard
-Any implementation of Paygod (whether in Rust, Go, .NET, or Python) **MUST** pass these test vectors bit-for-bit.
+Every independent implementation MUST produce the same canonical bytes for accepted vectors and the same explicit rejection class for rejected vectors.
 
-> **Why?** Paygod relies on cryptographic ledger chaining. A single byte difference in JSON serialization (e.g., a space or a float representation) will change the hash, breaking the chain and failing audit verification.
+## Canonical profile
 
-## 📂 Contents
+`paygod-c14n-v1` is a restricted deterministic JSON profile, not RFC 8785.
 
-*   **`test-vectors/canonical-json.json`**: Defines strict serialization rules (RFC 8785).
-    *   *Coverage:* Sorting, Whitespace, Unicode, Emojis, Floats, Escaping.
-*   **`test-vectors/ledger-chaining.json`**: Defines how ledger entries are linked via SHA-256 hashes.
+It accepts null, booleans, strings, arrays, objects, and safe integers only. It rejects floats/decimals, unsafe integers, and non-NFC property names. String values are preserved without silent Unicode normalization.
 
-## 🧪 How to Verify
-We provide a reference verification tool in `tools/verify_spec.py`.
+## Contents
 
-### Run Verification (CI)
+- `test-vectors/canonical-json.json` — accepted canonical forms plus fail-closed rejection vectors.
+- `test-vectors/ledger-chaining.json` — ledger payload canonicalization and SHA-256 chaining.
+
+## Verification
+
 ```bash
 python3 tools/verify_spec.py
 ```
 
-### Manual Check (Python)
-```python
-import json
-import hashlib
-
-# Your implementation MUST match this logic exactly:
-def calculate_hash(obj):
-    # 1. Canonicalize (RFC 8785)
-    canonical = json.dumps(obj, separators=(',', ':'), sort_keys=True, ensure_ascii=False)
-    # 2. Encode UTF-8
-    data = canonical.encode('utf-8')
-    # 3. SHA-256 Hash
-    return hashlib.sha256(data).hexdigest()
-```
+The Python verifier implementation is one implementation of the profile. The .NET canonicalizer is separately regression-tested and both must remain byte-compatible.

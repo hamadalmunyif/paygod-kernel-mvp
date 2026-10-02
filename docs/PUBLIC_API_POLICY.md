@@ -1,66 +1,64 @@
 # Public API Policy
 
-This document defines the **Public Surface Area** of the Paygod Kernel. These are the contracts we guarantee to be stable according to Semantic Versioning (SemVer).
+This document defines the public contract of the Paygod Kernel.
 
-## 🎯 Scope of Stability
-The "Public API" consists of:
+## 1. Canonical JSON profile
 
-### 1. Canonical Formats (Strict)
-To ensure identical behavior across languages (Rust/Go/.NET), we mandate:
+Paygod does **not** currently claim RFC 8785 / JCS conformance.
 
-*   **Canonical JSON:** MUST adhere to **[RFC 8785 (JCS)](https://tools.ietf.org/html/rfc8785)**.
-    *   Keys MUST be sorted lexicographically.
-    *   Whitespace MUST be removed (compact).
-    *   Numbers MUST be formatted as per IEEE 754 (e.g., `1e+2` becomes `100`).
-*   **Encoding:** UTF-8 **without BOM**.
-*   **Hashing:**
-    *   Algorithm: **SHA-256**.
-    *   Input: The UTF-8 bytes of the Canonical JSON string.
-    *   Output Format: **Hexadecimal (lowercase)**, e.g., `sha256:e3b0c442...` (prefix optional in internal storage, mandatory in public references).
+The canonical profile used by decision-critical hashes is `paygod-c14n-v1`. It is intentionally restricted so independent implementations can fail closed instead of guessing about numeric or Unicode semantics.
 
-### 2. CLI Contract
-The `paygod` binary guarantees the following interface:
+### Accepted JSON values
 
-*   **Exit Codes:**
-    *   `0`: Success (Valid/Pass).
-    *   `1`: Validation Failure (Deny/Error).
-    *   `2`: System/Internal Error.
-*   **Output Format:**
-    *   When `--json` is passed, the output MUST be a valid JSON object adhering to the `CliResponse` schema:
-        ```json
-        {
-          "status": "success|failure|error",
-          "code": 0,
-          "data": { ... },
-          "errors": [ { "message": "..." } ]
-        }
-        ```
+- `null`;
+- booleans;
+- strings;
+- arrays;
+- objects;
+- integers in the inclusive range `[-9007199254740991, 9007199254740991]`.
 
-### 3. Interfaces (`src/Core/Interfaces/`)
-*   `ILedgerStore`: Contract for appending and reading ledger records.
-*   `IPolicySource`: Contract for loading and resolving policy packs.
-*   `IAuthProvider`: Contract for identity resolution.
-*   `IAuditSink`: Contract for emitting audit events.
+### Rejected values
 
-### 4. Schemas (`contracts/schemas/`)
-*   All JSON Schemas in this directory are versioned.
-*   Breaking changes to schemas require a Major version bump.
+- floating-point / decimal JSON numbers;
+- exponent-form JSON numbers;
+- integers outside the safe-integer range;
+- object/property names that are not already NFC-normalized;
+- unsupported or unknown runtime value types.
 
-## 🚫 Excluded (Internal API)
-Everything else is considered internal and may change at any time without a major version bump:
-*   Internal helper classes and utility functions.
-*   Database schema of the local SQLite store (implementation detail).
-*   In-memory data structures not exposed via interfaces.
+String **values** are preserved as supplied; the canonicalizer does not silently normalize their Unicode. Object/property names must already be NFC before canonicalization.
 
-## 🔄 Versioning Rules (SemVer)
-We follow [Semantic Versioning 2.0.0](https://semver.org/):
+Objects are ordered using ordinal UTF-16 key ordering. JSON strings use deterministic escaping, including escaping non-ASCII UTF-16 code units. Output is UTF-8 without BOM and hashes use SHA-256 over the canonical UTF-8 bytes.
 
-*   **Major (X.y.z)**: Breaking changes to any Public API listed above.
-*   **Minor (x.Y.z)**: New features (e.g., new interface method with default implementation, new CLI flag) that are backward compatible.
-*   **Patch (x.y.Z)**: Bug fixes that do not change the Public API signature.
+This is a Paygod-specific restricted profile. A future RFC 8785 profile, if added, MUST be separately versioned and validated against independent JCS test vectors.
 
-## ⚠️ Breaking Change Policy
-If we must break a Public API:
-1.  **Deprecation Notice**: We will mark the feature as `@deprecated` in a Minor release.
-2.  **Migration Guide**: We will provide a document explaining how to upgrade.
-3.  **Grace Period**: We will support the deprecated feature for at least one minor release cycle before removal.
+## 2. Decision-domain numeric rule
+
+Decision-critical domain inputs MUST avoid floating-point values. Use scaled integers with an explicit unit, for example:
+
+- money: `amount_minor: 125050`, `currency: "SAR"`;
+- rates: `rate_bps: 250` for 2.50%;
+- CVSS: `cvss_score_tenths: 98` for 9.8;
+- emissions: integer mass units such as `scope1_kgco2e`.
+
+## 3. Verification semantics
+
+A top-level verifier `status: valid` means **bundle integrity verification succeeded within the documented trust boundary**. It does not imply issuer authenticity, replay, external truth, or trusted time.
+
+Machine-readable verifier output exposes these dimensions separately:
+
+- `integrity`;
+- `issuer_authenticity`;
+- `replay`;
+- `time_authority`.
+
+## 4. CLI contract
+
+The `paygod` binary uses stable machine-readable outputs where documented. Verification failures fail closed and return a non-zero exit code.
+
+## 5. Schemas
+
+Schemas under `contracts/schemas/` are versioned contracts. Breaking semantic changes require an explicit version/migration, not a silent reinterpretation.
+
+## Breaking-change rule
+
+A change to canonicalization, digest construction, decision semantics, or verifier trust claims must be versioned, documented, and covered by cross-implementation regression evidence.

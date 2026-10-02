@@ -94,12 +94,11 @@ public static class RunCommand
         var clockValue = Environment.GetEnvironmentVariable("PAYGOD_CLOCK") ?? "unset";
         var runnerImage = Environment.GetEnvironmentVariable("PAYGOD_RUNNER_IMAGE") ?? "paygod/runner:dev";
         var runnerDigest = Environment.GetEnvironmentVariable("PAYGOD_RUNNER_DIGEST") ?? "unknown";
-        var schemaManifestSha = new string('0', 64);
         var receipt = new
         {
-            api_version = "paygod/v1", kind = "Receipt", spec_version = "0.1.0", generated_at = clockValue,
+            api_version = "paygod/v1", kind = "Receipt", spec_version = "0.2.0", generated_at = clockValue,
             clock = new { value = clockValue, source = "env:PAYGOD_CLOCK" },
-            canonicalization = new { json = "rfc8785", schema_manifest_sha256 = schemaManifestSha },
+            canonicalization = new { json = Canonicalizer.ProfileName },
             runner = new { image = runnerImage, image_digest = runnerDigest },
             pack = packObj,
             input = new { canonical_hash = inputHash },

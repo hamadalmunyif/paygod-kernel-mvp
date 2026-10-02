@@ -2,8 +2,8 @@
 """Independent verifier for a transferred Paygod evidence bundle.
 
 This verifier deliberately does not execute the pack or require producer workspace state.
-It verifies the manifest lock, decision-critical receipt binding, and ledger hash chain
-from artifact bytes only.
+It verifies bundle integrity from artifact bytes only. Issuer authenticity, replay, and
+trusted time are separate verification dimensions and are not implied by integrity.
 """
 from __future__ import annotations
 
@@ -11,13 +11,14 @@ import argparse
 from datetime import datetime, timezone
 import hashlib
 import json
-import math
 from pathlib import Path
 import re
 import sys
 import unicodedata
 
-VERIFIER_VERSION = "0.2.0"
+VERIFIER_VERSION = "0.3.0"
+CANONICALIZATION_PROFILE = "paygod-c14n-v1"
+SAFE_INTEGER_MAX = 9_007_199_254_740_991
 _HEX64 = re.compile(r"^[a-f0-9]{64}$")
 _CANONICAL_VERDICTS = {"allow", "deny", "flag", "error"}
 
@@ -35,14 +36,24 @@ def _ordinal_key(value: str) -> bytes:
     return value.encode("utf-16-be", "surrogatepass")
 
 
-def _jcs_string(value: str) -> str:
-    # Match the producer's current Canonicalizer.cs behavior exactly:
-    # NFC normalize, then JSON-escape all non-ASCII UTF-16 code units.
-    value = unicodedata.normalize("NFC", value)
+def _profile_string(value: str) -> str:
+    # paygod-c14n-v1 preserves string values exactly; it does not normalize them.
+    # Non-ASCII UTF-16 code units are escaped to keep the profile byte-stable across runtimes.
     units = value.encode("utf-16-be", "surrogatepass")
     out = ['"']
-    for index in range(0, len(units), 2):
+    index = 0
+    while index < len(units):
         unit = (units[index] << 8) | units[index + 1]
+        if 0xD800 <= unit <= 0xDBFF:
+            if index + 3 >= len(units):
+                raise ValueError("unpaired Unicode surrogate")
+            next_unit = (units[index + 2] << 8) | units[index + 3]
+            if not (0xDC00 <= next_unit <= 0xDFFF):
+                raise ValueError("unpaired Unicode surrogate")
+        elif 0xDC00 <= unit <= 0xDFFF:
+            previous_unit = (units[index - 2] << 8) | units[index - 1] if index >= 2 else None
+            if previous_unit is None or not (0xD800 <= previous_unit <= 0xDBFF):
+                raise ValueError("unpaired Unicode surrogate")
         if unit == 0x22:
             out.append('\\\"')
         elif unit == 0x5C:
@@ -61,42 +72,61 @@ def _jcs_string(value: str) -> str:
             out.append(f"\\u{unit:04x}")
         else:
             out.append(chr(unit))
+        index += 2
     out.append('"')
     return "".join(out)
 
 
 def canonical_json(value) -> str:
-    """Mirror src/PayGod.Cli/Core/Canonicalizer.cs for ledger verification."""
+    """Encode the restricted paygod-c14n-v1 JSON profile.
+
+    Accepted values: null, booleans, strings, arrays, objects, and safe integers.
+    Object/property names MUST already be NFC. String values are preserved without
+    normalization. Floats/decimals and unsafe integers fail closed.
+    """
     if value is None:
         return "null"
     if isinstance(value, bool):
         return "true" if value else "false"
     if isinstance(value, str):
-        return _jcs_string(value)
+        return _profile_string(value)
     if isinstance(value, dict):
         if not all(isinstance(key, str) for key in value):
             raise TypeError("JSON object keys must be strings")
+        for key in value:
+            if unicodedata.normalize("NFC", key) != key:
+                raise ValueError("JSON object key is not NFC-normalized")
         keys = sorted(value, key=_ordinal_key)
-        return "{" + ",".join(f"{_jcs_string(key)}:{canonical_json(value[key])}" for key in keys) + "}"
+        return "{" + ",".join(
+            f"{_profile_string(key)}:{canonical_json(value[key])}" for key in keys
+        ) + "}"
     if isinstance(value, list):
         return "[" + ",".join(canonical_json(item) for item in value) + "]"
     if isinstance(value, int):
+        if abs(value) > SAFE_INTEGER_MAX:
+            raise ValueError("integer outside paygod-c14n-v1 safe range")
         return str(value)
     if isinstance(value, float):
-        if not math.isfinite(value):
-            raise ValueError("non-finite number")
-        if value == 0:
-            return "0"
-        rendered = format(value, ".17g").replace("E", "e")
-        return rendered
+        raise ValueError("floating-point numbers are not allowed by paygod-c14n-v1")
     raise TypeError(f"unsupported JSON value: {type(value).__name__}")
 
 
+def _dimensions(integrity: str, time_authority: str = "failed") -> dict:
+    return {
+        "integrity": integrity,
+        "issuer_authenticity": "not_verified",
+        "replay": "not_performed",
+        "time_authority": time_authority,
+    }
+
+
 def _invalid(errors: list[str], **extra) -> dict:
+    time_authority = extra.pop("time_authority", "failed")
     result = {
         "status": "invalid",
         "portable": False,
         "verifier_version": VERIFIER_VERSION,
+        "verification": _dimensions("failed", time_authority),
         "errors": errors,
     }
     result.update(extra)
@@ -159,6 +189,8 @@ def verify_ledger(path: Path, errors: list[str]) -> dict | None:
             return None
 
         record_hash = entry.get("record_hash")
+        if not isinstance(record_hash, str) or not _HEX64.fullmatch(record_hash):
+            errors.append(f"ledger line {line_no}: record_hash must be 64 lowercase hex characters")
         if record_hash != calculated:
             errors.append(f"ledger line {line_no}: record_hash mismatch")
         previous = record_hash if isinstance(record_hash, str) else ""
@@ -180,7 +212,7 @@ def _validate_receipt_semantics(
     manifest_sha: str,
     errors: list[str],
     allow_unbound_clock: bool,
-) -> str:
+) -> tuple[str, str]:
     if receipt.get("api_version") != "paygod/v1":
         errors.append("receipt api_version mismatch")
     if receipt.get("kind") != "Receipt":
@@ -196,7 +228,7 @@ def _validate_receipt_semantics(
         errors.append("receipt generated_at does not match clock.value")
 
     canonicalization = receipt.get("canonicalization")
-    if not isinstance(canonicalization, dict) or canonicalization.get("json") != "rfc8785":
+    if not isinstance(canonicalization, dict) or canonicalization.get("json") != CANONICALIZATION_PROFILE:
         errors.append("receipt canonicalization declaration mismatch")
 
     if receipt.get("pack") != manifest.get("pack"):
@@ -256,12 +288,12 @@ def _validate_receipt_semantics(
 
     if ledger_entry is None:
         errors.append("missing ledger entry for receipt decision binding")
-        return "invalid"
+        return "invalid", "failed"
 
     ledger_data = ledger_entry.get("data")
     if not isinstance(ledger_data, dict):
         errors.append("ledger data must be an object")
-        return "invalid"
+        return "invalid", "failed"
 
     ledger_verdict = ledger_data.get("verdict")
     ledger_rule = ledger_data.get("rule_name")
@@ -302,20 +334,24 @@ def _validate_receipt_semantics(
     if clock_value == "unset":
         if not allow_unbound_clock:
             errors.append("unbound receipt clock requires explicit --allow-unbound-clock")
-            return "unbound-rejected"
-        return "unbound-opt-in"
+            return "unbound-rejected", "unbound"
+        return "unbound-opt-in", "unbound"
 
     receipt_time = _parse_instant(clock_value)
     if receipt_time is None:
         errors.append("invalid or timezone-naive injected receipt clock")
-        return "invalid"
+        return "invalid", "failed"
     if manifest_time is not None and receipt_time != manifest_time:
         errors.append("receipt clock does not match locked manifest/ledger time")
-        return "invalid"
-    return "injected"
+        return "invalid", "failed"
+    return "injected", "producer_supplied"
 
 
-def verify(bundle: Path, allow_unbound_clock: bool = False) -> dict:
+def verify(
+    bundle: Path,
+    allow_unbound_clock: bool = False,
+    expected_receipt_sha256: str | None = None,
+) -> dict:
     errors: list[str] = []
     manifest_path = bundle / "manifest.json"
     receipt_path = bundle / "receipt.json"
@@ -326,20 +362,27 @@ def verify(bundle: Path, allow_unbound_clock: bool = False) -> dict:
     if errors:
         return _invalid(errors)
 
+    receipt_sha = sha256_file(receipt_path)
+    if expected_receipt_sha256 is not None:
+        if not _HEX64.fullmatch(expected_receipt_sha256):
+            errors.append("expected receipt sha256 must be 64 lowercase hex characters")
+        elif receipt_sha != expected_receipt_sha256:
+            errors.append("receipt sha256 does not match expected external commitment")
+
     try:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
         receipt = json.loads(receipt_path.read_text(encoding="utf-8-sig"))
     except Exception as exc:
-        return _invalid([f"invalid control JSON: {exc}"])
+        return _invalid(errors + [f"invalid control JSON: {exc}"], receipt_sha256=receipt_sha)
 
     if not isinstance(manifest, dict):
-        return _invalid(["manifest must be an object"])
+        return _invalid(errors + ["manifest must be an object"], receipt_sha256=receipt_sha)
     if not isinstance(receipt, dict):
-        return _invalid(["receipt must be an object"])
+        return _invalid(errors + ["receipt must be an object"], receipt_sha256=receipt_sha)
 
     entries = manifest.get("files")
     if not isinstance(entries, list) or not entries:
-        return _invalid(["manifest files must be a non-empty array"])
+        return _invalid(errors + ["manifest files must be a non-empty array"], receipt_sha256=receipt_sha)
 
     digest_lines: list[str] = []
     seen_names: set[str] = set()
@@ -360,7 +403,7 @@ def verify(bundle: Path, allow_unbound_clock: bool = False) -> dict:
         if not isinstance(expected, str) or not _HEX64.fullmatch(expected):
             errors.append(f"manifest file entry {index} has invalid sha256")
             continue
-        if not isinstance(expected_bytes, int) or expected_bytes < 0:
+        if not isinstance(expected_bytes, int) or isinstance(expected_bytes, bool) or expected_bytes < 0:
             errors.append(f"manifest file entry {index} has invalid byte count")
             continue
 
@@ -368,12 +411,25 @@ def verify(bundle: Path, allow_unbound_clock: bool = False) -> dict:
         if not path.is_file():
             errors.append(f"missing manifest file: {name}")
             continue
+        if path.is_symlink():
+            errors.append(f"manifest file must not be a symlink: {name}")
+            continue
         actual = sha256_file(path)
         if actual != expected:
             errors.append(f"sha256 mismatch: {name}")
         if path.stat().st_size != expected_bytes:
             errors.append(f"byte count mismatch: {name}")
         digest_lines.append(f"{name}={expected}\n")
+
+    allowed_files = {"manifest.json", "receipt.json"} | seen_names
+    try:
+        for child in bundle.iterdir():
+            if child.is_symlink():
+                errors.append(f"unexpected symlink in bundle: {child.name}")
+            elif child.is_file() and child.name not in allowed_files:
+                errors.append(f"unexpected bundle file: {child.name}")
+    except Exception as exc:
+        errors.append(f"bundle member enumeration failed: {exc}")
 
     manifest_bundle_obj = manifest.get("bundle")
     if not isinstance(manifest_bundle_obj, dict):
@@ -401,17 +457,27 @@ def verify(bundle: Path, allow_unbound_clock: bool = False) -> dict:
         errors.append("ledger.jsonl must appear exactly once in manifest files")
 
     ledger_entry = verify_ledger(bundle / "ledger.jsonl", errors)
+    ledger_head = None
+    if isinstance(ledger_entry, dict):
+        candidate = ledger_entry.get("record_hash")
+        if isinstance(candidate, str) and _HEX64.fullmatch(candidate):
+            ledger_head = candidate
+
     manifest_sha = sha256_file(manifest_path)
-    clock_binding = _validate_receipt_semantics(
+    clock_binding, time_authority = _validate_receipt_semantics(
         manifest, receipt, ledger_entry, manifest_sha, errors, allow_unbound_clock
     )
 
+    integrity = "verified" if not errors else "failed"
     return {
         "status": "valid" if not errors else "invalid",
         "portable": not errors,
         "verifier_version": VERIFIER_VERSION,
+        "verification": _dimensions(integrity, time_authority),
         "bundle_digest": manifest_bundle,
         "manifest_sha256": manifest_sha,
+        "receipt_sha256": receipt_sha,
+        "ledger_head": ledger_head,
         "verified_files": len(entries),
         "clock_binding": clock_binding,
         "errors": errors,
@@ -427,11 +493,19 @@ def main() -> int:
         action="store_true",
         help="Explicitly accept legacy/local bundles whose receipt clock is 'unset'.",
     )
+    parser.add_argument(
+        "--expect-receipt-sha256",
+        help="Fail closed unless receipt.json matches this externally supplied SHA-256 commitment.",
+    )
     parser.add_argument("--result", type=Path, default=Path("verification-result.json"))
     args = parser.parse_args()
 
     try:
-        result = verify(args.bundle, allow_unbound_clock=args.allow_unbound_clock)
+        result = verify(
+            args.bundle,
+            allow_unbound_clock=args.allow_unbound_clock,
+            expected_receipt_sha256=args.expect_receipt_sha256,
+        )
     except Exception as exc:
         result = _invalid([f"verifier failure: {type(exc).__name__}: {exc}"])
 

@@ -54,6 +54,6 @@ See [GATES.md](GATES.md). The canonical required contexts are `Paygod Kernel CI`
 - `ROADMAP.md`
 
 ## 8. Contribution rule
-Do not change canonicalization, digest construction, receipt binding, ledger-chain rules, deterministic pack semantics, or verifier fail-closed behavior merely to accommodate a domain feature.
+Do not silently change the versioned canonicalization profile, digest construction, receipt binding, ledger-chain rules, deterministic pack semantics, verifier fail-closed integrity behavior, or trust-dimension meanings merely to accommodate a domain feature.
 
 Try contracts, packs, or adapters first. Kernel-semantic changes require explicit justification and regression evidence.

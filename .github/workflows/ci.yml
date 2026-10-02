@@ -38,6 +38,9 @@ jobs:
       - name: Verify Spec Compliance (Python reference)
         run: python3 tools/verify_spec.py
 
+      - name: Run .NET canonicalization and unit regression tests
+        run: dotnet test tests/PayGod.Tests/PayGod.Tests.csproj --configuration Release
+
       - name: Reject CRLF in JSON schemas
         run: |
           python3 - <<'PY'

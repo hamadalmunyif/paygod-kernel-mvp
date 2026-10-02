@@ -13,7 +13,7 @@ The merged witness covers:
 - receipt, manifest/digest, and ledger verification where present;
 - machine-readable verification output;
 - fail-closed rejection after a one-byte evidence mutation;
-- no change to kernel decision semantics or canonicalization rules.
+- the historical witness did not change kernel decision semantics; canonicalization is subsequently repaired/versioned by v0.5.1.
 
 ```text
 Environment A (producer)
@@ -30,12 +30,12 @@ Environment B (verifier)
         | no hidden local configuration
         | no re-execution of the original decision
         v
-VALID / INVALID
+integrity verified / failed
 ```
 
 ## Non-claims
 
-This CI witness proves portability and integrity within its documented boundary. It does **not** prove:
+This CI witness proves portability and bundle integrity within its documented boundary. A successful integrity result does not imply issuer authenticity, replay, trusted time, or external truth. It does **not** prove:
 
 - truth or authenticity of an external real-world fact;
 - a published/signed external verifier trust root;

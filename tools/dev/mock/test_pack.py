@@ -67,13 +67,13 @@ def mock_engine_evaluate(pack_path, input_data):
         report = input_data.get('scan_report', {})
         vulns = report.get('vulnerabilities', [])
         
-        has_critical = any(v.get('cvss_score', 0) >= 9.0 and v.get('status') != 'fixed' for v in vulns)
-        has_high = any(7.0 <= v.get('cvss_score', 0) < 9.0 and v.get('status') != 'fixed' for v in vulns)
+        has_critical = any(v.get('cvss_score_tenths', 0) >= 90 and v.get('status') != 'fixed' for v in vulns)
+        has_high = any(70 <= v.get('cvss_score_tenths', 0) < 90 and v.get('status') != 'fixed' for v in vulns)
         
         if has_critical:
             return {
                 "decision": "deny",
-                "reason": "Artifact contains unpatched critical vulnerabilities (CVSS >= 9.0)."
+                "reason": "Artifact contains unpatched critical vulnerabilities (CVSS >= 90)."
             }
         elif has_high:
             return {

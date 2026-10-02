@@ -10,7 +10,7 @@
     "expected_hash": "e6a3385fb77c287a712e7f406a451727f0625041823ecf23bea7ef39b2e39805"
   },
   {
-    "description": "Object with whitespace",
+    "description": "Object with whitespace semantic equivalent",
     "input": {
       "a": 1,
       "b": 2
@@ -31,14 +31,14 @@
     "expected_hash": "4a1cd3abb367ad5a1a93fd454f6ff43b1e42707b8bd7450d7952fc9ae37aea28"
   },
   {
-    "description": "Unicode and Emojis",
+    "description": "Unicode values are preserved and escaped",
     "input": {
       "text": "مرحبا بالعالم",
       "emoji": "🚀",
       "mixed": "A©B"
     },
-    "expected_canonical": "{\"emoji\":\"🚀\",\"mixed\":\"A©B\",\"text\":\"مرحبا بالعالم\"}",
-    "expected_hash": "01536c374729aafbf6455832158f48c45116d079c7b4a0074c25298cf6f1a75d"
+    "expected_canonical": "{\"emoji\":\"\\ud83d\\ude80\",\"mixed\":\"A\\u00a9B\",\"text\":\"\\u0645\\u0631\\u062d\\u0628\\u0627 \\u0628\\u0627\\u0644\\u0639\\u0627\\u0644\\u0645\"}",
+    "expected_hash": "3da216704bfc21fcfa75988bee755949bc82e6629e56d19e9597a04f99a4c0c5"
   },
   {
     "description": "Escaping special characters",
@@ -74,13 +74,42 @@
     "expected_hash": "2fcfbded120ffe9e634ee9d7010d28ebf90b46707d8dfd6b7666091365ad044c"
   },
   {
-    "description": "Floats and Scientific Notation",
+    "description": "Safe integer boundaries",
     "input": {
-      "simple": 1.5,
-      "scientific": 100.0,
-      "small": 0.005
+      "max": 9007199254740991,
+      "min": -9007199254740991,
+      "zero": 0
     },
-    "expected_canonical": "{\"scientific\":100,\"simple\":1.5,\"small\":0.005}",
-    "expected_hash": "c9459e7bdf89640d1cf7cf7f72dd9fa9b39b1d34b6f1c99c9f2fc8270acf6302"
+    "expected_canonical": "{\"max\":9007199254740991,\"min\":-9007199254740991,\"zero\":0}",
+    "expected_hash": "b7b2401ddca2165824e98c61890c0aaec470258d3119dd265d02be9438bf47e6"
+  },
+  {
+    "description": "Decomposed Unicode string value is preserved",
+    "input": {
+      "text": "é"
+    },
+    "expected_canonical": "{\"text\":\"e\\u0301\"}",
+    "expected_hash": "2169722aee46a09ad91bae5ad6e5eb68e327438cdf02e2e04fe951f97ba466e8"
+  },
+  {
+    "description": "Floating point is rejected",
+    "input": {
+      "amount": 0.1
+    },
+    "expected_error": "floating-point"
+  },
+  {
+    "description": "Unsafe integer is rejected",
+    "input": {
+      "amount": 9007199254740992
+    },
+    "expected_error": "safe range"
+  },
+  {
+    "description": "Non-NFC property name is rejected",
+    "input": {
+      "é": "value"
+    },
+    "expected_error": "not NFC"
   }
 ]

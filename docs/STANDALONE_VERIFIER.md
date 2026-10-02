@@ -1,47 +1,69 @@
 # Standalone Third-Party Verifier Witness
 
-Status: **standalone/no-checkout baseline originated in PR #53; current verifier v0.2 adds decision-critical receipt, manifest-locked ledger, Unicode, malformed-input, and default-clock compatibility witnesses.**
+Status: **v0.3 verification-contract repair under v0.5.1.**
 
-## Proven boundary
+## What integrity verification proves
 
-Inside CI, a recipient can verify a transferred Paygod evidence bundle using a versioned standalone verifier artifact without checking out `paygod-kernel-mvp`, rebuilding the kernel, re-running the pack, or possessing producer-local state.
+The standalone verifier can verify a transferred Paygod evidence bundle without repository checkout, pack replay, Docker, the .NET SDK, or producer workspace state.
 
-The verifier checks:
+Integrity verification checks:
 
-- manifest integrity;
+- manifest structure and bundle digest;
 - artifact SHA-256 digests and byte counts;
-- bundle-digest binding;
+- no unexpected regular files or symlinks in the transferred directory;
 - exactly one manifest-locked `ledger.jsonl`;
 - receipt-to-manifest binding;
-- ledger hash-chain integrity;
+- ledger hash-chain integrity under `paygod-c14n-v1`;
 - decision-critical receipt claims against the locked ledger;
-- canonical `allow`, `deny`, `flag`, and `error` verdicts are ledger-bound;
-- required decision fields and their types are validated before equality/binding checks.
+- an optional externally supplied `--expect-receipt-sha256` commitment.
 
-Acceptance requires clean evidence -> `VALID`, payload tamper -> `INVALID`, decision-critical receipt tamper -> `INVALID`, a missing manifest-locked ledger -> `INVALID`, fail-closed behavior, and machine-readable results. Verifier v0.2 cross-checks receipt verdict/rule/reason, pack, input hash, and, when `PAYGOD_CLOCK` is injected, decision time against the locked manifest/ledger. For the supported non-strict local path where the receipt clock is `unset`, acceptance requires the verifier operator to pass `--allow-unbound-clock` explicitly. The result records `clock_binding: unbound-opt-in`; default verification rejects `unset`, preventing a receipt-only downgrade from an injected clock to an unbound clock. Manifest/ledger time consistency is still checked.
+The result exposes `receipt_sha256` and the verified `ledger_head`.
 
-## Trust boundary
+## Verification dimensions
 
-The recipient receives only:
+A top-level `status: valid` is retained for CLI compatibility, but it means only that the **integrity** checks in this verifier succeeded.
 
-1. an evidence bundle produced by Paygod; and
-2. a standalone verifier distribution whose version/integrity metadata can be checked.
+The machine-readable result separates:
 
-The recipient witness does not require repository checkout, producer workspace state, Docker, the .NET SDK, original pack replay, Paygod secrets, or hidden producer configuration.
+```text
+integrity            verified | failed
+issuer_authenticity  not_verified
+replay               not_performed
+time_authority       producer_supplied | unbound | failed
+```
 
-## Next distribution boundary
+`producer_supplied` time means the receipt/manifest/ledger agree on the injected producer clock. It is not third-party trusted timestamping.
 
-The next gate is to package and test the verifier **outside repository CI** on an independent device/environment with published integrity/version metadata. Verifier v0.2 does not authenticate the runner/issuer identity by itself; that remains part of the external trust-root/provenance boundary.
+## Canonicalization contract
 
-A browser/client-side verifier may follow for iPad use and a future surface such as `verify.paygod.net`, but the hosting domain must not become the source of trust.
+The verifier accepts `paygod-c14n-v1`, not an RFC 8785 claim.
+
+The profile accepts null, booleans, strings, arrays, objects, and safe integers only. It rejects floats/decimals, unsafe integers, and non-NFC property names. String values are preserved without silent Unicode normalization.
+
+## External receipt commitment
+
+A relying party can pin a receipt received over another channel:
+
+```bash
+python paygod-verify.py evidence \
+  --expect-receipt-sha256 <64-lowercase-hex>
+```
+
+A mismatch fails closed. This proves equality with the externally committed receipt bytes; it does not by itself authenticate who supplied that external commitment.
+
+## Unbound clock compatibility
+
+Legacy/local output whose receipt clock is `unset` requires explicit `--allow-unbound-clock`. The result reports `time_authority: unbound`.
 
 ## Non-claims
 
-PR #53 establishes a CI-level standalone/no-checkout verification witness. It does **not** yet establish:
+The verifier does not currently prove:
 
-- a published/signed external verifier trust root;
-- a truly external device/party witness;
+- publisher/issuer identity;
 - truth or provenance of external evidence;
-- institutional adoption or a live financial release workflow.
+- trusted third-party time;
+- replay of the original decision;
+- institutional adoption;
+- a live financial/payment release.
 
-Do not describe this boundary as full external P4 until the external distribution witness passes.
+Those capabilities require separate evidence and MUST NOT be inferred from `status: valid`.

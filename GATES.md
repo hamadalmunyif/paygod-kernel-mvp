@@ -49,7 +49,7 @@ See [Repository Boundary Closure v0.1](docs/REPOSITORY_BOUNDARY.md).
 
 The invariants in `docs/ARCHITECTURE_AUDIT.md` are the baseline. Before changing a frozen kernel primitive, explain why contracts, packs, or adapters are insufficient and preserve or explicitly version the affected verification contract.
 
-Frozen semantics include canonicalization/digests, bundle digest construction, receipt-manifest binding, ledger hash-chain rules, deterministic pack evaluation, verifier fail-closed behavior, and the no-checkout verification boundary.
+After v0.5.1 closes the known contract defects, frozen semantics include the versioned `paygod-c14n-v1` canonicalization/digests, bundle digest construction, receipt-manifest binding, ledger hash-chain rules, deterministic pack evaluation, verifier fail-closed integrity behavior, explicit trust-dimension semantics, and the no-checkout verification boundary. Future changes must be explicitly versioned rather than silently changing those meanings.
 
 ## Documentation gate
 
@@ -59,6 +59,6 @@ A material architectural change is incomplete unless README reflects what Paygod
 
 ## Product gate
 
-After the first real domain authority pack is implemented, stop generic feature development and run a shadow pilot before adding broad platform capability.
+After v0.5.1, run an Internal Rehearsal before treating any domain workflow as pilot-ready. Internal rehearsal validates engineering/readiness only; it does not prove demand. A real shadow pilot requires an external design partner.
 
 No domain feature should silently create an alternate decision engine.

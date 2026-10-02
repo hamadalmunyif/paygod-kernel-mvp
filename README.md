@@ -17,7 +17,7 @@ The repository currently has CI witnesses for:
 - fail-closed rejection after a one-byte evidence mutation;
 - single-authority enforcement for registered repository-hosted adapters, including rejection of injected verdict, receipt, and bundle-identity authority.
 
-The standalone verifier checks manifest integrity, artifact SHA-256 digests and byte counts, bundle-digest binding, exactly one manifest-locked `ledger.jsonl`, decision-critical receipt claims against that locked ledger, and ledger hash-chain integrity. All canonical verdicts in the current decision contract (`allow`, `deny`, `flag`, `error`) are ledger-bound. Verifier v0.2 also mirrors the producer's Unicode canonicalization, rejects silent injected-clock -> `unset` downgrades, and emits machine-readable `INVALID` results for malformed control shapes. Legacy/local unbound-clock verification requires explicit `--allow-unbound-clock` opt-in and is labeled `clock_binding: unbound-opt-in`. These checks establish bundle consistency/tamper evidence within the documented trust boundary; they do not authenticate the evidence publisher.
+The standalone verifier checks bundle **integrity**: manifest/file digests and byte counts, strict transferred-file membership, bundle binding, exactly one manifest-locked `ledger.jsonl`, receipt-to-manifest binding, decision-critical receipt claims against that ledger, and ledger hash-chain integrity. Verifier v0.3 uses the restricted `paygod-c14n-v1` profile, exposes `receipt_sha256` and `ledger_head`, and can fail closed against an externally supplied `--expect-receipt-sha256`. Its machine-readable result separates `integrity`, `issuer_authenticity`, `replay`, and `time_authority`; a top-level `status: valid` means integrity verified within this documented boundary only. It does not authenticate the evidence publisher, replay the original policy decision, establish trusted time, or prove external truth.
 
 The single-authority witness is deliberately scoped: it covers adapters registered in `tools/check_repository_boundary.py`. New execution-facing surfaces must be registered and covered by the same boundary witness.
 
@@ -89,7 +89,7 @@ Expected: `PASS` (strict) with matching digests.
 ## Portable verification
 
 - `.github/workflows/portable-evidence.yml` — artifact handoff and cross-OS independent verification.
-- `.github/workflows/standalone-verifier.yml` — versioned standalone verifier artifact, no repository checkout in recipient jobs, clean evidence -> `VALID`, one-byte tamper -> `INVALID`.
+- `.github/workflows/standalone-verifier.yml` — versioned standalone verifier artifact, no repository checkout in recipient jobs, clean evidence -> integrity `verified`, one-byte tamper -> integrity `failed`.
 
 See [Standalone Verifier](docs/STANDALONE_VERIFIER.md).
 
@@ -100,23 +100,13 @@ See [GATES.md](GATES.md). The governance contract defines stable required check 
 ## Next boundary
 
 0. Complete main-ruleset alignment with the stable required check contexts in `GATES.md`.
-1. Package and test the verifier outside repository CI.
-2. Select one bounded real-domain workflow and derive the minimum evidence-provenance contract it actually requires.
-3. Implement that domain authority pack without changing frozen kernel semantics.
-4. Stop generic feature development.
-5. Run a shadow pilot against real human decisions.
+1. Close v0.5.1 verification-contract repair: restricted canonicalization, scoped verification dimensions, receipt pinning, ledger head, and strict transferred-file membership.
+2. Run an **Internal Rehearsal** against benchmark/adversarial cases before any external pilot.
+3. Select one bounded real workflow only after the kernel/verifier rehearsal is clean.
+4. Derive provenance requirements from the evidence the workflow actually uses.
+5. Run a shadow external pilot only after internal readiness evidence exists.
 
-First candidate:
-
-```text
-invoice + PO + facility state + collateral/evidence + policy
-                         |
-                         v
-              RELEASE / REDUCE / HOLD
-                         |
-                         v
-                       receipt
-```
+Do not treat an Internal Rehearsal as evidence of market demand or willingness to pay.
 
 See [ROADMAP.md](ROADMAP.md).
 

@@ -3,8 +3,8 @@ cases:
     input:
       ghg_report:
         reporting_year: 2025
-        scope1_tco2e: 100.0
-        scope2_tco2e: 50.0
+        scope1_kgco2e: 100000
+        scope2_kgco2e: 50000
         methodology_ref: "ref:methodology/v1"
     expected:
       decision: "deny"
@@ -17,8 +17,8 @@ cases:
     input:
       ghg_report:
         reporting_year: 2025
-        scope1_tco2e: 100.0
-        scope2_tco2e: 50.0
+        scope1_kgco2e: 100000
+        scope2_kgco2e: 50000
         methodology_ref: "ref:methodology/v1"
         evidence_refs: ["ref:evidence/ghg/2025-01"]
     expected:
@@ -28,8 +28,8 @@ cases:
     input:
       ghg_report:
         reporting_year: 2025
-        scope1_tco2e: 100.0
-        scope2_tco2e: 50.0
+        scope1_kgco2e: 100000
+        scope2_kgco2e: 50000
         methodology_ref: "ref:methodology/v1"
         emission_factor_refs: ["ref:ef/grid/v2"]
         evidence_refs: ["ref:evidence/ghg/2025-01"]
