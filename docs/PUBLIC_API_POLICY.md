@@ -6,17 +6,20 @@ This document defines the **Public Surface Area** of the Paygod Kernel. These ar
 The "Public API" consists of:
 
 ### 1. Canonical Formats (Strict)
-To ensure identical behavior across languages (Rust/Go/.NET), we mandate:
+To ensure identical behavior across producer and verifier runtimes, Paygod currently mandates the restricted profile `paygod-c14n-v1`.
 
-*   **Canonical JSON:** MUST adhere to **[RFC 8785 (JCS)](https://tools.ietf.org/html/rfc8785)**.
-    *   Keys MUST be sorted lexicographically.
-    *   Whitespace MUST be removed (compact).
-    *   Numbers MUST be formatted as per IEEE 754 (e.g., `1e+2` becomes `100`).
-*   **Encoding:** UTF-8 **without BOM**.
-*   **Hashing:**
-    *   Algorithm: **SHA-256**.
-    *   Input: The UTF-8 bytes of the Canonical JSON string.
-    *   Output Format: **Hexadecimal (lowercase)**, e.g., `sha256:e3b0c442...` (prefix optional in internal storage, mandatory in public references).
+- **Accepted JSON values:** null, booleans, strings, arrays, objects, and safe integers only.
+- **Safe integer range:** `[-9007199254740991, 9007199254740991]`.
+- **Rejected numeric forms:** floating-point, decimal, and exponent-form JSON numbers.
+- **Object/property names:** MUST already be NFC-normalized; non-NFC keys fail closed.
+- **String values:** preserved without Unicode normalization. Domain-specific normalization belongs in packs/derived views, not in the canonicalizer.
+- **Unknown/unsupported values:** fail closed; no silent coercion to `null`.
+- **Object ordering:** .NET ordinal/UTF-16 code-unit order.
+- **String escaping:** deterministic JSON escaping with non-ASCII UTF-16 code units emitted as lowercase `\\uXXXX` sequences.
+- **Encoding:** UTF-8 without BOM.
+- **Hashing:** SHA-256 over the UTF-8 bytes of the canonical string; lowercase hexadecimal output.
+
+This profile is **not RFC 8785/JCS**. A future JCS profile, if adopted, must be separately versioned and pass independent interoperability vectors before it is advertised as RFC 8785.
 
 ### 2. CLI Contract
 The `paygod` binary guarantees the following interface:
