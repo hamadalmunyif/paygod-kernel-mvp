@@ -1,105 +1,69 @@
 # Standalone Third-Party Verifier Witness
 
-Status: **v0.3 verification-contract repair in progress on Issue #67.**
+Status: **v0.3 verification-contract repair under v0.5.1.**
 
-## What the verifier proves
+## What integrity verification proves
 
-The standalone verifier can check a transferred Paygod evidence directory without checking out the repository, rebuilding the kernel, or replaying the original decision.
+The standalone verifier can verify a transferred Paygod evidence bundle without repository checkout, pack replay, Docker, the .NET SDK, or producer workspace state.
 
-It verifies the **integrity dimension**:
-- manifest structure and declared file set;
+Integrity verification checks:
+
+- manifest structure and bundle digest;
 - artifact SHA-256 digests and byte counts;
-- rejection of unexpected regular files and symlinks in the transferred directory;
-- bundle-digest binding;
+- no unexpected regular files or symlinks in the transferred directory;
 - exactly one manifest-locked `ledger.jsonl`;
 - receipt-to-manifest binding;
 - ledger hash-chain integrity under `paygod-c14n-v1`;
 - decision-critical receipt claims against the locked ledger;
-- optional external pinning of `receipt.json` with `--expect-receipt-sha256`.
+- an optional externally supplied `--expect-receipt-sha256` commitment.
 
-The result also exposes:
-- `receipt_sha256` — the digest a recipient can pin through another channel;
-- `ledger_head` — the verified last ledger record hash.
+The result exposes `receipt_sha256` and the verified `ledger_head`.
 
 ## Verification dimensions
 
-A top-level `status: valid` means **bundle integrity verified within this contract**. It does not mean every trust dimension is verified.
+A top-level `status: valid` is retained for CLI compatibility, but it means only that the **integrity** checks in this verifier succeeded.
 
-Example:
+The machine-readable result separates:
 
-```json
-{
-  "status": "valid",
-  "verification": {
-    "integrity": "verified",
-    "issuer_authenticity": "not_verified",
-    "replay": "not_performed",
-    "time_authority": "producer_supplied"
-  }
-}
+```text
+integrity            verified | failed
+issuer_authenticity  not_verified
+replay               not_performed
+time_authority       producer_supplied | unbound | failed
 ```
 
-The dimensions are deliberately independent:
+`producer_supplied` time means the receipt/manifest/ledger agree on the injected producer clock. It is not third-party trusted timestamping.
 
-- **Integrity** — are the transferred artifacts internally consistent and bound as declared?
-- **Issuer authenticity** — is the receipt authenticated to a known issuer key? Not yet implemented in v0.3.
-- **Replay** — was the original input/policy/runner material re-executed and compared? Not performed by this verifier.
-- **Time authority** — the current timestamp is producer-supplied when `PAYGOD_CLOCK` is injected, or explicitly unbound in the supported local mode. It is not a third-party timestamp.
+## Canonicalization contract
 
-## Canonicalization profile
+The verifier accepts `paygod-c14n-v1`, not an RFC 8785 claim.
 
-Receipts MUST declare:
-
-```json
-"canonicalization": { "json": "paygod-c14n-v1" }
-```
-
-`paygod-c14n-v1` is a restricted Paygod profile, not RFC 8785/JCS. It accepts null, booleans, strings, arrays, objects, and safe integers only. Floating-point/decimal/exponent numbers, unsafe integers, non-NFC object keys, and unsupported values fail closed. String values are preserved without silent Unicode normalization.
-
-See `spec/README.md` and `spec/test-vectors/canonical-json.json`.
+The profile accepts null, booleans, strings, arrays, objects, and safe integers only. It rejects floats/decimals, unsafe integers, and non-NFC property names. String values are preserved without silent Unicode normalization.
 
 ## External receipt commitment
 
-A relying party that receives the receipt digest through an independent channel can pin it:
+A relying party can pin a receipt received over another channel:
 
 ```bash
 python paygod-verify.py evidence \
-  --expect-receipt-sha256 <64-lowercase-hex> \
-  --result verification-result.json
+  --expect-receipt-sha256 <64-lowercase-hex>
 ```
 
-A mismatch fails closed.
+A mismatch fails closed. This proves equality with the externally committed receipt bytes; it does not by itself authenticate who supplied that external commitment.
 
-This authenticates neither the issuer nor the external facts by itself; it only binds verification to the externally supplied digest.
+## Unbound clock compatibility
 
-## Clock handling
-
-When the producer injects `PAYGOD_CLOCK`, the verifier checks its consistency with manifest/ledger time and reports:
-
-```text
-time_authority: producer_supplied
-```
-
-For the supported non-strict local path where the receipt clock is `unset`, acceptance requires `--allow-unbound-clock` and reports:
-
-```text
-time_authority: unbound
-```
-
-No current path claims trusted third-party time.
+Legacy/local output whose receipt clock is `unset` requires explicit `--allow-unbound-clock`. The result reports `time_authority: unbound`.
 
 ## Non-claims
 
-The current verifier does **not** prove:
-- truth or provenance of an external real-world fact;
-- issuer identity or possession of an institutional signing key;
+The verifier does not currently prove:
+
+- publisher/issuer identity;
+- truth or provenance of external evidence;
 - trusted third-party time;
-- replay of the policy decision;
-- institutional adoption or willingness to pay;
-- a live financial or operational release integration.
+- replay of the original decision;
+- institutional adoption;
+- a live financial/payment release.
 
-**Integrity is not authenticity. Authenticity is not external truth.**
-
-## Next gate
-
-After v0.5.1 closes, the next engineering activity is an **Internal Rehearsal** designed to attack these boundaries before any external pilot. Issuer signing and real provenance remain separately versioned follow-ups.
+Those capabilities require separate evidence and MUST NOT be inferred from `status: valid`.
