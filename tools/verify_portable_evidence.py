@@ -41,8 +41,19 @@ def _profile_string(value: str) -> str:
     # Non-ASCII UTF-16 code units are escaped to keep the profile byte-stable across runtimes.
     units = value.encode("utf-16-be", "surrogatepass")
     out = ['"']
-    for index in range(0, len(units), 2):
+    index = 0
+    while index < len(units):
         unit = (units[index] << 8) | units[index + 1]
+        if 0xD800 <= unit <= 0xDBFF:
+            if index + 3 >= len(units):
+                raise ValueError("unpaired Unicode surrogate")
+            next_unit = (units[index + 2] << 8) | units[index + 3]
+            if not (0xDC00 <= next_unit <= 0xDFFF):
+                raise ValueError("unpaired Unicode surrogate")
+        elif 0xDC00 <= unit <= 0xDFFF:
+            previous_unit = (units[index - 2] << 8) | units[index - 1] if index >= 2 else None
+            if previous_unit is None or not (0xD800 <= previous_unit <= 0xDBFF):
+                raise ValueError("unpaired Unicode surrogate")
         if unit == 0x22:
             out.append('\\\"')
         elif unit == 0x5C:
@@ -61,6 +72,7 @@ def _profile_string(value: str) -> str:
             out.append(f"\\u{unit:04x}")
         else:
             out.append(chr(unit))
+        index += 2
     out.append('"')
     return "".join(out)
 
