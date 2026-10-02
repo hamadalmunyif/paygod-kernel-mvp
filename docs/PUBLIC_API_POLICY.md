@@ -1,69 +1,64 @@
 # Public API Policy
 
-This document defines the **Public Surface Area** of the Paygod Kernel. These are the contracts we guarantee to be stable according to Semantic Versioning (SemVer).
+This document defines the public contract of the Paygod Kernel.
 
-## 🎯 Scope of Stability
-The "Public API" consists of:
+## 1. Canonical JSON profile
 
-### 1. Canonical Formats (Strict)
-To ensure identical behavior across producer and verifier runtimes, Paygod currently mandates the restricted profile `paygod-c14n-v1`.
+Paygod does **not** currently claim RFC 8785 / JCS conformance.
 
-- **Accepted JSON values:** null, booleans, strings, arrays, objects, and safe integers only.
-- **Safe integer range:** `[-9007199254740991, 9007199254740991]`.
-- **Rejected numeric forms:** floating-point, decimal, and exponent-form JSON numbers.
-- **Object/property names:** MUST already be NFC-normalized; non-NFC keys fail closed.
-- **String values:** preserved without Unicode normalization. Domain-specific normalization belongs in packs/derived views, not in the canonicalizer.
-- **Unknown/unsupported values:** fail closed; no silent coercion to `null`.
-- **Object ordering:** .NET ordinal/UTF-16 code-unit order.
-- **String escaping:** deterministic JSON escaping with non-ASCII UTF-16 code units emitted as lowercase `\\uXXXX` sequences.
-- **Encoding:** UTF-8 without BOM.
-- **Hashing:** SHA-256 over the UTF-8 bytes of the canonical string; lowercase hexadecimal output.
+The canonical profile used by decision-critical hashes is `paygod-c14n-v1`. It is intentionally restricted so independent implementations can fail closed instead of guessing about numeric or Unicode semantics.
 
-This profile is **not RFC 8785/JCS**. A future JCS profile, if adopted, must be separately versioned and pass independent interoperability vectors before it is advertised as RFC 8785.
+### Accepted JSON values
 
-### 2. CLI Contract
-The `paygod` binary guarantees the following interface:
+- `null`;
+- booleans;
+- strings;
+- arrays;
+- objects;
+- integers in the inclusive range `[-9007199254740991, 9007199254740991]`.
 
-*   **Exit Codes:**
-    *   `0`: Success (Valid/Pass).
-    *   `1`: Validation Failure (Deny/Error).
-    *   `2`: System/Internal Error.
-*   **Output Format:**
-    *   When `--json` is passed, the output MUST be a valid JSON object adhering to the `CliResponse` schema:
-        ```json
-        {
-          "status": "success|failure|error",
-          "code": 0,
-          "data": { ... },
-          "errors": [ { "message": "..." } ]
-        }
-        ```
+### Rejected values
 
-### 3. Interfaces (`src/Core/Interfaces/`)
-*   `ILedgerStore`: Contract for appending and reading ledger records.
-*   `IPolicySource`: Contract for loading and resolving policy packs.
-*   `IAuthProvider`: Contract for identity resolution.
-*   `IAuditSink`: Contract for emitting audit events.
+- floating-point / decimal JSON numbers;
+- exponent-form JSON numbers;
+- integers outside the safe-integer range;
+- object/property names that are not already NFC-normalized;
+- unsupported or unknown runtime value types.
 
-### 4. Schemas (`contracts/schemas/`)
-*   All JSON Schemas in this directory are versioned.
-*   Breaking changes to schemas require a Major version bump.
+String **values** are preserved as supplied; the canonicalizer does not silently normalize their Unicode. Object/property names must already be NFC before canonicalization.
 
-## 🚫 Excluded (Internal API)
-Everything else is considered internal and may change at any time without a major version bump:
-*   Internal helper classes and utility functions.
-*   Database schema of the local SQLite store (implementation detail).
-*   In-memory data structures not exposed via interfaces.
+Objects are ordered using ordinal UTF-16 key ordering. JSON strings use deterministic escaping, including escaping non-ASCII UTF-16 code units. Output is UTF-8 without BOM and hashes use SHA-256 over the canonical UTF-8 bytes.
 
-## 🔄 Versioning Rules (SemVer)
-We follow [Semantic Versioning 2.0.0](https://semver.org/):
+This is a Paygod-specific restricted profile. A future RFC 8785 profile, if added, MUST be separately versioned and validated against independent JCS test vectors.
 
-*   **Major (X.y.z)**: Breaking changes to any Public API listed above.
-*   **Minor (x.Y.z)**: New features (e.g., new interface method with default implementation, new CLI flag) that are backward compatible.
-*   **Patch (x.y.Z)**: Bug fixes that do not change the Public API signature.
+## 2. Decision-domain numeric rule
 
-## ⚠️ Breaking Change Policy
-If we must break a Public API:
-1.  **Deprecation Notice**: We will mark the feature as `@deprecated` in a Minor release.
-2.  **Migration Guide**: We will provide a document explaining how to upgrade.
-3.  **Grace Period**: We will support the deprecated feature for at least one minor release cycle before removal.
+Decision-critical domain inputs MUST avoid floating-point values. Use scaled integers with an explicit unit, for example:
+
+- money: `amount_minor: 125050`, `currency: "SAR"`;
+- rates: `rate_bps: 250` for 2.50%;
+- CVSS: `cvss_score_tenths: 98` for 9.8;
+- emissions: integer mass units such as `scope1_kgco2e`.
+
+## 3. Verification semantics
+
+A top-level verifier `status: valid` means **bundle integrity verification succeeded within the documented trust boundary**. It does not imply issuer authenticity, replay, external truth, or trusted time.
+
+Machine-readable verifier output exposes these dimensions separately:
+
+- `integrity`;
+- `issuer_authenticity`;
+- `replay`;
+- `time_authority`.
+
+## 4. CLI contract
+
+The `paygod` binary uses stable machine-readable outputs where documented. Verification failures fail closed and return a non-zero exit code.
+
+## 5. Schemas
+
+Schemas under `contracts/schemas/` are versioned contracts. Breaking semantic changes require an explicit version/migration, not a silent reinterpretation.
+
+## Breaking-change rule
+
+A change to canonicalization, digest construction, decision semantics, or verifier trust claims must be versioned, documented, and covered by cross-implementation regression evidence.
