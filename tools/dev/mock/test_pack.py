@@ -67,8 +67,8 @@ def mock_engine_evaluate(pack_path, input_data):
         report = input_data.get('scan_report', {})
         vulns = report.get('vulnerabilities', [])
         
-        has_critical = any(v.get('cvss_score_x10', 0) >= 90 and v.get('status') != 'fixed' for v in vulns)
-        has_high = any(70 <= v.get('cvss_score_x10', 0) < 90 and v.get('status') != 'fixed' for v in vulns)
+        has_critical = any(v.get('cvss_score_tenths', 0) >= 90 and v.get('status') != 'fixed' for v in vulns)
+        has_high = any(70 <= v.get('cvss_score_tenths', 0) < 90 and v.get('status') != 'fixed' for v in vulns)
         
         if has_critical:
             return {
