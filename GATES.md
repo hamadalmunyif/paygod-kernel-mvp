@@ -59,6 +59,6 @@ A material architectural change is incomplete unless README reflects what Paygod
 
 ## Product gate
 
-After the first real domain authority pack is implemented, stop generic feature development and run a shadow pilot before adding broad platform capability.
+After v0.5.1, run an Internal Rehearsal before treating any domain workflow as pilot-ready. Internal rehearsal validates engineering/readiness only; it does not prove demand. A real shadow pilot requires an external design partner.
 
 No domain feature should silently create an alternate decision engine.
