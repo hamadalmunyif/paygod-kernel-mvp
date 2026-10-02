@@ -123,6 +123,13 @@ public class CanonicalizerTests
     }
 
     [Fact]
+    public void Canonicalize_UnpairedUnicodeSurrogate_FailsClosed()
+    {
+        var node = JsonValue.Create(new string('\\uD800', 1));
+        Assert.Throws<InvalidOperationException>(() => Canonicalizer.Canonicalize(node));
+    }
+
+    [Fact]
     public void Canonicalize_ComplexNestedStructure_ProducesConsistentOutput()
     {
         var json = @"{
