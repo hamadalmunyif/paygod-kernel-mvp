@@ -43,14 +43,14 @@ jobs:
           digest = hashlib.sha256(target.read_bytes()).hexdigest()
           manifest = {
               'artifact_type': 'paygod/standalone-verifier/v1',
-              'version': '0.2.0',
+              'version': '0.3.0',
               'entrypoint': 'paygod-verify.py',
               'sha256': digest,
           }
           (root / 'verifier-manifest.json').write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n', encoding='utf-8')
       - uses: actions/upload-artifact@v4
         with:
-          name: paygod-standalone-verifier-v0.2.0
+          name: paygod-standalone-verifier-v0.3.0
           path: verifier-dist/
 
   producer:
@@ -84,7 +84,7 @@ jobs:
           $env:PAYGOD_STRICT = $savedStrict
 
           @'
-          {"ghg_report":{"reporting_year":2025,"scope1_tco2e":100.0,"scope2_tco2e":50.0,"methodology_ref":"ref:methodology/v1","evidence_refs":["ref:evidence/ghg/2025-01"]}}
+          {"ghg_report":{"reporting_year":2025,"scope1_tco2e":100,"scope2_tco2e":50,"methodology_ref":"ref:methodology/v1","evidence_refs":["ref:evidence/ghg/2025-01"]}}
           '@ | Set-Content -NoNewline -Encoding utf8 portable-input/flag-input.json
           & ./out/PayGod.Cli run --pack ./packs/core/ghg-scope-1-2-guard --input ./portable-input/flag-input.json --out ./flag-evidence
           if ($LASTEXITCODE -ne 0) { throw "flag producer failed: $LASTEXITCODE" }
@@ -122,7 +122,7 @@ jobs:
           }
       - uses: actions/download-artifact@v4
         with:
-          name: paygod-standalone-verifier-v0.2.0
+          name: paygod-standalone-verifier-v0.3.0
           path: verifier
       - uses: actions/download-artifact@v4
         with:
@@ -136,14 +136,18 @@ jobs:
           root = Path('verifier')
           manifest = json.loads((root / 'verifier-manifest.json').read_text(encoding='utf-8'))
           assert manifest['artifact_type'] == 'paygod/standalone-verifier/v1'
-          assert manifest['version'] == '0.2.0'
+          assert manifest['version'] == '0.3.0'
           target = root / manifest['entrypoint']
           actual = hashlib.sha256(target.read_bytes()).hexdigest()
           if actual != manifest['sha256']:
               raise SystemExit('verifier distribution sha256 mismatch')
-      - name: Verify clean evidence without checkout or replay
-        run: python verifier/paygod-verify.py evidence --result verification-result.json
-      - name: Assert machine-readable VALID result
+      - name: Verify clean evidence against an external receipt commitment
+        shell: pwsh
+        run: |
+          $receiptSha = (Get-FileHash evidence/receipt.json -Algorithm SHA256).Hash.ToLower()
+          python verifier/paygod-verify.py evidence --expect-receipt-sha256 $receiptSha --result verification-result.json
+          if ($LASTEXITCODE -ne 0) { throw "clean evidence verification failed: $LASTEXITCODE" }
+      - name: Assert machine-readable scoped verification result
         shell: python
         run: |
           import json
@@ -151,7 +155,13 @@ jobs:
           result = json.loads(Path('verification-result.json').read_text(encoding='utf-8'))
           assert result['status'] == 'valid'
           assert result['portable'] is True
-          assert result['verifier_version'] == '0.2.0'
+          assert result['verifier_version'] == '0.3.0'
+          assert result['verification']['integrity'] == 'verified'
+          assert result['verification']['issuer_authenticity'] == 'not_verified'
+          assert result['verification']['replay'] == 'not_performed'
+          assert result['verification']['time_authority'] == 'producer_supplied'
+          assert len(result['receipt_sha256']) == 64
+          assert len(result['ledger_head']) == 64
       - uses: actions/download-artifact@v4
         with:
           name: paygod-default-clock-evidence
@@ -168,6 +178,7 @@ jobs:
           assert receipt['clock']['value'] == 'unset'
           assert result['status'] == 'valid'
           assert result['clock_binding'] == 'unbound-opt-in'
+          assert result['verification']['time_authority'] == 'unbound'
       - uses: actions/download-artifact@v4
         with:
           name: paygod-flag-evidence
@@ -187,6 +198,7 @@ jobs:
           assert ledger['data']['verdict'] == 'flag'
           assert result['status'] == 'valid'
           assert result['clock_binding'] == 'injected'
+          assert result['verification']['integrity'] == 'verified'
       - uses: actions/upload-artifact@v4
         with:
           name: standalone-third-party-verification-result
@@ -209,7 +221,7 @@ jobs:
           }
       - uses: actions/download-artifact@v4
         with:
-          name: paygod-standalone-verifier-v0.2.0
+          name: paygod-standalone-verifier-v0.3.0
           path: verifier
       - uses: actions/download-artifact@v4
         with:
@@ -424,6 +436,27 @@ jobs:
           if ($result.status -ne 'invalid') { throw 'malformed result was not INVALID' }
           exit 0
 
+      - name: Download fresh evidence for unexpected-member test
+        uses: actions/download-artifact@v4
+        with:
+          name: paygod-third-party-evidence
+          path: unexpected-member-evidence
+      - name: Add an unmanifested file
+        shell: pwsh
+        run: |
+          'noise' | Set-Content -NoNewline unexpected-member-evidence/.DS_Store
+      - name: Require unexpected member rejection
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $output = & python verifier/paygod-verify.py unexpected-member-evidence --result unexpected-member-result.json 2>&1
+          $code = $LASTEXITCODE
+          $output | ForEach-Object { Write-Host $_ }
+          if ($code -eq 0) { throw 'bundle with unexpected file was incorrectly accepted' }
+          $result = Get-Content unexpected-member-result.json -Raw | ConvertFrom-Json
+          if (-not (($result.errors -join ' ') -match 'unexpected bundle file')) { throw 'unexpected member was not explicitly rejected' }
+          exit 0
+
       - uses: actions/upload-artifact@v4
         with:
           name: standalone-third-party-tamper-results
@@ -434,6 +467,7 @@ jobs:
             clock-downgrade-result.json
             ledger-lock-result.json
             malformed-result.json
+            unexpected-member-result.json
 
   verifier-integrity-gate:
     name: Verifier Integrity Gate
