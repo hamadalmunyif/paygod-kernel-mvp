@@ -28,7 +28,7 @@ spec:
               properties:
                 policy_id: { type: "string" }
                 required: { type: "boolean" }
-                last_reviewed_days: { type: "number" }
+                last_reviewed_days: { type: "integer" }
                 approved_by_role: { type: "string" }
                 evidence_refs:
                   type: "array"
