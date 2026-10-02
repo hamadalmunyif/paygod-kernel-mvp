@@ -65,7 +65,7 @@
         "json": {
           "type": "string",
           "enum": [
-            "rfc8785"
+            "paygod-c14n-v1"
           ]
         },
         "schema_manifest_sha256": {
