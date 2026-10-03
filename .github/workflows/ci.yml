@@ -78,6 +78,9 @@ jobs:
           ./out/paygod test --pack packs/core/iso27001-policy-review
           ./out/paygod test --pack packs/providers/aws/admin-drift-detection
 
+      - name: Verify concise fail-closed input rejection
+        run: python3 tools/test_cli_input_rejection.py --cli ./out/paygod
+
   paygod-kernel-ci:
     name: Paygod Kernel CI
     runs-on: ubuntu-latest
