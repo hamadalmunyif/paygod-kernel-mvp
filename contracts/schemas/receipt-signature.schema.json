@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paygod.net/contracts/receipt-signature.schema.json",
+  "title": "Paygod Detached Receipt Signature",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "profile",
+    "algorithm",
+    "key_id",
+    "receipt_sha256",
+    "signature_b64"
+  ],
+  "properties": {
+    "profile": {
+      "const": "paygod-ed25519-receipt-v1"
+    },
+    "algorithm": {
+      "const": "Ed25519"
+    },
+    "key_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+    },
+    "receipt_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "signature_b64": {
+      "type": "string",
+      "contentEncoding": "base64"
+    }
+  }
+}
