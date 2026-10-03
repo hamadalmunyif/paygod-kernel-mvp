@@ -7,7 +7,6 @@ It pressure-tests the v0.5.1 verification contract and its documented limits.
 from __future__ import annotations
 
 import argparse
-import copy
 import hashlib
 import json
 from pathlib import Path
