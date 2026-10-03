@@ -33,7 +33,36 @@
       "checks_passed": 11,
       "checks_total": 12,
       "expected_failure": "External receipt commitment: check failed."
+    },
+    {
+      "name": "signed-bundle-without-recipient-trust-anchor",
+      "integrity": "verified",
+      "issuer_authenticity": "not_verified",
+      "issuer_key_id": "paygod-demo-issuer-2026-10-03",
+      "issuer_signature_reason": "no_trust_anchor_supplied",
+      "replay": "not_performed",
+      "time_authority": "producer_supplied",
+      "external_receipt_pin": "not_provided",
+      "checks_passed": 11,
+      "checks_total": 11
+    },
+    {
+      "name": "signed-bundle-with-recipient-demo-trust-store",
+      "integrity": "verified",
+      "issuer_authenticity": "verified",
+      "issuer_key_id": "paygod-demo-issuer-2026-10-03",
+      "issuer_trust_source": "recipient-supplied demo trust store",
+      "replay": "not_performed",
+      "time_authority": "producer_supplied",
+      "external_receipt_pin": "not_provided",
+      "checks_passed": 11,
+      "checks_total": 11,
+      "production_authority_claim": false
     }
   ],
-  "external_pilot_evidence": false
+  "external_pilot_evidence": false,
+  "kernel_issuer_auth_commit": "224d06fb32eee0931fd2863e72f00bb0c98c4b7b",
+  "website_production_commit": "8532995e4c50e43c83f9fc973fd014b45ed92ca1",
+  "manual_issuer_authentication_witness": "pass",
+  "demo_key_only": true
 }
