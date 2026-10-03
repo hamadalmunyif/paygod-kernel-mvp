@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
+import { generateKeyPairSync, sign as nodeSign } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import {
   canonicalJson,
+  issuerSigningMessage,
   sha256Bytes,
   sha256Text,
   strictJsonParse,
@@ -16,6 +18,65 @@ function bytes(text) {
 
 function cloneFiles(files) {
   return new Map(Array.from(files, ([name, value]) => [name, new Uint8Array(value)]));
+}
+
+
+function b64(value) {
+  return Buffer.from(value).toString("base64");
+}
+
+function rawEd25519PublicKey(publicKey) {
+  const spki = publicKey.export({ type: "spki", format: "der" });
+  return new Uint8Array(spki.subarray(spki.length - 32));
+}
+
+async function attachIssuerSignature(files, keyPair, keyId = "browser-test-key") {
+  const receiptSha = await sha256Bytes(files.get("receipt.json"));
+  const signature = nodeSign(
+    null,
+    Buffer.from(issuerSigningMessage(keyId, receiptSha)),
+    keyPair.privateKey,
+  );
+  const envelope = {
+    profile: "paygod-ed25519-receipt-v1",
+    algorithm: "Ed25519",
+    key_id: keyId,
+    receipt_sha256: receiptSha,
+    signature_b64: signature.toString("base64"),
+  };
+  files.set("receipt.sig.json", bytes(JSON.stringify(envelope, null, 2) + "\n"));
+  return {
+    [keyId]: b64(rawEd25519PublicKey(keyPair.publicKey)),
+  };
+}
+
+async function testRfc8032Vector() {
+  const publicKey = Uint8Array.from(Buffer.from(
+    "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+    "hex",
+  ));
+  const signature = Uint8Array.from(Buffer.from(
+    "e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e06522490155" +
+    "5fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b",
+    "hex",
+  ));
+  const key = await globalThis.crypto.subtle.importKey(
+    "raw",
+    publicKey,
+    { name: "Ed25519" },
+    false,
+    ["verify"],
+  );
+  assert.equal(
+    await globalThis.crypto.subtle.verify(
+      { name: "Ed25519" },
+      key,
+      signature,
+      new Uint8Array(),
+    ),
+    true,
+    "RFC 8032 Ed25519 vector 1",
+  );
 }
 
 async function buildBundle(verdict = "allow") {
@@ -191,6 +252,44 @@ function testLexicalNumberRejection() {
   assert.equal(strictJsonParse('{"n":9007199254740991}').n, 9007199254740991);
 }
 
+async function testIssuerAuthenticity() {
+  const base = await buildBundle();
+  const keyPair = generateKeyPairSync("ed25519");
+  const trustedIssuerKeys = await attachIssuerSignature(base.files, keyPair);
+
+  const verified = await verifyBundle(base.files, { trustedIssuerKeys });
+  assert.equal(verified.status, "valid");
+  assert.equal(verified.verification.integrity, "verified");
+  assert.equal(verified.verification.issuer_authenticity, "verified");
+  assert.equal(verified.issuer_signature.key_trusted, true);
+  assert.equal(verified.issuer_signature.signature_valid, true);
+
+  const noTrust = await verifyBundle(base.files);
+  assert.equal(noTrust.status, "valid");
+  assert.equal(noTrust.verification.integrity, "verified");
+  assert.equal(noTrust.verification.issuer_authenticity, "not_verified");
+  assert.equal(noTrust.issuer_signature.reason, "no_trust_anchor_supplied");
+
+  const wrongPair = generateKeyPairSync("ed25519");
+  const wrongTrust = {
+    "browser-test-key": b64(rawEd25519PublicKey(wrongPair.publicKey)),
+  };
+  const wrongKey = await verifyBundle(base.files, { trustedIssuerKeys: wrongTrust });
+  assert.equal(wrongKey.status, "valid");
+  assert.equal(wrongKey.verification.integrity, "verified");
+  assert.equal(wrongKey.verification.issuer_authenticity, "failed");
+  assert.equal(wrongKey.issuer_signature.reason, "signature_invalid");
+
+  const mutated = cloneFiles(base.files);
+  const receiptText = new TextDecoder().decode(mutated.get("receipt.json"));
+  mutated.set("receipt.json", bytes(receiptText + " "));
+  const mutatedResult = await verifyBundle(mutated, { trustedIssuerKeys });
+  assert.equal(mutatedResult.status, "valid");
+  assert.equal(mutatedResult.verification.integrity, "verified");
+  assert.equal(mutatedResult.verification.issuer_authenticity, "failed");
+  assert.equal(mutatedResult.issuer_signature.reason, "receipt_commitment_mismatch");
+}
+
 async function testCleanAndAttacks() {
   const base = await buildBundle();
 
@@ -249,8 +348,10 @@ async function testCleanAndAttacks() {
   assert.ok(pinned.errors.some((e) => e.includes("expected external commitment")));
 }
 
+await testRfc8032Vector();
 await testSharedVectors();
 testLexicalNumberRejection();
+await testIssuerAuthenticity();
 await testCleanAndAttacks();
 
-console.log("PASS: browser verifier v0.3 parity regression suite");
+console.log("PASS: browser verifier v0.4 integrity + Ed25519 issuer-auth regression suite");

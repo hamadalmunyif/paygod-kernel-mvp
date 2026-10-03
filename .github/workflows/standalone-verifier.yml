@@ -39,18 +39,27 @@ jobs:
           root = Path('verifier-dist')
           root.mkdir()
           target = root / 'paygod-verify.py'
+          helper = root / 'issuer_auth.py'
+          requirements = root / 'requirements-issuer-auth.txt'
           shutil.copyfile('tools/verify_portable_evidence.py', target)
+          shutil.copyfile('tools/issuer_auth.py', helper)
+          shutil.copyfile('tools/requirements-issuer-auth.txt', requirements)
           digest = hashlib.sha256(target.read_bytes()).hexdigest()
+          support_files = {
+              helper.name: hashlib.sha256(helper.read_bytes()).hexdigest(),
+              requirements.name: hashlib.sha256(requirements.read_bytes()).hexdigest(),
+          }
           manifest = {
               'artifact_type': 'paygod/standalone-verifier/v1',
-              'version': '0.3.0',
+              'version': '0.4.0',
               'entrypoint': 'paygod-verify.py',
               'sha256': digest,
+              'support_files': support_files,
           }
           (root / 'verifier-manifest.json').write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n', encoding='utf-8')
       - uses: actions/upload-artifact@v4
         with:
-          name: paygod-standalone-verifier-v0.3.0
+          name: paygod-standalone-verifier-v0.4.0
           path: verifier-dist/
 
   producer:
@@ -122,7 +131,7 @@ jobs:
           }
       - uses: actions/download-artifact@v4
         with:
-          name: paygod-standalone-verifier-v0.3.0
+          name: paygod-standalone-verifier-v0.4.0
           path: verifier
       - uses: actions/download-artifact@v4
         with:
@@ -136,11 +145,15 @@ jobs:
           root = Path('verifier')
           manifest = json.loads((root / 'verifier-manifest.json').read_text(encoding='utf-8'))
           assert manifest['artifact_type'] == 'paygod/standalone-verifier/v1'
-          assert manifest['version'] == '0.3.0'
+          assert manifest['version'] == '0.4.0'
           target = root / manifest['entrypoint']
           actual = hashlib.sha256(target.read_bytes()).hexdigest()
           if actual != manifest['sha256']:
               raise SystemExit('verifier distribution sha256 mismatch')
+          for name, expected in manifest.get('support_files', {}).items():
+              actual_support = hashlib.sha256((root / name).read_bytes()).hexdigest()
+              if actual_support != expected:
+                  raise SystemExit(f'verifier support-file sha256 mismatch: {name}')
       - name: Verify clean evidence against an external receipt commitment
         shell: pwsh
         run: |
@@ -155,7 +168,7 @@ jobs:
           result = json.loads(Path('verification-result.json').read_text(encoding='utf-8'))
           assert result['status'] == 'valid'
           assert result['portable'] is True
-          assert result['verifier_version'] == '0.3.0'
+          assert result['verifier_version'] == '0.4.0'
           assert result['verification']['integrity'] == 'verified'
           assert result['verification']['issuer_authenticity'] == 'not_verified'
           assert result['verification']['replay'] == 'not_performed'
@@ -227,7 +240,7 @@ jobs:
           }
       - uses: actions/download-artifact@v4
         with:
-          name: paygod-standalone-verifier-v0.3.0
+          name: paygod-standalone-verifier-v0.4.0
           path: verifier
       - uses: actions/download-artifact@v4
         with:
@@ -243,6 +256,9 @@ jobs:
           target = root / manifest['entrypoint']
           if hashlib.sha256(target.read_bytes()).hexdigest() != manifest['sha256']:
               raise SystemExit('verifier distribution sha256 mismatch')
+          for name, expected in manifest.get('support_files', {}).items():
+              if hashlib.sha256((root / name).read_bytes()).hexdigest() != expected:
+                  raise SystemExit(f'verifier support-file sha256 mismatch: {name}')
       - name: Tamper one byte
         shell: python
         run: |

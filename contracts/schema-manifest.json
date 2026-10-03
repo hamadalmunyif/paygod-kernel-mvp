@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-03T13:43:43Z",
+  "generated_at": "2026-10-03T02:23:00Z",
   "manifest_version": "1.0.0",
   "schemas": {
     "belloop_artifact_envelope.schema.json": {
@@ -16,6 +16,9 @@
     },
     "impact.schema.json": {
       "sha256": "5cded0ef02befaa3509fcbfb41548a2f1e7e15217c4ef6e8914b57484e940981"
+    },
+    "issuer-trust-store.schema.json": {
+      "sha256": "07da3c3dd53ca4d7c029716daabfbef2ab24c8bca5eae3823c59e67e9a50453f"
     },
     "ledger_entry.schema.json": {
       "sha256": "8564165fb6f75df7d763d16dfa739a9951c5f55a44eb0d212a1f99d3cfafef22"
@@ -38,14 +41,17 @@
     "plan_report.schema.json": {
       "sha256": "2e36c5120f5c9de6afdb3eca4e7c01388b329955f69dff4a47df02be90e41a34"
     },
+    "receipt-signature.schema.json": {
+      "sha256": "562daaac3b4ce4560282a847497afc790a4e2e70b6a0f65f7fc481e7d7e49b4d"
+    },
+    "receipt.schema.json": {
+      "sha256": "9b882f046b7a647b9d362260a0026f05cc22837f5e99ff64691c140c838d026d"
+    },
     "truth_decision.schema.json": {
       "sha256": "0625941e98314b9c497ac4c41a4fe0f219643fa5619fa9cc4326642ee7dd4542"
     },
     "truth_ledger_entry.schema.json": {
       "sha256": "d96361d61dd9b449ae95df7131de4021ac50217bf677d901db7ce14390956a96"
-    },
-    "receipt.schema.json": {
-      "sha256": "9b882f046b7a647b9d362260a0026f05cc22837f5e99ff64691c140c838d026d"
     }
   }
 }

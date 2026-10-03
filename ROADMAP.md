@@ -27,25 +27,33 @@ This roadmap separates proven repository capabilities from rehearsal evidence, e
 - manifest-locked ledger and decision-critical receipt binding;
 - fail-closed malformed/tamper witnesses.
 
+### v0.5.1 — Verification Contract Repair — PROVEN
+- restricted `paygod-c14n-v1`;
+- safe integers only;
+- cross-runtime fail-closed parity;
+- scoped verification dimensions;
+- external receipt commitment;
+- verified ledger head;
+- strict transferred-member contract;
+- manual production-browser receipt-pin witness.
+
 ## Current gate
 
-### v0.5.1 — Verification Contract Repair
-Goal: **claim = proof** before any workflow rehearsal.
+### v0.5.2 — Minimal Issuer Authentication
+Goal: authenticate the receipt commitment without confusing key authentication with external truth.
 
-- replace inaccurate `rfc8785` claim with restricted `paygod-c14n-v1`;
-- safe integers only; reject floats/decimals and unsafe integers;
-- require NFC object/property names while preserving raw string values;
-- cross-implementation fail-closed parity;
-- separate integrity, issuer authenticity, replay, and time authority in verifier output;
-- external receipt SHA-256 commitment;
-- expose verified ledger head;
-- reject unexpected transferred members.
-
-This gate adds no domain product feature.
+- optional detached `receipt.sig.json`;
+- Ed25519 only;
+- domain-separated signed message;
+- external recipient trust store;
+- `verified | not_verified | failed` issuer-authentication states;
+- RFC 8032 regression vector;
+- private key remains outside the repository;
+- no claim of regulator authorization, source truth, replay, or trusted time.
 
 ## Next gate
 
-### v0.6 — Internal Rehearsal
+### v0.6 — Internal Rehearsal B2
 This is **not a pilot** and does not prove demand or willingness to pay.
 
 Run one bounded decision workflow against:

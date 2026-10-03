@@ -1,0 +1,39 @@
+{
+  "witness": "manual-browser-verification",
+  "date": "2026-10-03",
+  "environment": "production-browser-verifier",
+  "verifier_url": "https://www.paygod.net/verifier/",
+  "transport_profile": "paygod-demo-transport/1",
+  "canonicalization": "paygod-c14n-v1",
+  "receipt_sha256": "d019ae508d5d108bf959789d5e6ab212ae9d357ab08661cdbd0085efa8409cac",
+  "manifest_sha256": "7e9b0eb366b6de06c70590145e146811fc3fd16222612afb2c7bfff2b12c528e",
+  "ledger_head": "9315508573392cd79b9f5acf15b7ef117cd715ed770b3abb6f016c62b6091adb",
+  "cases": [
+    {
+      "name": "bundle-without-external-pin",
+      "integrity": "verified",
+      "issuer_authenticity": "not_verified",
+      "replay": "not_performed",
+      "time_authority": "producer_supplied",
+      "external_receipt_pin": "not_provided",
+      "checks_passed": 11,
+      "checks_total": 11
+    },
+    {
+      "name": "correct-external-pin",
+      "integrity": "verified",
+      "external_receipt_pin": "matched",
+      "checks_passed": 12,
+      "checks_total": 12
+    },
+    {
+      "name": "altered-external-pin",
+      "integrity": "failed",
+      "external_receipt_pin": "mismatch",
+      "checks_passed": 11,
+      "checks_total": 12,
+      "expected_failure": "External receipt commitment: check failed."
+    }
+  ],
+  "external_pilot_evidence": false
+}

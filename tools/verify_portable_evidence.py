@@ -16,7 +16,13 @@ import re
 import sys
 import unicodedata
 
-VERIFIER_VERSION = "0.3.0"
+try:
+    from issuer_auth import load_trust_store, verify_detached_signature
+except ModuleNotFoundError:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from issuer_auth import load_trust_store, verify_detached_signature
+
+VERIFIER_VERSION = "0.4.0"
 CANONICALIZATION_PROFILE = "paygod-c14n-v1"
 SAFE_INTEGER_MAX = 9_007_199_254_740_991
 _HEX64 = re.compile(r"^[a-f0-9]{64}$")
@@ -111,10 +117,14 @@ def canonical_json(value) -> str:
     raise TypeError(f"unsupported JSON value: {type(value).__name__}")
 
 
-def _dimensions(integrity: str, time_authority: str = "failed") -> dict:
+def _dimensions(
+    integrity: str,
+    time_authority: str = "failed",
+    issuer_authenticity: str = "not_verified",
+) -> dict:
     return {
         "integrity": integrity,
-        "issuer_authenticity": "not_verified",
+        "issuer_authenticity": issuer_authenticity,
         "replay": "not_performed",
         "time_authority": time_authority,
     }
@@ -351,6 +361,7 @@ def verify(
     bundle: Path,
     allow_unbound_clock: bool = False,
     expected_receipt_sha256: str | None = None,
+    trusted_issuer_keys_path: Path | None = None,
 ) -> dict:
     errors: list[str] = []
     manifest_path = bundle / "manifest.json"
@@ -421,7 +432,7 @@ def verify(
             errors.append(f"byte count mismatch: {name}")
         digest_lines.append(f"{name}={expected}\n")
 
-    allowed_files = {"manifest.json", "receipt.json"} | seen_names
+    allowed_files = {"manifest.json", "receipt.json", "receipt.sig.json"} | seen_names
     try:
         for child in bundle.iterdir():
             if child.is_symlink():
@@ -469,11 +480,33 @@ def verify(
     )
 
     integrity = "verified" if not errors else "failed"
+
+    try:
+        trusted_keys = load_trust_store(trusted_issuer_keys_path)
+        issuer_authenticity, issuer_signature = verify_detached_signature(
+            bundle / "receipt.sig.json",
+            receipt_sha,
+            trusted_keys,
+        )
+    except Exception as exc:
+        issuer_authenticity = "failed"
+        issuer_signature = {
+            "present": (bundle / "receipt.sig.json").is_file(),
+            "profile": None,
+            "algorithm": None,
+            "key_id": None,
+            "receipt_sha256_matches": False,
+            "key_trusted": False,
+            "signature_valid": False,
+            "reason": f"trust_store_invalid: {exc}",
+        }
+
     return {
         "status": "valid" if not errors else "invalid",
         "portable": not errors,
         "verifier_version": VERIFIER_VERSION,
-        "verification": _dimensions(integrity, time_authority),
+        "verification": _dimensions(integrity, time_authority, issuer_authenticity),
+        "issuer_signature": issuer_signature,
         "bundle_digest": manifest_bundle,
         "manifest_sha256": manifest_sha,
         "receipt_sha256": receipt_sha,
@@ -497,6 +530,16 @@ def main() -> int:
         "--expect-receipt-sha256",
         help="Fail closed unless receipt.json matches this externally supplied SHA-256 commitment.",
     )
+    parser.add_argument(
+        "--trusted-issuer-keys",
+        type=Path,
+        help="External paygod-ed25519-trust-v1 JSON trust store used for receipt.sig.json.",
+    )
+    parser.add_argument(
+        "--require-issuer-authenticity",
+        action="store_true",
+        help="Return nonzero unless issuer_authenticity is verified. Does not redefine integrity.",
+    )
     parser.add_argument("--result", type=Path, default=Path("verification-result.json"))
     args = parser.parse_args()
 
@@ -505,6 +548,7 @@ def main() -> int:
             args.bundle,
             allow_unbound_clock=args.allow_unbound_clock,
             expected_receipt_sha256=args.expect_receipt_sha256,
+            trusted_issuer_keys_path=args.trusted_issuer_keys,
         )
     except Exception as exc:
         result = _invalid([f"verifier failure: {type(exc).__name__}: {exc}"])
@@ -512,7 +556,9 @@ def main() -> int:
     args.result.parent.mkdir(parents=True, exist_ok=True)
     args.result.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(result, sort_keys=True))
-    return 0 if result["status"] == "valid" else 1
+    integrity_ok = result["status"] == "valid"
+    issuer_ok = result.get("verification", {}).get("issuer_authenticity") == "verified"
+    return 0 if integrity_ok and (not args.require_issuer_authenticity or issuer_ok) else 1
 
 
 if __name__ == "__main__":

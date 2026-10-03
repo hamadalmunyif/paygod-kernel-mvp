@@ -1,0 +1,3 @@
+# Exact security pin.
+# 50.0.2 is newer than fixes for GHSA-537c-gmf6-5ccf and GHSA-jwv3-5hgf-82ww.
+cryptography==50.0.2
