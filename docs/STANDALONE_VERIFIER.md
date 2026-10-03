@@ -1,6 +1,6 @@
 # Standalone Third-Party Verifier Witness
 
-Status: **v0.3 verification-contract repair under v0.5.1.**
+Status: **v0.4 integrity + optional detached Ed25519 issuer authentication.**
 
 ## What integrity verification proves
 
@@ -27,7 +27,7 @@ The machine-readable result separates:
 
 ```text
 integrity            verified | failed
-issuer_authenticity  not_verified
+issuer_authenticity  verified | not_verified | failed
 replay               not_performed
 time_authority       producer_supplied | unbound | failed
 ```
@@ -39,6 +39,19 @@ time_authority       producer_supplied | unbound | failed
 The verifier accepts `paygod-c14n-v1`, not an RFC 8785 claim.
 
 The profile accepts null, booleans, strings, arrays, objects, and safe integers only. It rejects floats/decimals, unsafe integers, and non-NFC property names. String values are preserved without silent Unicode normalization.
+
+## Issuer authenticity
+
+An optional detached `receipt.sig.json` can authenticate the receipt commitment against a recipient-supplied external Ed25519 trust store.
+
+Issuer authenticity is deliberately separate from integrity. A bad/missing signature does not silently redefine an otherwise valid integrity result. Callers that require an authenticated issuer can add:
+
+```bash
+--trusted-issuer-keys trusted-issuers.json \
+--require-issuer-authenticity
+```
+
+See [Issuer Authenticity](ISSUER_AUTHENTICITY.md).
 
 ## External receipt commitment
 
@@ -59,7 +72,7 @@ Legacy/local output whose receipt clock is `unset` requires explicit `--allow-un
 
 The verifier does not currently prove:
 
-- publisher/issuer identity;
+- organization/regulator authorization merely because a trusted signing key verified;
 - truth or provenance of external evidence;
 - trusted third-party time;
 - replay of the original decision;
