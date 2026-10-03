@@ -32,11 +32,11 @@
     "observation.schema.json": {
       "sha256": "c751a3872839fafa291835525de97b4dc447d5186a1bea9d806b55b25c140ba9"
     },
-    "pack_test_cases.schema.json": {
-      "sha256": "18d1a8d9152fa915a1cf52fa6ac1ad85355af396c1a318548789fd735fa3441f"
-    },
     "pack.schema.json": {
       "sha256": "8f9d7abda1e748fc53a4ffc244fd3ae5522b7a8fb89e59bd1325fb86110733fd"
+    },
+    "pack_test_cases.schema.json": {
+      "sha256": "18d1a8d9152fa915a1cf52fa6ac1ad85355af396c1a318548789fd735fa3441f"
     },
     "plan_report.schema.json": {
       "sha256": "2e36c5120f5c9de6afdb3eca4e7c01388b329955f69dff4a47df02be90e41a34"
