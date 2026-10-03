@@ -1,0 +1,60 @@
+name: Internal Verification Challenge
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/internal_verification_challenge.py'
+      - 'tools/verify_portable_evidence.py'
+      - 'src/PayGod.Cli/Core/Canonicalizer.cs'
+      - 'spec/test-vectors/**'
+      - 'docs/INTERNAL_VERIFICATION_CHALLENGE.md'
+      - '.github/workflows/internal-verification-challenge.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  challenge:
+    name: Internal Verification Challenge
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run five-case challenge
+        run: |
+          python tools/internal_verification_challenge.py \
+            --result internal-verification-challenge-result.json
+
+      - name: Assert rehearsal contract
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          result = json.loads(
+              Path('internal-verification-challenge-result.json').read_text(encoding='utf-8')
+          )
+          assert result['artifact_type'] == 'paygod/internal-verification-challenge/v0.1'
+          assert result['phase'] == 'internal_rehearsal'
+          assert result['external_pilot'] is False
+          assert result['case_count'] == 5
+          assert result['passed'] is True
+          assert all(case['passed'] for case in result['cases'])
+
+          by_name = {case['name']: case for case in result['cases']}
+          rewrite = by_name['coordinated_rewrite_requires_external_pin']['observation']
+          assert rewrite['unpinned_integrity'] == 'verified'
+          assert rewrite['pinned_status'] == 'invalid'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paygod-internal-verification-challenge-v0.1
+          path: internal-verification-challenge-result.json
+          if-no-files-found: error
+          retention-days: 30
