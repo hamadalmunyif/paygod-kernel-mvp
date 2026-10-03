@@ -1,0 +1,39 @@
+{
+  "case_id": "B2-REAL-XX",
+  "source_type": "real_deidentified",
+  "deidentified": true,
+  "decision_owner_role": "",
+  "evidence_at_decision_time": {
+    "site_id": "",
+    "evidence_site_id": "",
+    "pressure_test_passed": null,
+    "isolation_valves_ready": null,
+    "fire_protection_ready": null,
+    "leak_detection_required": null,
+    "leak_detection_auto_shutoff_ready": null,
+    "preoperation_notification_evidence": null,
+    "warning_signs_installed": null
+  },
+  "human_judgment_before_paygod": {
+    "decision": "",
+    "evidence_refs": [],
+    "unrepresentable_evidence": []
+  },
+  "paygod_result": {
+    "decision": "",
+    "integrity_verified": null,
+    "issuer_authenticity": ""
+  },
+  "comparison": {
+    "agreement": null,
+    "disagreement_class": ""
+  },
+  "timing_seconds": {
+    "evidence_preparation": null,
+    "human_decision": null,
+    "paygod_produce_verify": null,
+    "baseline_reconstruction": null,
+    "paygod_reconstruction": null
+  },
+  "notes": ""
+}
