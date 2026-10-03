@@ -1,0 +1,43 @@
+name: B2 Readiness Contract
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'rehearsals/gas-site-readiness/b2/**'
+      - 'rehearsals/manual-browser-witness-2026-10-03.json'
+      - 'docs/MANUAL_BROWSER_WITNESS_2026-10-03.md'
+      - 'tools/check_b2_readiness.py'
+      - '.github/workflows/b2-readiness-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: B2 Readiness Contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate B2 registers and calculate current gate
+        run: python tools/check_b2_readiness.py --output b2-readiness-result.json
+      - name: Show current readiness without forcing a false pass
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          data=json.load(open('b2-readiness-result.json'))
+          print('ready=',data['ready'])
+          print('recommendation=',data['recommendation'])
+          print('real_cases=',data['counts']['real_deidentified_cases'])
+          assert data['criteria']['engineering_evidence_does_not_substitute_for_real_cases'] is True
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: b2-readiness-result
+          path: b2-readiness-result.json
+          retention-days: 30
