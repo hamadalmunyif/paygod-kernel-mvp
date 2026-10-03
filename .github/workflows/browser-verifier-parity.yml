@@ -1,0 +1,59 @@
+name: Browser Verifier Parity
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'web/verifier/**'
+      - 'tools/test_browser_verifier.mjs'
+      - 'tools/verify_portable_evidence.py'
+      - 'spec/test-vectors/**'
+      - '.github/workflows/browser-verifier-parity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-verifier-parity:
+    name: Browser Verifier Parity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run browser verifier regression suite
+        run: node tools/test_browser_verifier.mjs
+
+      - name: Run standalone verifier regression suite
+        run: python tools/test_verify_portable_evidence.py
+
+      - name: Run shared canonicalization vectors in Python
+        run: python tools/verify_spec.py
+
+      - name: Assert browser distribution is self-contained
+        shell: bash
+        run: |
+          test -f web/verifier/index.html
+          test -f web/verifier/app.mjs
+          test -f web/verifier/verifier-core.mjs
+          test -f web/verifier/styles.css
+          if grep -R -E 'https?://[^ ]+\.(js|css)' web/verifier/index.html web/verifier/app.mjs; then
+            echo "browser verifier must not depend on remote JS/CSS"
+            exit 1
+          fi
+
+      - name: Publish browser verifier static artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: paygod-browser-verifier-v0.3.0
+          path: web/verifier
+          if-no-files-found: error
+          retention-days: 30
