@@ -15,9 +15,11 @@ The repository currently has CI witnesses for:
 - Linux-producer to Windows-verifier portability;
 - standalone/no-checkout verification inside CI;
 - fail-closed rejection after a one-byte evidence mutation;
-- single-authority enforcement for registered repository-hosted adapters, including rejection of injected verdict, receipt, and bundle-identity authority.
+- single-authority enforcement for registered repository-hosted adapters, including rejection of injected verdict, receipt, and bundle-identity authority;
+- production mobile-browser manual witness for receipt-pin match and fail-closed mismatch;
+- detached Ed25519 receipt-signature verification against an externally supplied recipient trust store.
 
-The standalone verifier checks bundle **integrity**: manifest/file digests and byte counts, strict transferred-file membership, bundle binding, exactly one manifest-locked `ledger.jsonl`, receipt-to-manifest binding, decision-critical receipt claims against that ledger, and ledger hash-chain integrity. Verifier v0.3 uses the restricted `paygod-c14n-v1` profile, exposes `receipt_sha256` and `ledger_head`, and can fail closed against an externally supplied `--expect-receipt-sha256`. Its machine-readable result separates `integrity`, `issuer_authenticity`, `replay`, and `time_authority`; a top-level `status: valid` means integrity verified within this documented boundary only. It does not authenticate the evidence publisher, replay the original policy decision, establish trusted time, or prove external truth.
+The standalone verifier checks bundle **integrity**: manifest/file digests and byte counts, strict transferred-file membership, bundle binding, exactly one manifest-locked `ledger.jsonl`, receipt-to-manifest binding, decision-critical receipt claims against that ledger, and ledger hash-chain integrity. Verifier v0.4 uses the restricted `paygod-c14n-v1` profile, exposes `receipt_sha256` and `ledger_head`, and can fail closed against an externally supplied `--expect-receipt-sha256`. It can also verify an optional detached Ed25519 `receipt.sig.json` against a recipient-supplied external trust store. Its machine-readable result separates `integrity`, `issuer_authenticity`, `replay`, and `time_authority`; a top-level `status: valid` still means integrity verified within this documented boundary only. `issuer_authenticity: verified` means a trusted key signed this receipt commitment; it does not prove external evidence truth, regulator authorization, replay, or trusted time.
 
 The single-authority witness is deliberately scoped: it covers adapters registered in `tools/check_repository_boundary.py`. New execution-facing surfaces must be registered and covered by the same boundary witness.
 
@@ -25,8 +27,8 @@ The single-authority witness is deliberately scoped: it covers adapters register
 
 The repository does **not** yet prove:
 - that an external real-world fact or claimed evidence issuer is truthful;
-- a published/signed external verifier trust root;
-- an external-device/party verification witness outside repository CI;
+- a published production organization-level trust root with rotation/revocation;
+- external institutional adoption beyond the recorded manual browser witness;
 - a live bank/PSP release integration;
 - autonomous authority over money movement;
 - institutional adoption or willingness to pay.
@@ -91,7 +93,7 @@ Expected: `PASS` (strict) with matching digests.
 - `.github/workflows/portable-evidence.yml` — artifact handoff and cross-OS independent verification.
 - `.github/workflows/standalone-verifier.yml` — versioned standalone verifier artifact, no repository checkout in recipient jobs, clean evidence -> integrity `verified`, one-byte tamper -> integrity `failed`.
 
-See [Standalone Verifier](docs/STANDALONE_VERIFIER.md).
+See [Standalone Verifier](docs/STANDALONE_VERIFIER.md) and [Issuer Authenticity](docs/ISSUER_AUTHENTICITY.md).
 
 ## Main-branch enforcement
 
@@ -99,11 +101,10 @@ See [GATES.md](GATES.md). The governance contract defines stable required check 
 
 ## Next boundary
 
-0. Complete main-ruleset alignment with the stable required check contexts in `GATES.md`.
-1. Close v0.5.1 verification-contract repair: restricted canonicalization, scoped verification dimensions, receipt pinning, ledger head, and strict transferred-file membership.
-2. Run an **Internal Rehearsal** against benchmark/adversarial cases before any external pilot.
-3. Select one bounded real workflow only after the kernel/verifier rehearsal is clean.
-4. Derive provenance requirements from the evidence the workflow actually uses.
+1. Complete v0.5.2 minimal issuer-authentication proof without storing a real private key in the repository.
+2. Complete **Internal Rehearsal B2** with real/de-identified cases, independent human decisions, recipient comprehension, timing, and browser parity.
+3. Derive provenance requirements only from evidence gaps observed in the real workflow.
+4. Move to design-partner discovery only after the Internal Rehearsal readiness gate passes.
 5. Run a shadow external pilot only after internal readiness evidence exists.
 
 Do not treat an Internal Rehearsal as evidence of market demand or willingness to pay.
