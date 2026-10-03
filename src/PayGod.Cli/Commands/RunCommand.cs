@@ -32,9 +32,32 @@ public static class RunCommand
         outDir.Create();
 
         var pack = PolicyEngine.LoadPack(packPath);
-        var inputJson = JsonNode.Parse(File.ReadAllText(input.FullName)) ?? throw new InvalidOperationException("Invalid input JSON.");
+
+        JsonNode inputJson;
+        try
+        {
+            inputJson = JsonNode.Parse(File.ReadAllText(input.FullName))
+                ?? throw new JsonException("Input JSON produced a null document.");
+        }
+        catch (JsonException ex)
+        {
+            FailCode("INPUT_JSON_INVALID", ex.Message);
+            return;
+        }
+
         var runTs = PaygodClock.UtcNowOffset.ToString("o");
-        var inputHash = Hasher.ComputeHash(inputJson);
+
+        string inputHash;
+        try
+        {
+            inputHash = Hasher.ComputeHash(inputJson);
+        }
+        catch (InvalidOperationException ex)
+        {
+            FailCode("CANONICAL_INPUT_REJECTED", ex.Message);
+            return;
+        }
+
         var packDigest = Sha256Hex(File.ReadAllBytes(packPath));
         var packObj = new { name = pack.metadata.name, version = pack.metadata.version, path = packDir, digest_sha256 = packDigest };
 
@@ -172,6 +195,12 @@ public static class RunCommand
     private static void Fail(string msg)
     {
         Console.Error.WriteLine($"ERR: {msg}");
+        Environment.Exit(2);
+    }
+
+    private static void FailCode(string code, string message)
+    {
+        Console.Error.WriteLine($"ERR[{code}]: {message}");
         Environment.Exit(2);
     }
 }
