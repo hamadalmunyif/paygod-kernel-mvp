@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paygod.net/contracts/issuer-trust-store.schema.json",
+  "title": "Paygod Ed25519 Issuer Trust Store",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["profile", "keys"],
+  "properties": {
+    "profile": {
+      "const": "paygod-ed25519-trust-v1"
+    },
+    "keys": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key_id", "algorithm", "public_key_b64"],
+        "properties": {
+          "key_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          },
+          "algorithm": {
+            "const": "Ed25519"
+          },
+          "public_key_b64": {
+            "type": "string",
+            "contentEncoding": "base64"
+          }
+        }
+      }
+    }
+  }
+}
