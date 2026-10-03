@@ -87,21 +87,46 @@ def curated_cases() -> list[dict]:
 
 
 def generated_cases() -> list[dict]:
+    """Deterministic blind-style combinations with outcome quotas.
+
+    Naive independent booleans heavily bias this policy toward REJECT because
+    several safety gates are conjunctive. Rejection sampling preserves a fixed
+    seed while ensuring the generated set exercises READY, HOLD, and REJECT.
+    """
     rng = random.Random(20261003)
-    result = []
-    for index in range(1, 11):
-        result.append(
-            _site(
-                f"GEN-{index:02d}",
-                pressure_test_passed=bool(rng.getrandbits(1)),
-                isolation_valves_ready=bool(rng.getrandbits(1)),
-                fire_protection_ready=bool(rng.getrandbits(1)),
-                leak_detection_required=bool(rng.getrandbits(1)),
-                leak_detection_auto_shutoff_ready=bool(rng.getrandbits(1)),
-                preoperation_notification_evidence=bool(rng.getrandbits(1)),
-                warning_signs_installed=bool(rng.getrandbits(1)),
-            )
+    targets = {"READY": 3, "HOLD": 3, "REJECT": 4}
+    counts = {key: 0 for key in targets}
+    result: list[dict] = []
+    attempts = 0
+
+    while len(result) < 10:
+        attempts += 1
+        if attempts > 10000:
+            raise RuntimeError("unable to satisfy generated outcome quotas")
+
+        candidate = _site(
+            "PENDING",
+            pressure_test_passed=bool(rng.getrandbits(1)),
+            isolation_valves_ready=bool(rng.getrandbits(1)),
+            fire_protection_ready=bool(rng.getrandbits(1)),
+            leak_detection_required=bool(rng.getrandbits(1)),
+            leak_detection_auto_shutoff_ready=bool(rng.getrandbits(1)),
+            preoperation_notification_evidence=bool(rng.getrandbits(1)),
+            warning_signs_installed=bool(rng.getrandbits(1)),
         )
+        outcome = checklist_outcome(candidate)
+        if counts[outcome] >= targets[outcome]:
+            continue
+
+        index = len(result) + 1
+        candidate["site_id"] = f"GEN-{index:02d}"
+        candidate["evidence_site_id"] = candidate["site_id"]
+        candidate["site_name"] = f"موقع تجريبي {candidate['site_id']}"
+        counts[outcome] += 1
+        result.append(candidate)
+
+    if counts != targets:
+        raise RuntimeError(f"generated outcome quota mismatch: {counts}")
     return result
 
 
@@ -400,6 +425,10 @@ def run(cli: Path, pack: str, result_path: Path) -> dict:
     integrity_count = sum(1 for item in decisions if item["integrity_verified"])
     adversarial_passed = sum(1 for item in attacks if item["passed"])
     decision_total = len(decisions)
+    generated_outcome_counts = {
+        outcome: sum(1 for item in decisions[10:] if item["actual"] == outcome)
+        for outcome in ("READY", "HOLD", "REJECT")
+    }
 
     passed = (
         decision_total == 20
@@ -432,6 +461,7 @@ def run(cli: Path, pack: str, result_path: Path) -> dict:
             "clean_integrity_verified_count": integrity_count,
             "false_invalid_count": decision_total - integrity_count,
             "adversarial_passed_count": adversarial_passed,
+            "generated_outcome_counts": generated_outcome_counts,
         },
         "decision_results": decisions,
         "adversarial_results": attacks,
