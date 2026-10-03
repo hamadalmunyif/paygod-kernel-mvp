@@ -1,0 +1,46 @@
+{
+  "artifact_type": "paygod/internal-rehearsal-requirements/v0.1",
+  "jurisdiction_context": "Saudi Arabia",
+  "source_type": "public official guidance",
+  "source_url": "https://998.gov.sa/Ar/Page/SafetyInstForEngServices/web/Safety/SafetyInstructionList/",
+  "regulatory_claim": false,
+  "note": "Requirement categories are source-derived. READY/HOLD/REJECT severity mapping is a Paygod Internal Rehearsal policy and is not an official regulatory interpretation.",
+  "requirements": [
+    {
+      "id": "CD-4-12-10-4-3",
+      "field": "isolation_valves_ready",
+      "source_summary": "Isolation valve provision for each gas appliance.",
+      "rehearsal_gate": "REJECT when false or missing"
+    },
+    {
+      "id": "CD-4-12-11-1",
+      "field": "preoperation_notification_evidence",
+      "source_summary": "Civil Defense notification/coordination across project stages including before operation.",
+      "rehearsal_gate": "HOLD when false or missing"
+    },
+    {
+      "id": "CD-4-12-11-2",
+      "field": "pressure_test_passed",
+      "source_summary": "Gas-system piping is pressure-tested before operation.",
+      "rehearsal_gate": "REJECT when false or missing"
+    },
+    {
+      "id": "CD-4-12-11-3",
+      "field": "fire_protection_ready",
+      "source_summary": "Suitable alarm/fire-extinguishing provisions are available near the gas installation.",
+      "rehearsal_gate": "REJECT when false or missing"
+    },
+    {
+      "id": "CD-4-12-11-4",
+      "field": "warning_signs_installed",
+      "source_summary": "Safety warning signage is installed around the gas area.",
+      "rehearsal_gate": "HOLD when false or missing"
+    },
+    {
+      "id": "CD-4-12-11-5",
+      "field": "leak_detection_auto_shutoff_ready",
+      "source_summary": "Where the modeled use case requires it, gas-leak detection automatically cuts gas supply.",
+      "rehearsal_gate": "REJECT when required and false/missing"
+    }
+  ]
+}
