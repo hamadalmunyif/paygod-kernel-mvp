@@ -1,0 +1,91 @@
+name: Gas Site Readiness Internal Rehearsal
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'rehearsals/gas-site-readiness/**'
+      - 'tools/run_gas_site_readiness_rehearsal.py'
+      - 'tools/verify_portable_evidence.py'
+      - 'src/PayGod.Cli/**'
+      - '.github/workflows/gas-site-readiness-rehearsal.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rehearsal:
+    name: Gas Site Readiness Internal Rehearsal
+    runs-on: ubuntu-latest
+    env:
+      PAYGOD_CLOCK: 2026-10-03T00:00:00+00:00
+      PAYGOD_STRICT: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Publish Paygod CLI
+        run: dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -o out
+
+      - name: Run 30-case synthetic workflow rehearsal
+        run: |
+          python tools/run_gas_site_readiness_rehearsal.py \
+            --cli ./out/PayGod.Cli \
+            --pack rehearsals/gas-site-readiness \
+            --result gas-site-readiness-rehearsal-result.json
+
+      - name: Assert B1 readiness boundary
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          result = json.loads(
+              Path('gas-site-readiness-rehearsal-result.json').read_text(encoding='utf-8')
+          )
+
+          assert result['artifact_type'] == 'paygod/gas-site-readiness-internal-rehearsal/v0.1'
+          assert result['phase'] == 'internal_rehearsal_b1_synthetic'
+          assert result['external_pilot'] is False
+          assert result['regulatory_compliance_claim'] is False
+          assert result['passed'] is True
+          assert result['readiness'] == 'engineering_ready_for_real_cases'
+
+          coverage = result['coverage']
+          assert coverage['decision_cases'] == 20
+          assert coverage['curated_synthetic_cases'] == 10
+          assert coverage['generated_synthetic_cases'] == 10
+          assert coverage['adversarial_cases'] == 10
+          assert coverage['real_historical_cases'] == 0
+          assert coverage['independent_human_decisions'] == 0
+
+          metrics = result['metrics']
+          assert metrics['checklist_paygod_agreement_count'] == 20
+          assert metrics['checklist_paygod_agreement_basis_points'] == 10000
+          assert metrics['clean_integrity_verified_count'] == 20
+          assert metrics['false_invalid_count'] == 0
+          assert metrics['adversarial_passed_count'] == 10
+          assert metrics['generated_outcome_counts'] == {
+              'READY': 3,
+              'HOLD': 3,
+              'REJECT': 4,
+          }
+
+          assert result['full_internal_rehearsal_complete'] is False
+          assert result['external_pilot_ready'] is False
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gas-site-readiness-internal-rehearsal-v0.1
+          path: gas-site-readiness-rehearsal-result.json
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,69 @@
+api_version: "paygod/v1"
+kind: Pack
+metadata:
+  name: "internal-gas-site-readiness-rehearsal"
+  version: "0.1.0"
+  description: "Synthetic Internal Rehearsal only. Maps selected public gas-safety requirement categories to READY/HOLD/REJECT test semantics; not a regulatory compliance determination."
+  maintainer: "paygod-kernel-mvp"
+  tags: ["internal-rehearsal", "gas-safety", "site-readiness", "synthetic"]
+
+spec:
+  inputs:
+    - name: "site"
+      type: "observation"
+      source: "internal-rehearsal"
+      schema:
+        type: "object"
+        properties:
+          site_id: { type: "string" }
+          evidence_site_id: { type: "string" }
+          site_name: { type: "string" }
+          pressure_test_passed: { type: "boolean" }
+          isolation_valves_ready: { type: "boolean" }
+          fire_protection_ready: { type: "boolean" }
+          leak_detection_required: { type: "boolean" }
+          leak_detection_auto_shutoff_ready: { type: "boolean" }
+          preoperation_notification_evidence: { type: "boolean" }
+          warning_signs_installed: { type: "boolean" }
+
+  policy:
+    rules:
+      - name: "reject-subject-mismatch"
+        condition: "input.site.site_id != input.site.evidence_site_id"
+        decision: "deny"
+        reason: "REJECT: evidence subject does not match the site under decision."
+
+      - name: "reject-pressure-test-not-passed"
+        condition: "not input.site.pressure_test_passed"
+        decision: "deny"
+        reason: "REJECT: pressure-test evidence is missing or not passed."
+
+      - name: "reject-isolation-valves-not-ready"
+        condition: "not input.site.isolation_valves_ready"
+        decision: "deny"
+        reason: "REJECT: appliance isolation-valve readiness is missing or failed."
+
+      - name: "reject-fire-protection-not-ready"
+        condition: "not input.site.fire_protection_ready"
+        decision: "deny"
+        reason: "REJECT: required fire-protection readiness is missing or failed."
+
+      - name: "reject-required-leak-shutoff-not-ready"
+        condition: "input.site.leak_detection_required and not input.site.leak_detection_auto_shutoff_ready"
+        decision: "deny"
+        reason: "REJECT: required leak detection / automatic shutoff readiness is missing or failed."
+
+      - name: "hold-preoperation-notification-evidence"
+        condition: "not input.site.preoperation_notification_evidence"
+        decision: "flag"
+        reason: "HOLD: pre-operation notification evidence is missing."
+
+      - name: "hold-warning-signs"
+        condition: "not input.site.warning_signs_installed"
+        decision: "flag"
+        reason: "HOLD: warning-sign evidence is missing."
+
+      - name: "ready"
+        condition: "input.site.site_id == input.site.evidence_site_id and input.site.pressure_test_passed and input.site.isolation_valves_ready and input.site.fire_protection_ready and (not input.site.leak_detection_required or input.site.leak_detection_auto_shutoff_ready) and input.site.preoperation_notification_evidence and input.site.warning_signs_installed"
+        decision: "allow"
+        reason: "READY: all rehearsal evidence gates are satisfied."
