@@ -1,0 +1,19 @@
+{
+  "entry_index": 0,
+  "timestamp": "2026-01-29T00:00:00Z",
+  "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "data": {
+    "verdict": "allow",
+    "rule_name": "allow-compliant",
+    "reason": "Example truth decision.",
+    "pack": {
+      "name": "iso27001-policy-review-a5-1",
+      "version": "1.0.0"
+    },
+    "input_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+    "evidence_refs": [
+      "ref:evidence/1"
+    ]
+  },
+  "record_hash": "3333333333333333333333333333333333333333333333333333333333333333"
+}
