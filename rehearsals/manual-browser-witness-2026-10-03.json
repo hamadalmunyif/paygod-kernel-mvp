@@ -61,8 +61,8 @@
     }
   ],
   "external_pilot_evidence": false,
-  "kernel_issuer_auth_commit": "224d06fb32eee0931fd2863e72f00bb0c98c4b7b",
-  "website_production_commit": "8532995e4c50e43c83f9fc973fd014b45ed92ca1",
+  "kernel_issuer_auth_commit": "224d06fb32ee",
+  "website_production_commit": "8532995e4c50",
   "manual_issuer_authentication_witness": "pass",
   "demo_key_only": true
 }
