@@ -74,6 +74,11 @@ jobs:
           assert metrics['clean_integrity_verified_count'] == 20
           assert metrics['false_invalid_count'] == 0
           assert metrics['adversarial_passed_count'] == 10
+          assert metrics['generated_outcome_counts'] == {
+              'READY': 3,
+              'HOLD': 3,
+              'REJECT': 4,
+          }
 
           assert result['full_internal_rehearsal_complete'] is False
           assert result['external_pilot_ready'] is False
