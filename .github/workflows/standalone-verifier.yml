@@ -57,7 +57,7 @@ jobs:
               'support_files': support_files,
           }
           (root / 'verifier-manifest.json').write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n', encoding='utf-8')
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: paygod-standalone-verifier-v0.4.0
           path: verifier-dist/
@@ -97,19 +97,19 @@ jobs:
           '@ | Set-Content -NoNewline -Encoding utf8 portable-input/flag-input.json
           & ./out/PayGod.Cli run --pack ./packs/core/ghg-scope-1-2-guard --input ./portable-input/flag-input.json --out ./flag-evidence
           if ($LASTEXITCODE -ne 0) { throw "flag producer failed: $LASTEXITCODE" }
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: paygod-third-party-evidence
           path: portable-evidence/
           if-no-files-found: error
           retention-days: 7
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: paygod-default-clock-evidence
           path: default-clock-evidence/
           if-no-files-found: error
           retention-days: 7
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: paygod-flag-evidence
           path: flag-evidence/
@@ -218,7 +218,7 @@ jobs:
           assert result['verification']['issuer_authenticity'] == 'not_verified'
           assert result['verification']['replay'] == 'not_performed'
           assert result['verification']['time_authority'] == 'producer_supplied'
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: standalone-third-party-verification-result
           path: |
@@ -479,7 +479,7 @@ jobs:
           if (-not (($result.errors -join ' ') -match 'unexpected bundle file')) { throw 'unexpected member was not explicitly rejected' }
           exit 0
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: standalone-third-party-tamper-results
           path: |
