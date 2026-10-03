@@ -72,7 +72,7 @@ export function parseIssuerTrustStore(value) {
   return result;
 }
 
-function issuerSigningMessage(keyId, receiptSha) {
+export function issuerSigningMessage(keyId, receiptSha) {
   if (!KEY_ID.test(keyId)) throw new Error("invalid issuer key_id");
   const domain = ED25519_DOMAIN(encoder);
   const key = encoder.encode(keyId);
