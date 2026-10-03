@@ -35,7 +35,18 @@ def _crypto():
     return Ed25519PrivateKey, Ed25519PublicKey
 
 
-def _write_trust_store(root: Path, public_key: bytes = RFC8032_PUBLIC, key_id: str = KEY_ID) -> Path:
+def _new_bundle(root: Path) -> Path:
+    bundle = root / "bundle"
+    bundle.mkdir()
+    _write_valid_bundle(bundle)
+    return bundle
+
+
+def _write_trust_store(
+    root: Path,
+    public_key: bytes = RFC8032_PUBLIC,
+    key_id: str = KEY_ID,
+) -> Path:
     path = root / "trusted-issuers.json"
     path.write_text(json.dumps({
         "profile": TRUST_PROFILE,
@@ -48,9 +59,9 @@ def _write_trust_store(root: Path, public_key: bytes = RFC8032_PUBLIC, key_id: s
     return path
 
 
-def _sign_bundle(root: Path, key_id: str = KEY_ID) -> dict:
+def _sign_bundle(bundle: Path, key_id: str = KEY_ID) -> dict:
     Ed25519PrivateKey, _ = _crypto()
-    receipt_sha = hashlib.sha256((root / "receipt.json").read_bytes()).hexdigest()
+    receipt_sha = hashlib.sha256((bundle / "receipt.json").read_bytes()).hexdigest()
     private_key = Ed25519PrivateKey.from_private_bytes(RFC8032_SEED)
     signature = private_key.sign(signing_message(key_id, receipt_sha))
     envelope = {
@@ -60,7 +71,7 @@ def _sign_bundle(root: Path, key_id: str = KEY_ID) -> dict:
         "receipt_sha256": receipt_sha,
         "signature_b64": base64.b64encode(signature).decode("ascii"),
     }
-    (root / "receipt.sig.json").write_text(
+    (bundle / "receipt.sig.json").write_text(
         json.dumps(envelope, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
@@ -78,12 +89,12 @@ class IssuerAuthenticityTests(unittest.TestCase):
     def test_correct_key_and_receipt_commitment_is_verified(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            bundle = root / "bundle"
-            bundle.mkdir()
-            _write_valid_bundle(bundle)
+            bundle = _new_bundle(root)
             _sign_bundle(bundle)
             trust = _write_trust_store(root)
+
             result = verify(bundle, trusted_issuer_keys_path=trust)
+
             self.assertEqual(result["status"], "valid")
             self.assertEqual(result["verification"]["integrity"], "verified")
             self.assertEqual(result["verification"]["issuer_authenticity"], "verified")
@@ -93,10 +104,12 @@ class IssuerAuthenticityTests(unittest.TestCase):
     def test_wrong_public_key_fails_authenticity_not_integrity(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            _write_valid_bundle(root)
-            _sign_bundle(root)
+            bundle = _new_bundle(root)
+            _sign_bundle(bundle)
             trust = _write_trust_store(root, RFC8032_WRONG_PUBLIC)
+
             result = verify(bundle, trusted_issuer_keys_path=trust)
+
             self.assertEqual(result["status"], "valid")
             self.assertEqual(result["verification"]["integrity"], "verified")
             self.assertEqual(result["verification"]["issuer_authenticity"], "failed")
@@ -105,14 +118,14 @@ class IssuerAuthenticityTests(unittest.TestCase):
     def test_one_byte_receipt_mutation_breaks_signature_commitment(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            bundle = root / "bundle"
-            bundle.mkdir()
-            _write_valid_bundle(bundle)
+            bundle = _new_bundle(root)
             _sign_bundle(bundle)
             trust = _write_trust_store(root)
             receipt = bundle / "receipt.json"
             receipt.write_bytes(receipt.read_bytes() + b" ")
+
             result = verify(bundle, trusted_issuer_keys_path=trust)
+
             self.assertEqual(result["status"], "valid")
             self.assertEqual(result["verification"]["integrity"], "verified")
             self.assertEqual(result["verification"]["issuer_authenticity"], "failed")
@@ -121,50 +134,78 @@ class IssuerAuthenticityTests(unittest.TestCase):
     def test_substituted_receipt_digest_fails(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            _write_valid_bundle(root)
-            envelope = _sign_bundle(root)
+            bundle = _new_bundle(root)
+            envelope = _sign_bundle(bundle)
             envelope["receipt_sha256"] = "f" * 64
             (bundle / "receipt.sig.json").write_text(
                 json.dumps(envelope, indent=2, sort_keys=True) + "\n",
                 encoding="utf-8",
             )
             trust = _write_trust_store(root)
+
             result = verify(bundle, trusted_issuer_keys_path=trust)
+
+            self.assertEqual(result["status"], "valid")
+            self.assertEqual(result["verification"]["integrity"], "verified")
             self.assertEqual(result["verification"]["issuer_authenticity"], "failed")
             self.assertEqual(result["issuer_signature"]["reason"], "receipt_commitment_mismatch")
 
     def test_malformed_signature_fails(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            _write_valid_bundle(root)
-            envelope = _sign_bundle(root)
+            bundle = _new_bundle(root)
+            envelope = _sign_bundle(bundle)
             envelope["signature_b64"] = "***not-base64***"
             (bundle / "receipt.sig.json").write_text(
                 json.dumps(envelope, indent=2, sort_keys=True) + "\n",
                 encoding="utf-8",
             )
             trust = _write_trust_store(root)
+
             result = verify(bundle, trusted_issuer_keys_path=trust)
+
+            self.assertEqual(result["status"], "valid")
+            self.assertEqual(result["verification"]["integrity"], "verified")
             self.assertEqual(result["verification"]["issuer_authenticity"], "failed")
             self.assertIn("signature_envelope_invalid", result["issuer_signature"]["reason"])
 
     def test_absent_signature_is_not_verified(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            _write_valid_bundle(root)
+            bundle = _new_bundle(root)
             trust = _write_trust_store(root)
+
             result = verify(bundle, trusted_issuer_keys_path=trust)
+
             self.assertEqual(result["status"], "valid")
+            self.assertEqual(result["verification"]["integrity"], "verified")
             self.assertEqual(result["verification"]["issuer_authenticity"], "not_verified")
             self.assertEqual(result["issuer_signature"]["reason"], "signature_not_present")
+
+    def test_signature_without_external_trust_anchor_is_not_verified(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bundle = _new_bundle(root)
+            _sign_bundle(bundle)
+
+            result = verify(bundle)
+
+            self.assertEqual(result["status"], "valid")
+            self.assertEqual(result["verification"]["integrity"], "verified")
+            self.assertEqual(result["verification"]["issuer_authenticity"], "not_verified")
+            self.assertEqual(result["issuer_signature"]["reason"], "no_trust_anchor_supplied")
 
     def test_key_id_not_in_trust_store_fails(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            _write_valid_bundle(root)
-            _sign_bundle(root)
+            bundle = _new_bundle(root)
+            _sign_bundle(bundle)
             trust = _write_trust_store(root, RFC8032_PUBLIC, "different-key-id")
+
             result = verify(bundle, trusted_issuer_keys_path=trust)
+
+            self.assertEqual(result["status"], "valid")
+            self.assertEqual(result["verification"]["integrity"], "verified")
             self.assertEqual(result["verification"]["issuer_authenticity"], "failed")
             self.assertEqual(result["issuer_signature"]["reason"], "key_id_not_in_trust_store")
 
