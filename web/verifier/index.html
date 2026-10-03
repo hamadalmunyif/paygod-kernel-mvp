@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>PayGod Verifier</title>
+  <meta name="description" content="Independently verify a PayGod evidence bundle in your browser.">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <a class="brand" href="/">PAYGOD</a>
+      <span class="version">Verifier v0.3</span>
+    </header>
+
+    <section class="hero">
+      <p class="eyebrow">Independent evidence verification</p>
+      <h1>Verify before you trust.</h1>
+      <p class="lede">
+        Verification runs locally in this browser. Integrity is checked independently from
+        issuer identity, replay, external truth, and trusted time.
+      </p>
+    </section>
+
+    <section class="panel input-panel">
+      <div class="field">
+        <label for="bundleFiles">Evidence bundle files</label>
+        <input id="bundleFiles" type="file" multiple>
+        <p class="hint">Select all files from one PayGod evidence directory, including manifest.json and receipt.json.</p>
+      </div>
+
+      <div class="field">
+        <label for="receiptPin">Expected Receipt SHA-256 <span>optional external commitment</span></label>
+        <input id="receiptPin" type="text" inputmode="text" autocomplete="off" spellcheck="false"
+          placeholder="64 lowercase hexadecimal characters">
+      </div>
+
+      <label class="check-row">
+        <input id="allowUnbound" type="checkbox">
+        <span>Allow legacy/local bundles with an unbound producer clock</span>
+      </label>
+
+      <button id="verifyButton" type="button">Verify evidence</button>
+      <p id="selection" class="selection">No files selected.</p>
+    </section>
+
+    <section id="resultSection" class="results hidden" aria-live="polite">
+      <div class="result-heading">
+        <div>
+          <p class="eyebrow">Verification result</p>
+          <h2 id="integrityHeadline">Integrity</h2>
+        </div>
+        <span id="profileBadge" class="badge">paygod-c14n-v1</span>
+      </div>
+
+      <div class="trust-grid">
+        <article class="trust-card">
+          <span>Integrity</span>
+          <strong id="integrityValue">—</strong>
+        </article>
+        <article class="trust-card">
+          <span>Issuer Authenticity</span>
+          <strong id="issuerValue">—</strong>
+        </article>
+        <article class="trust-card">
+          <span>Replay</span>
+          <strong id="replayValue">—</strong>
+        </article>
+        <article class="trust-card">
+          <span>Time Authority</span>
+          <strong id="timeValue">—</strong>
+        </article>
+      </div>
+
+      <div class="panel commitments">
+        <div class="commitment-row">
+          <span>Receipt SHA-256</span>
+          <code id="receiptSha">—</code>
+        </div>
+        <div class="commitment-row">
+          <span>External Receipt Pin</span>
+          <strong id="pinStatus">NOT PROVIDED</strong>
+        </div>
+        <div class="commitment-row">
+          <span>Ledger Head</span>
+          <code id="ledgerHead">—</code>
+        </div>
+        <div class="commitment-row">
+          <span>Manifest SHA-256</span>
+          <code id="manifestSha">—</code>
+        </div>
+        <div class="commitment-row">
+          <span>Bundle Digest</span>
+          <code id="bundleDigest">—</code>
+        </div>
+      </div>
+
+      <div class="panel boundary">
+        <h3>What this result means</h3>
+        <p id="boundaryText"></p>
+      </div>
+
+      <details class="panel details">
+        <summary>Technical details</summary>
+        <pre id="rawResult"></pre>
+      </details>
+    </section>
+
+    <footer>
+      <p>Integrity is not provenance. Verification does not imply external truth.</p>
+    </footer>
+  </main>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>
