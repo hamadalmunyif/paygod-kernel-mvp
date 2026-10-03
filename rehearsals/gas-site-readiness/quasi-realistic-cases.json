@@ -1,0 +1,218 @@
+{
+  "artifact_type": "paygod/gas-site-readiness-quasi-realistic-cases/v0.1",
+  "classification": "quasi_realistic_simulation",
+  "external_pilot": false,
+  "counts_as_real_b2_cases": false,
+  "cases": [
+    {
+      "case_id": "SIM-01",
+      "scenario": "New restaurant central LPG handover",
+      "site": {
+        "site_id": "SITE-A01",
+        "evidence_site_id": "SITE-A01",
+        "site_name": "Simulated Site A01",
+        "pressure_test_passed": true,
+        "isolation_valves_ready": true,
+        "fire_protection_ready": true,
+        "leak_detection_required": true,
+        "leak_detection_auto_shutoff_ready": true,
+        "preoperation_notification_evidence": true,
+        "warning_signs_installed": true
+      },
+      "simulated_operator_decision": "READY",
+      "operator_rationale": "All represented readiness evidence is present.",
+      "expected_paygod_decision": "READY",
+      "expected_relationship": "AGREE",
+      "expected_gap_class": ""
+    },
+    {
+      "case_id": "SIM-02",
+      "scenario": "Bakery branch after failed pressure test",
+      "site": {
+        "site_id": "SITE-A02",
+        "evidence_site_id": "SITE-A02",
+        "site_name": "Simulated Site A02",
+        "pressure_test_passed": false,
+        "isolation_valves_ready": true,
+        "fire_protection_ready": true,
+        "leak_detection_required": true,
+        "leak_detection_auto_shutoff_ready": true,
+        "preoperation_notification_evidence": true,
+        "warning_signs_installed": true
+      },
+      "simulated_operator_decision": "REJECT",
+      "operator_rationale": "Pressure test did not pass; do not hand over.",
+      "expected_paygod_decision": "REJECT",
+      "expected_relationship": "AGREE",
+      "expected_gap_class": ""
+    },
+    {
+      "case_id": "SIM-03",
+      "scenario": "Hotel kitchen with fire-protection work incomplete",
+      "site": {
+        "site_id": "SITE-A03",
+        "evidence_site_id": "SITE-A03",
+        "site_name": "Simulated Site A03",
+        "pressure_test_passed": true,
+        "isolation_valves_ready": true,
+        "fire_protection_ready": false,
+        "leak_detection_required": true,
+        "leak_detection_auto_shutoff_ready": true,
+        "preoperation_notification_evidence": true,
+        "warning_signs_installed": true
+      },
+      "simulated_operator_decision": "REJECT",
+      "operator_rationale": "Fire-protection readiness is incomplete.",
+      "expected_paygod_decision": "REJECT",
+      "expected_relationship": "AGREE",
+      "expected_gap_class": ""
+    },
+    {
+      "case_id": "SIM-04",
+      "scenario": "Central kitchen with required leak shutoff not ready",
+      "site": {
+        "site_id": "SITE-A04",
+        "evidence_site_id": "SITE-A04",
+        "site_name": "Simulated Site A04",
+        "pressure_test_passed": true,
+        "isolation_valves_ready": true,
+        "fire_protection_ready": true,
+        "leak_detection_required": true,
+        "leak_detection_auto_shutoff_ready": false,
+        "preoperation_notification_evidence": true,
+        "warning_signs_installed": true
+      },
+      "simulated_operator_decision": "REJECT",
+      "operator_rationale": "Required automatic shutoff is not ready.",
+      "expected_paygod_decision": "REJECT",
+      "expected_relationship": "AGREE",
+      "expected_gap_class": ""
+    },
+    {
+      "case_id": "SIM-05",
+      "scenario": "Restaurant ready except warning signage",
+      "site": {
+        "site_id": "SITE-A05",
+        "evidence_site_id": "SITE-A05",
+        "site_name": "Simulated Site A05",
+        "pressure_test_passed": true,
+        "isolation_valves_ready": true,
+        "fire_protection_ready": true,
+        "leak_detection_required": true,
+        "leak_detection_auto_shutoff_ready": true,
+        "preoperation_notification_evidence": true,
+        "warning_signs_installed": false
+      },
+      "simulated_operator_decision": "HOLD",
+      "operator_rationale": "Operation should wait for warning signage completion.",
+      "expected_paygod_decision": "HOLD",
+      "expected_relationship": "AGREE",
+      "expected_gap_class": ""
+    },
+    {
+      "case_id": "SIM-06",
+      "scenario": "Commercial kitchen missing pre-operation notification evidence",
+      "site": {
+        "site_id": "SITE-A06",
+        "evidence_site_id": "SITE-A06",
+        "site_name": "Simulated Site A06",
+        "pressure_test_passed": true,
+        "isolation_valves_ready": true,
+        "fire_protection_ready": true,
+        "leak_detection_required": true,
+        "leak_detection_auto_shutoff_ready": true,
+        "preoperation_notification_evidence": false,
+        "warning_signs_installed": true
+      },
+      "simulated_operator_decision": "HOLD",
+      "operator_rationale": "Pre-operation notification evidence is absent.",
+      "expected_paygod_decision": "HOLD",
+      "expected_relationship": "AGREE",
+      "expected_gap_class": ""
+    },
+    {
+      "case_id": "SIM-07",
+      "scenario": "Outdoor arrangement where leak detection is declared not required",
+      "site": {
+        "site_id": "SITE-A07",
+        "evidence_site_id": "SITE-A07",
+        "site_name": "Simulated Site A07",
+        "pressure_test_passed": true,
+        "isolation_valves_ready": true,
+        "fire_protection_ready": true,
+        "leak_detection_required": false,
+        "leak_detection_auto_shutoff_ready": false,
+        "preoperation_notification_evidence": true,
+        "warning_signs_installed": true
+      },
+      "simulated_operator_decision": "READY",
+      "operator_rationale": "Under the frozen rehearsal policy, all represented gates pass.",
+      "expected_paygod_decision": "READY",
+      "expected_relationship": "AGREE",
+      "expected_gap_class": ""
+    },
+    {
+      "case_id": "SIM-08",
+      "scenario": "Handover package references another site",
+      "site": {
+        "site_id": "SITE-A08",
+        "evidence_site_id": "SITE-B08",
+        "site_name": "Simulated Site A08",
+        "pressure_test_passed": true,
+        "isolation_valves_ready": true,
+        "fire_protection_ready": true,
+        "leak_detection_required": true,
+        "leak_detection_auto_shutoff_ready": true,
+        "preoperation_notification_evidence": true,
+        "warning_signs_installed": true
+      },
+      "simulated_operator_decision": "REJECT",
+      "operator_rationale": "Evidence subject does not match the installation under decision.",
+      "expected_paygod_decision": "REJECT",
+      "expected_relationship": "AGREE",
+      "expected_gap_class": ""
+    },
+    {
+      "case_id": "SIM-09",
+      "scenario": "All represented booleans pass but pressure-test certificate is expired",
+      "site": {
+        "site_id": "SITE-A09",
+        "evidence_site_id": "SITE-A09",
+        "site_name": "Simulated Site A09",
+        "pressure_test_passed": true,
+        "isolation_valves_ready": true,
+        "fire_protection_ready": true,
+        "leak_detection_required": true,
+        "leak_detection_auto_shutoff_ready": true,
+        "preoperation_notification_evidence": true,
+        "warning_signs_installed": true
+      },
+      "simulated_operator_decision": "HOLD",
+      "operator_rationale": "A passed pressure test exists, but its validity/expiry is outside the current contract.",
+      "expected_paygod_decision": "READY",
+      "expected_relationship": "DISAGREE",
+      "expected_gap_class": "contract_gap"
+    },
+    {
+      "case_id": "SIM-10",
+      "scenario": "All represented booleans pass but detector calibration provenance is unavailable",
+      "site": {
+        "site_id": "SITE-A10",
+        "evidence_site_id": "SITE-A10",
+        "site_name": "Simulated Site A10",
+        "pressure_test_passed": true,
+        "isolation_valves_ready": true,
+        "fire_protection_ready": true,
+        "leak_detection_required": true,
+        "leak_detection_auto_shutoff_ready": true,
+        "preoperation_notification_evidence": true,
+        "warning_signs_installed": true
+      },
+      "simulated_operator_decision": "HOLD",
+      "operator_rationale": "Declared detector readiness cannot be independently supported by calibration/source provenance.",
+      "expected_paygod_decision": "READY",
+      "expected_relationship": "DISAGREE",
+      "expected_gap_class": "provenance_gap"
+    }
+  ]
+}

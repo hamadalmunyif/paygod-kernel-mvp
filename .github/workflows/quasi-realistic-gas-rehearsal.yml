@@ -1,0 +1,55 @@
+name: Quasi-Realistic Gas Rehearsal
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'rehearsals/gas-site-readiness/quasi-realistic-cases.json'
+      - 'rehearsals/gas-site-readiness/pack.yaml'
+      - 'tools/run_quasi_realistic_gas_rehearsal.py'
+      - 'tools/run_gas_site_readiness_rehearsal.py'
+      - 'tools/verify_portable_evidence.py'
+      - '.github/workflows/quasi-realistic-gas-rehearsal.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quasi-realistic-gas-rehearsal:
+    name: Quasi-Realistic Gas Rehearsal
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Publish CLI
+        run: dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -o out
+      - name: Run quasi-realistic rehearsal
+        run: |
+          python tools/run_quasi_realistic_gas_rehearsal.py \
+            --cli ./out/PayGod.Cli \
+            --pack rehearsals/gas-site-readiness \
+            --result quasi-realistic-gas-rehearsal-result.json
+      - name: Assert simulation boundary
+        run: |
+          python - <<'PY'
+          import json
+          data=json.load(open('quasi-realistic-gas-rehearsal-result.json'))
+          assert data['passed'] is True
+          assert data['counts_as_real_b2_cases'] is False
+          assert data['case_count'] == 10
+          assert data['agreement_count'] == 8
+          assert data['disagreement_count'] == 2
+          assert data['integrity_verified_count'] == 10
+          assert data['expected_deliberate_gaps'] == {'contract_gap': 1, 'provenance_gap': 1}
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: quasi-realistic-gas-rehearsal-result
+          path: quasi-realistic-gas-rehearsal-result.json
+          retention-days: 30
