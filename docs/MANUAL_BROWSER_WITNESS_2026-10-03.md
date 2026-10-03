@@ -137,8 +137,8 @@ The key used in this witness is explicitly a **demo/test key only**.
 
 ### Production identifiers
 
-- kernel issuer-auth merge: `224d06fb32eee0931fd2863e72f00bb0c98c4b7b`
-- website production commit: `8532995e4c50e43c83f9fc973fd014b45ed92ca1`
+- kernel issuer-auth merge: `224d06fb32ee`
+- website production commit: `8532995e4c50`
 - production verifier: `https://www.paygod.net/verifier/`
 
 ## Updated conclusion
