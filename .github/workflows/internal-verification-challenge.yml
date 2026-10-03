@@ -52,7 +52,7 @@ jobs:
           assert rewrite['unpinned_integrity'] == 'verified'
           assert rewrite['pinned_status'] == 'invalid'
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: paygod-internal-verification-challenge-v0.1
           path: internal-verification-challenge-result.json

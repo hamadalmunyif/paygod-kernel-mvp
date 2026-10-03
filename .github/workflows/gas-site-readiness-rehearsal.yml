@@ -83,7 +83,7 @@ jobs:
           assert result['full_internal_rehearsal_complete'] is False
           assert result['external_pilot_ready'] is False
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: gas-site-readiness-internal-rehearsal-v0.1
           path: gas-site-readiness-rehearsal-result.json
