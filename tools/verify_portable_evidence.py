@@ -16,7 +16,11 @@ import re
 import sys
 import unicodedata
 
-from issuer_auth import load_trust_store, verify_detached_signature
+try:
+    from issuer_auth import load_trust_store, verify_detached_signature
+except ModuleNotFoundError:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from issuer_auth import load_trust_store, verify_detached_signature
 
 VERIFIER_VERSION = "0.4.0"
 CANONICALIZATION_PROFILE = "paygod-c14n-v1"
