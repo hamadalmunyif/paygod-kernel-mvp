@@ -1,0 +1,113 @@
+name: Issuer Authenticity
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/issuer_auth.py'
+      - 'tools/sign_receipt_commitment.py'
+      - 'tools/verify_portable_evidence.py'
+      - 'tools/test_issuer_auth.py'
+      - 'tools/requirements-issuer-auth.txt'
+      - 'contracts/schemas/receipt-signature.schema.json'
+      - 'web/verifier/**'
+      - 'tools/test_browser_verifier.mjs'
+      - '.github/workflows/issuer-auth.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  issuer-authenticity:
+    name: Issuer Authenticity Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install established Ed25519 backend
+        run: python -m pip install -r tools/requirements-issuer-auth.txt
+
+      - name: RFC 8032 and issuer-auth regression suite
+        run: python tools/test_issuer_auth.py
+
+      - name: Browser Ed25519 parity suite
+        run: node tools/test_browser_verifier.mjs
+
+      - name: End-to-end signing utility smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp-issuer/bundle
+          python - <<'PY'
+          import base64, json, sys
+          from pathlib import Path
+          sys.path.insert(0, 'tools')
+          from cryptography.hazmat.primitives import serialization
+          from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+          from test_verify_portable_evidence import _write_valid_bundle
+          from issuer_auth import TRUST_PROFILE, ALGORITHM
+
+          root = Path('.tmp-issuer')
+          bundle = root / 'bundle'
+          _write_valid_bundle(bundle)
+
+          private_key = Ed25519PrivateKey.generate()
+          public_key = private_key.public_key()
+          (root / 'issuer-private.pem').write_bytes(
+              private_key.private_bytes(
+                  serialization.Encoding.PEM,
+                  serialization.PrivateFormat.PKCS8,
+                  serialization.NoEncryption(),
+              )
+          )
+          raw_public = public_key.public_bytes(
+              serialization.Encoding.Raw,
+              serialization.PublicFormat.Raw,
+          )
+          trust = {
+              'profile': TRUST_PROFILE,
+              'keys': [{
+                  'key_id': 'ci-ephemeral-key',
+                  'algorithm': ALGORITHM,
+                  'public_key_b64': base64.b64encode(raw_public).decode('ascii'),
+              }],
+          }
+          (root / 'trusted-issuers.json').write_text(
+              json.dumps(trust, indent=2) + '\n',
+              encoding='utf-8',
+          )
+          PY
+
+          python tools/sign_receipt_commitment.py .tmp-issuer/bundle             --key-id ci-ephemeral-key             --private-key .tmp-issuer/issuer-private.pem
+
+          python tools/verify_portable_evidence.py .tmp-issuer/bundle             --trusted-issuer-keys .tmp-issuer/trusted-issuers.json             --require-issuer-authenticity             --result .tmp-issuer/result.json
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('.tmp-issuer/result.json').read_text(encoding='utf-8'))
+          assert result['status'] == 'valid'
+          assert result['verification']['integrity'] == 'verified'
+          assert result['verification']['issuer_authenticity'] == 'verified'
+          assert result['issuer_signature']['key_trusted'] is True
+          assert result['issuer_signature']['signature_valid'] is True
+          PY
+
+      - name: Ensure no private key is staged or published
+        shell: bash
+        run: |
+          git status --short
+          if git grep -n -- 'BEGIN PRIVATE KEY' -- ':!tools/test_issuer_auth.py'; then
+            echo 'private key material must not be committed'
+            exit 1
+          fi
+          rm -rf .tmp-issuer
