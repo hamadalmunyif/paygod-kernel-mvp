@@ -1,0 +1,31 @@
+{
+  "artifact_type": "paygod/internal-rehearsal-b2-engineering-evidence/v0.1",
+  "workflow": "gas-site-readiness",
+  "external_pilot": false,
+  "b1": {
+    "synthetic_decision_cases": 20,
+    "checklist_paygod_agreement": "20/20",
+    "clean_integrity_verified": "20/20",
+    "adversarial_expectations": "10/10"
+  },
+  "browser_witness": {
+    "date": "2026-10-03",
+    "production_url": "https://www.paygod.net/verifier/",
+    "external_receipt_pin_correct": "matched",
+    "external_receipt_pin_altered": "fail_closed",
+    "manual_witness_file": "rehearsals/manual-browser-witness-2026-10-03.json"
+  },
+  "issuer_authentication": {
+    "kernel_merge_commit": "224d06fb32ee",
+    "website_production_commit": "8532995e4c50",
+    "signed_bundle_without_recipient_trust": "not_verified",
+    "signed_bundle_with_recipient_demo_trust": "verified",
+    "demo_key_only": true,
+    "production_authority_claim": false
+  },
+  "baseline_capability_advantage": {
+    "tamper_detection": true,
+    "description": "The tested evidence path detects manifested-byte tamper and external receipt-commitment mismatch; a plain unsigned checklist/spreadsheet baseline does not supply this cryptographic commitment check by itself."
+  },
+  "real_case_evidence_substitute": false
+}
