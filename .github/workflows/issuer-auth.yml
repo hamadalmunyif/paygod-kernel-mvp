@@ -102,12 +102,12 @@ jobs:
           assert result['issuer_signature']['signature_valid'] is True
           PY
 
-      - name: Ensure no private key is staged or published
+      - name: Ensure no private key is tracked or published
         shell: bash
         run: |
-          git status --short
-          if git grep -n -- 'BEGIN PRIVATE KEY' -- ':!tools/test_issuer_auth.py'; then
+          if git grep -n -E 'BEGIN (EC |RSA |OPENSSH )?PRIVATE KEY' -- ':!.github/workflows/issuer-auth.yml'; then
             echo 'private key material must not be committed'
             exit 1
           fi
           rm -rf .tmp-issuer
+          test -z "$(git status --short)"
