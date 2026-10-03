@@ -12,7 +12,7 @@
   <main class="shell">
     <header class="masthead">
       <a class="brand" href="/">PAYGOD</a>
-      <span class="version">Verifier v0.3</span>
+      <span class="version">Verifier v0.4</span>
     </header>
 
     <section class="hero">
@@ -35,6 +35,12 @@
         <label for="receiptPin">Expected Receipt SHA-256 <span>optional external commitment</span></label>
         <input id="receiptPin" type="text" inputmode="text" autocomplete="off" spellcheck="false"
           placeholder="64 lowercase hexadecimal characters">
+      </div>
+
+      <div class="field">
+        <label for="issuerTrustStore">Trusted issuer keys <span>optional external trust store</span></label>
+        <input id="issuerTrustStore" type="file" accept=".json,application/json">
+        <p id="issuerTrustStatus" class="hint">No trusted issuer keys loaded.</p>
       </div>
 
       <label class="check-row">
