@@ -16,8 +16,8 @@
     "manual_witness_file": "rehearsals/manual-browser-witness-2026-10-03.json"
   },
   "issuer_authentication": {
-    "kernel_merge_commit": "224d06fb32eee0931fd2863e72f00bb0c98c4b7b",
-    "website_production_commit": "8532995e4c50e43c83f9fc973fd014b45ed92ca1",
+    "kernel_merge_commit": "224d06fb32ee",
+    "website_production_commit": "8532995e4c50",
     "signed_bundle_without_recipient_trust": "not_verified",
     "signed_bundle_with_recipient_demo_trust": "verified",
     "demo_key_only": true,
