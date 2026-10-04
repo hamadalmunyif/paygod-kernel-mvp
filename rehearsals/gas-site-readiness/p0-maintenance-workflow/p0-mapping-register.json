@@ -1,0 +1,306 @@
+{
+  "artifact_type": "paygod/p0-gas-maintenance-mapping-register/v0.1",
+  "classification": "simulated_shadow_pilot",
+  "counts_as_b2_real": false,
+  "source_mapping_artifact_sha256": "c5655120466990e18db9a9b6ebb32c1ab45c7da5379b14e6d9c9226e67a003f4",
+  "aggregate": {
+    "cases": 15,
+    "executable": 0,
+    "paygod_run": 0,
+    "not_run": 15,
+    "assignments": {
+      "pressure_test_passed": {
+        "TRUE": 8,
+        "FALSE": 0,
+        "WITHHELD": 7
+      },
+      "isolation_valves_ready": {
+        "TRUE": 1,
+        "FALSE": 0,
+        "WITHHELD": 14
+      },
+      "fire_protection_ready": {
+        "TRUE": 1,
+        "FALSE": 0,
+        "WITHHELD": 14
+      },
+      "leak_detection_required": {
+        "TRUE": 0,
+        "FALSE": 0,
+        "WITHHELD": 15
+      },
+      "leak_detection_auto_shutoff_ready": {
+        "TRUE": 5,
+        "FALSE": 0,
+        "WITHHELD": 10
+      },
+      "preoperation_notification_evidence": {
+        "TRUE": 6,
+        "FALSE": 0,
+        "WITHHELD": 9
+      },
+      "warning_signs_installed": {
+        "TRUE": 4,
+        "FALSE": 0,
+        "WITHHELD": 11
+      }
+    }
+  },
+  "cases": [
+    {
+      "case_id": "SIM-C-01",
+      "human_frozen_decision": "HOLD",
+      "mapping": {
+        "pressure_test_passed": "WITHHELD",
+        "isolation_valves_ready": "WITHHELD",
+        "fire_protection_ready": "WITHHELD",
+        "leak_detection_required": "WITHHELD",
+        "leak_detection_auto_shutoff_ready": "WITHHELD",
+        "preoperation_notification_evidence": "WITHHELD",
+        "warning_signs_installed": "TRUE"
+      },
+      "executable": false,
+      "paygod_execution": "NOT_RUN",
+      "agreement": null,
+      "disagreement_class": null
+    },
+    {
+      "case_id": "SIM-C-02",
+      "human_frozen_decision": "HOLD",
+      "mapping": {
+        "pressure_test_passed": "TRUE",
+        "isolation_valves_ready": "WITHHELD",
+        "fire_protection_ready": "WITHHELD",
+        "leak_detection_required": "WITHHELD",
+        "leak_detection_auto_shutoff_ready": "WITHHELD",
+        "preoperation_notification_evidence": "WITHHELD",
+        "warning_signs_installed": "TRUE"
+      },
+      "executable": false,
+      "paygod_execution": "NOT_RUN",
+      "agreement": null,
+      "disagreement_class": null
+    },
+    {
+      "case_id": "SIM-C-03",
+      "human_frozen_decision": "HOLD",
+      "mapping": {
+        "pressure_test_passed": "TRUE",
+        "isolation_valves_ready": "WITHHELD",
+        "fire_protection_ready": "WITHHELD",
+        "leak_detection_required": "WITHHELD",
+        "leak_detection_auto_shutoff_ready": "TRUE",
+        "preoperation_notification_evidence": "TRUE",
+        "warning_signs_installed": "WITHHELD"
+      },
+      "executable": false,
+      "paygod_execution": "NOT_RUN",
+      "agreement": null,
+      "disagreement_class": null
+    },
+    {
+      "case_id": "SIM-C-04",
+      "human_frozen_decision": "REJECT",
+      "mapping": {
+        "pressure_test_passed": "WITHHELD",
+        "isolation_valves_ready": "WITHHELD",
+        "fire_protection_ready": "WITHHELD",
+        "leak_detection_required": "WITHHELD",
+        "leak_detection_auto_shutoff_ready": "WITHHELD",
+        "preoperation_notification_evidence": "WITHHELD",
+        "warning_signs_installed": "WITHHELD"
+      },
+      "executable": false,
+      "paygod_execution": "NOT_RUN",
+      "agreement": null,
+      "disagreement_class": null
+    },
+    {
+      "case_id": "SIM-C-05",
+      "human_frozen_decision": "HOLD",
+      "mapping": {
+        "pressure_test_passed": "TRUE",
+        "isolation_valves_ready": "WITHHELD",
+        "fire_protection_ready": "WITHHELD",
+        "leak_detection_required": "WITHHELD",
+        "leak_detection_auto_shutoff_ready": "TRUE",
+        "preoperation_notification_evidence": "TRUE",
+        "warning_signs_installed": "WITHHELD"
+      },
+      "executable": false,
+      "paygod_execution": "NOT_RUN",
+      "agreement": null,
+      "disagreement_class": null
+    },
+    {
+      "case_id": "SIM-C-06",
+      "human_frozen_decision": "REJECT",
+      "mapping": {
+        "pressure_test_passed": "TRUE",
+        "isolation_valves_ready": "WITHHELD",
+        "fire_protection_ready": "WITHHELD",
+        "leak_detection_required": "WITHHELD",
+        "leak_detection_auto_shutoff_ready": "WITHHELD",
+        "preoperation_notification_evidence": "WITHHELD",
+        "warning_signs_installed": "WITHHELD"
+      },
+      "executable": false,
+      "paygod_execution": "NOT_RUN",
+      "agreement": null,
+      "disagreement_class": null
+    },
+    {
+      "case_id": "SIM-C-07",
+      "human_frozen_decision": "HOLD",
+      "mapping": {
+        "pressure_test_passed": "TRUE",
+        "isolation_valves_ready": "WITHHELD",
+        "fire_protection_ready": "WITHHELD",
+        "leak_detection_required": "WITHHELD",
+        "leak_detection_auto_shutoff_ready": "WITHHELD",
+        "preoperation_notification_evidence": "TRUE",
+        "warning_signs_installed": "WITHHELD"
+      },
+      "executable": false,
+      "paygod_execution": "NOT_RUN",
+      "agreement": null,
+      "disagreement_class": null
+    },
+    {
+      "case_id": "SIM-C-08",
+      "human_frozen_decision": "REJECT",
+      "mapping": {
+        "pressure_test_passed": "WITHHELD",
+        "isolation_valves_ready": "WITHHELD",
+        "fire_protection_ready": "WITHHELD",
+        "leak_detection_required": "WITHHELD",
+        "leak_detection_auto_shutoff_ready": "WITHHELD",
+        "preoperation_notification_evidence": "WITHHELD",
+        "warning_signs_installed": "WITHHELD"
+      },
+      "executable": false,
+      "paygod_execution": "NOT_RUN",
+      "agreement": null,
+      "disagreement_class": null
+    },
+    {
+      "case_id": "SIM-C-09",
+      "human_frozen_decision": "HOLD",
+      "mapping": {
+        "pressure_test_passed": "TRUE",
+        "isolation_valves_ready": "WITHHELD",
+        "fire_protection_ready": "WITHHELD",
+        "leak_detection_required": "WITHHELD",
+        "leak_detection_auto_shutoff_ready": "TRUE",
+        "preoperation_notification_evidence": "TRUE",
+        "warning_signs_installed": "WITHHELD"
+      },
+      "executable": false,
+      "paygod_execution": "NOT_RUN",
+      "agreement": null,
+      "disagreement_class": null
+    },
+    {
+      "case_id": "SIM-C-10",
+      "human_frozen_decision": "REJECT",
+      "mapping": {
+        "pressure_test_passed": "WITHHELD",
+        "isolation_valves_ready": "WITHHELD",
+        "fire_protection_ready": "WITHHELD",
+        "leak_detection_required": "WITHHELD",
+        "leak_detection_auto_shutoff_ready": "TRUE",
+        "preoperation_notification_evidence": "WITHHELD",
+        "warning_signs_installed": "TRUE"
+      },
+      "executable": false,
+      "paygod_execution": "NOT_RUN",
+      "agreement": null,
+      "disagreement_class": null
+    },
+    {
+      "case_id": "SIM-C-11",
+      "human_frozen_decision": "HOLD",
+      "mapping": {
+        "pressure_test_passed": "TRUE",
+        "isolation_valves_ready": "TRUE",
+        "fire_protection_ready": "WITHHELD",
+        "leak_detection_required": "WITHHELD",
+        "leak_detection_auto_shutoff_ready": "WITHHELD",
+        "preoperation_notification_evidence": "WITHHELD",
+        "warning_signs_installed": "WITHHELD"
+      },
+      "executable": false,
+      "paygod_execution": "NOT_RUN",
+      "agreement": null,
+      "disagreement_class": null
+    },
+    {
+      "case_id": "SIM-C-12",
+      "human_frozen_decision": "HOLD",
+      "mapping": {
+        "pressure_test_passed": "WITHHELD",
+        "isolation_valves_ready": "WITHHELD",
+        "fire_protection_ready": "TRUE",
+        "leak_detection_required": "WITHHELD",
+        "leak_detection_auto_shutoff_ready": "TRUE",
+        "preoperation_notification_evidence": "TRUE",
+        "warning_signs_installed": "TRUE"
+      },
+      "executable": false,
+      "paygod_execution": "NOT_RUN",
+      "agreement": null,
+      "disagreement_class": null
+    },
+    {
+      "case_id": "SIM-C-13",
+      "human_frozen_decision": "REJECT",
+      "mapping": {
+        "pressure_test_passed": "TRUE",
+        "isolation_valves_ready": "WITHHELD",
+        "fire_protection_ready": "WITHHELD",
+        "leak_detection_required": "WITHHELD",
+        "leak_detection_auto_shutoff_ready": "WITHHELD",
+        "preoperation_notification_evidence": "WITHHELD",
+        "warning_signs_installed": "WITHHELD"
+      },
+      "executable": false,
+      "paygod_execution": "NOT_RUN",
+      "agreement": null,
+      "disagreement_class": null
+    },
+    {
+      "case_id": "SIM-C-14",
+      "human_frozen_decision": "HOLD",
+      "mapping": {
+        "pressure_test_passed": "WITHHELD",
+        "isolation_valves_ready": "WITHHELD",
+        "fire_protection_ready": "WITHHELD",
+        "leak_detection_required": "WITHHELD",
+        "leak_detection_auto_shutoff_ready": "WITHHELD",
+        "preoperation_notification_evidence": "TRUE",
+        "warning_signs_installed": "WITHHELD"
+      },
+      "executable": false,
+      "paygod_execution": "NOT_RUN",
+      "agreement": null,
+      "disagreement_class": null
+    },
+    {
+      "case_id": "SIM-C-15",
+      "human_frozen_decision": "REJECT",
+      "mapping": {
+        "pressure_test_passed": "WITHHELD",
+        "isolation_valves_ready": "WITHHELD",
+        "fire_protection_ready": "WITHHELD",
+        "leak_detection_required": "WITHHELD",
+        "leak_detection_auto_shutoff_ready": "WITHHELD",
+        "preoperation_notification_evidence": "WITHHELD",
+        "warning_signs_installed": "WITHHELD"
+      },
+      "executable": false,
+      "paygod_execution": "NOT_RUN",
+      "agreement": null,
+      "disagreement_class": null
+    }
+  ]
+}
