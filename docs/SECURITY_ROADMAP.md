@@ -1,116 +1,85 @@
 # Paygod Kernel Security Hardening Roadmap
 
-This document outlines the strategic security enhancements required to elevate Paygod Kernel from a functional prototype to a production-grade, high-assurance financial system.
+This document records future security-hardening work separately from the repository's current proven assurance boundary. Roadmap items are not current capability claims unless explicitly backed by an active witness.
 
 ## 1. Container Hardening (Priority: High)
 
 **Objective:** Mitigate container breakout risks by enforcing least-privilege principles at the runtime level.
 
 ### Implementation Strategy
-- **Non-Root Execution:** Modify all Dockerfiles to create and switch to a dedicated user (e.g., `app`) before the `ENTRYPOINT` instruction.
-- **Read-Only Filesystems:** Configure `docker-compose.yml` and Kubernetes manifests to mount the root filesystem as read-only (`read_only: true`). Use explicit `tmpfs` mounts for temporary directories required by the runtime.
-- **Capability Dropping:** Explicitly drop all Linux capabilities (`cap_drop: [ALL]`) and only add back strictly necessary ones (if any).
+- **Non-Root Execution:** Keep runtime containers non-root and verify this property in the relevant container path.
+- **Read-Only Filesystems:** Where production container execution becomes in-scope, prefer read-only root filesystems with explicit temporary-write locations.
+- **Capability Dropping:** Where production container execution becomes in-scope, drop unnecessary Linux capabilities and add back only those explicitly required.
 
 ## 2. Supply Chain Security (Priority: High)
 
-**Objective:** Ensure the integrity of all software dependencies and build artifacts.
+**Objective:** Improve reproducibility and provenance of software dependencies and build artifacts.
 
-### Implementation Strategy
-- **Vulnerability Scanning:** Integrate **Trivy** or **Grype** into the CI pipeline to scan base images and NuGet/Python packages for known CVEs before every build.
-- **SBOM Generation:** Automatically generate a Software Bill of Materials (SBOM) for every release artifact to facilitate rapid impact analysis during security incidents.
-- **Dependency Pinning:** Enforce strict version pinning (including hashes) for all dependencies in `csproj` and `requirements.txt` files.
+### Future Work
+- dependency/tool version closure where reproducibility requires it;
+- immutable GitHub Action references;
+- broader dependency update coverage;
+- artifact provenance/attestation when justified by the release workflow;
+- image digest pinning when container images become release artifacts.
 
-## 3. Image Integrity & Signing (Priority: Medium)
+These are roadmap items and are not implied by the current merge-gate contract.
 
-**Objective:** Prevent the deployment of unauthorized or tampered container images.
+## 3. Image Integrity & Signing (Future)
 
-### Implementation Strategy
-- **Cosign Integration:** Use **Sigstore Cosign** to cryptographically sign container images immediately after the build phase in the CI pipeline.
-- **Admission Controllers:** Deploy a Kubernetes Admission Controller (e.g., Kyverno or OPA Gatekeeper) to verify image signatures before allowing pods to start.
+Potential future work includes externally attested build provenance, container/image signing, and verification at deployment boundaries.
 
-## 4. Cryptographic Ledger Locking (Priority: Critical)
+The repository does **not** currently claim universal Cosign/Sigstore release signing or production image-admission enforcement.
 
-**Objective:** Protect the immutable ledger against retroactive tampering, even in the event of a key compromise.
+## 4. Key and Trust-Root Governance (Future)
 
-### Implementation Strategy
-- **HSM Integration:** Transition signing keys from software-based storage to Hardware Security Modules (HSM) or managed cloud KMS (Key Management Service).
-- **Key Rotation Policy:** Implement automated key rotation for ledger signing keys.
-- **Checkpointing:** Periodically publish the latest ledger root hash to a public, decentralized blockchain (e.g., Ethereum or Bitcoin) to serve as an indisputable timestamp proof.
+Potential future work includes:
+- institutional signing-key custody;
+- rotation and revocation policy;
+- hardware-backed or managed-key custody where justified;
+- externally anchored or transparent publication where a real workflow requires it.
 
-## 5. Network Segmentation (Priority: Medium)
+These are separate trust dimensions and must not be conflated with current bundle integrity.
 
-**Objective:** Limit the blast radius of a potential breach by strictly controlling network traffic.
+## 5. Network and Runtime Hardening (Future)
 
-### Implementation Strategy
-- **Service Mesh:** Implement mTLS (mutual TLS) between all microservices (Kernel, Ledger, Metrics) to ensure encrypted and authenticated communication.
-- **Network Policies:** Apply strict Kubernetes Network Policies to deny all ingress/egress traffic by default, whitelisting only necessary communication paths.
-
----
-
-*This roadmap is a living document. Security is a continuous process, not a final destination.*
+Network segmentation, service-to-service authentication, and runtime policy are deferred until a production deployment architecture creates a concrete requirement.
 
 ---
 
-## PR Security Gate (GitHub Actions + Branch Protection)
+*This roadmap is a living document. Future work must remain subordinate to the repository's stop-build rule and evidence from real workflows.*
 
-Paygod Kernel treats security checks as **merge-blocking** on `main`.
+---
 
-### Workflows
+## Canonical Merge Governance
 
-- `Paygod Kernel CI` — build, spec checks, schema stability, pack tests, and pack-provider separation lint.
-- `security-gate` — CodeQL, Dependency Review, secret scanning, and PR SBOM artifact.
+The canonical merge contract is defined in [GATES.md](../GATES.md).
 
-### Required Checks (Branch Protection)
+The required status checks for pull requests targeting `main` are:
 
-In GitHub: **Settings → Branches → Branch protection rules → main**, enable:
+1. **Paygod Kernel CI**
+2. **security-gate**
+3. **Paygod CI Enforcement**
+4. **Pack Contract (paygod/v1)**
+5. **Repository Boundary Gate**
+6. **Verifier Integrity Gate**
 
-- **Require status checks to pass before merging**
-- Select the checks below (names must match exactly):
+Each required witness MUST report a terminal status on every pull request targeting `main`. A required witness therefore must not depend on path filtering that can prevent the required context from being emitted.
 
-1) **CodeQL (C#)**
-2) **Dependency Review (PR)**
-3) **Secret Scan (gitleaks)**
-4) **SBOM (PR artifact)**
-5) **build-and-test** (from `Paygod Kernel CI`)
+The effective GitHub repository ruleset must require these six exact contexts. A workflow being green is not sufficient if the ruleset does not require it.
 
-Recommended toggles:
-- Require branches to be up to date before merging
-- Require signed commits (if your org enforces it)
-- Require approvals (CODEOWNERS-driven)
+### Security Gate Composition
 
-### Notes
+`security-gate` is the required aggregate context for the security workflow. It propagates failures from its internal security jobs, currently including CodeQL, dependency review, secret scanning, and PR SBOM generation. Those internal job names are implementation details of the security workflow and are not substitutes for the canonical top-level merge contract above.
 
-- Dependency Review runs **only** on pull requests by design.
-- PR SBOM is uploaded as an artifact for transparency; release SBOM is still produced on tags.
-- Container scanning is intentionally deferred until Docker images become a first-class MVP deliverable.
+### Ruleset Alignment
 
-## Making the Security Gate truly merge-blocking (Branch Protection)
+Repository administrators must keep the active `main` ruleset aligned with [GATES.md](../GATES.md). Changes to required context names, workflow triggers, or ruleset requirements must be reviewed as governance changes.
 
-Workflows alone **do not** prevent merging. To make the Security Gate a real PR Gate, you must
-enable **Branch Protection** on `main` and set **Required status checks** to include the security
-jobs and CI build/test.
+Recommended repository protections include:
+- require pull requests before merging;
+- require the six canonical status checks above;
+- require branches to be up to date before merging;
+- prohibit force-push/non-fast-forward history on `main`;
+- require additional review controls where the repository ownership model supports them.
 
-### Required checks (job names must match exactly)
-- `CodeQL (C#)`
-- `Dependency Review (PR)`
-- `Secret Scan (gitleaks)`
-- `SBOM (PR artifact)`
-- `CI`
-
-### Fast path (recommended): apply via GitHub CLI
-If you have repo admin rights, run:
-
-```bash
-gh auth login
-export REPO="OWNER/REPO"
-export BRANCH="main"
-./tools/admin/enable_branch_protection.sh
-```
-
-### Manual path (UI)
-GitHub → **Settings** → **Branches** → **Add rule** for `main`:
-- ✅ Require a pull request before merging
-- ✅ Require status checks to pass before merging
-  - add the required checks listed above
-- ✅ Require branches to be up to date before merging (recommended)
-- ✅ Require Code Owner review (recommended)
+Ruleset drift is a governance defect even when underlying workflows remain green.
