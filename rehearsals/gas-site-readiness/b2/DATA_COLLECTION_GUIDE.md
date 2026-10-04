@@ -33,7 +33,7 @@ External challenges SHOULD bind public sources as precisely as the source permit
 
 ## 2. Sampling Rule — Freeze Before PayGod Output
 
-The qualifying sample MUST be selected before PayGod results are observed.
+The candidate population MUST be selected by the frozen sampling rule before PayGod results are observed. Qualification occurs only after the historical cut-off, human-judgment freeze, evidence admission, and Executability Gate.
 
 Preferred methods:
 
