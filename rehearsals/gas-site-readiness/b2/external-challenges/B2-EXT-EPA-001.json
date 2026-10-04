@@ -1,0 +1,173 @@
+{
+  "case_id": "B2-EXT-EPA-001",
+  "case_class": "B2-EXT",
+  "gating": false,
+  "title": "Limetree Bay Flare #8 / Phase 2 purge — prerequisite-to-transition challenge",
+  "source": {
+    "issuer": "U.S. Environmental Protection Agency, Region 2",
+    "source_class": "official_regulatory_record",
+    "facility": "Limetree Bay Refining, St. Croix, U.S. Virgin Islands",
+    "context": "long-term shutdown; Flare #8 testing and Phase 2 hydrocarbon purge controls",
+    "phase_1_test_plan_url": "https://www.epa.gov/system/files/documents/2021-07/ltb-phase-1-flare-plan.pdf",
+    "phase_2_pending_approval_letter_url": "https://www.epa.gov/system/files/documents/2021-08/2021-08-23-limetree-notification-of-pending-approval-of-phase-2-plan.pdf",
+    "epa_case_page_url": "https://www.epa.gov/vi/limetree-bay-terminals-and-limetree-bay-refining-llc",
+    "phase_2_community_update_url": "https://www.epa.gov/system/files/documents/2021-08/aug-27-2021-limetree-bay-community-update.pdf",
+    "binding_method": "official EPA domain + facility identity + dated Phase 1 plan + dated Phase 2 pending-approval letter + dated EPA community update",
+    "terminology_note": "The Phase 1 plan uses Pre-Startup Safety Review (PSSR); the August 23 Phase 2 letter uses Pre-startup Review (PSR). This challenge preserves the source terminology rather than normalizing them as identical legal terms."
+  },
+  "historical_evidence_cutoff": {
+    "basis": "Evidence, submissions, and controls available before EPA's written approval allowing Phase 2 to commence.",
+    "exact_hour_level_cutoff_established": false,
+    "rule": "Later EPA status updates may establish subsequent operational state but are not backfilled as evidence available before approval."
+  },
+  "source_locators": [
+    {
+      "source": "Flare #8 Phase 1 Test Plan",
+      "location": "Phase 1 testing items 2-4",
+      "fact": "The plan called for safety-system tests, loop checks of flare temperature, pressure, flow, and level devices from field device to DCS, stroking control valves from the DCS to confirm field operation, control-logic checks, and completion of a Pre-Startup Safety Review."
+    },
+    {
+      "source": "Flare #8 Phase 1 Test Plan",
+      "location": "Phase 1 Operational Controls",
+      "fact": "The plan states that valves at refinery process units were closed and locked, visual surveys with documented sign-offs were available, and a mechanical blind isolated the refinery flare system from Flare #8 during Phase 1 testing."
+    },
+    {
+      "source": "EPA August 23, 2021 pending-approval letter",
+      "location": "pre-approval requirements",
+      "fact": "Before EPA would approve the Phase 2 purge plan, Limetree was required to provide a Pre-startup Review for Flare #8 completed up to the unblinding step, certify that staff performing Phase 2 work were properly trained in applicable procedures, and submit specified additional Phase 2 safety and process information."
+    },
+    {
+      "source": "EPA August 23, 2021 pending-approval letter",
+      "location": "post-approval obligations",
+      "fact": "After the additional information was submitted and EPA approved the Phase 2 purge plan in writing, Limetree was required to submit the final completed Flare #8 PSR within one business day of unblinding and continue recurring Phase 2 reporting and compliance obligations."
+    },
+    {
+      "source": "EPA Limetree case page and August 27, 2021 community update",
+      "location": "Phase 1 completion / Phase 2 commencement",
+      "fact": "EPA states that Phase 1 was successfully completed on July 31, 2021, EPA approved the Phase 2 Plan and Timeline, and Phase 2 began on August 27, 2021."
+    }
+  ],
+  "evidence_deconstruction": {
+    "contemporaneous_plan_and_evidence": [
+      "A documented Phase 1 test plan covered safety-system testing.",
+      "The plan specified loop checks for temperature, pressure, flow, and level devices from field device to DCS.",
+      "The plan specified stroking control valves from the DCS and confirming operation in the field.",
+      "The plan specified control-logic checks using simulated field inputs and confirmation of automatic field action.",
+      "The plan stated that process-unit valves were closed and locked and that visual surveys with documented sign-offs were available.",
+      "The plan required a PSSR as part of Phase 1 testing.",
+      "EPA later reported Phase 1 successfully completed on July 31, 2021."
+    ],
+    "contemporaneous_known_requirements_and_boundaries": [
+      "EPA written approval was required before the Phase 2 purge plan could proceed.",
+      "A Flare #8 PSR completed up to the unblinding step was a pre-approval requirement.",
+      "A certification that staff performing Phase 2 work were properly trained in applicable procedures was a pre-approval requirement.",
+      "Additional safety/process descriptions and supporting information identified by EPA were required before written approval.",
+      "Within one business day of unblinding Flare #8, the final completed PSR was required to be submitted to EPA."
+    ],
+    "human_or_regulatory_decision": {
+      "decision": "EPA approval of the Phase 2 Plan and Timeline",
+      "approval_status": "approved",
+      "subsequent_phase_start_date": "2021-08-27",
+      "decision_effect": "permission for the approved Phase 2 long-term shutdown work to proceed subject to the stated controls and continuing obligations",
+      "exact_unblinding_timestamp_established": false
+    },
+    "subsequent_operational_state": {
+      "phase_2_reported_underway": true,
+      "phase_2_start_date": "2021-08-27",
+      "exact_flare_8_unblinding_timestamp_established": false,
+      "final_psr_submission_artifact_retrieved_in_this_challenge": false,
+      "note": "The selected EPA records establish approval and Phase 2 commencement, but this challenge does not infer the exact unblinding time or completion of every post-unblinding obligation without a direct artifact."
+    }
+  },
+  "frozen_contract_mapping": {
+    "mapping_status": "no_faithful_complete_frozen_input",
+    "domain_scope_status": "under_evaluation",
+    "executable_b2_input_produced": false,
+    "coercion_prohibited": true,
+    "candidate_identifiers": {
+      "site_id": "Limetree_Bay_Refinery_Flare_8",
+      "evidence_site_id": "epa_limetree_phase1_phase2_2021"
+    },
+    "field_probes": [
+      {
+        "field": "pressure_test_passed",
+        "candidate_assignment": "withheld",
+        "reason": "The selected evidence describes safety-system tests and instrument loop checks, not a qualifying frozen-contract pressure-test result."
+      },
+      {
+        "field": "isolation_valves_ready",
+        "candidate_assignment": "withheld",
+        "reason": "The Phase 1 plan reports process-unit valves closed and locked and a blind installed for the Phase 1 test configuration, but that bounded configuration is not coerced into the frozen Gas Site Readiness isolation-readiness boolean."
+      },
+      {
+        "field": "fire_protection_ready",
+        "candidate_assignment": "withheld",
+        "reason": "The selected records do not establish the frozen contract's fire-protection readiness fact."
+      },
+      {
+        "field": "leak_detection_required",
+        "candidate_assignment": "withheld",
+        "reason": "The selected records do not establish the frozen contract's leak-detection requirement fact."
+      },
+      {
+        "field": "leak_detection_auto_shutoff_ready",
+        "candidate_assignment": "withheld",
+        "reason": "Safety-system and flare-control tests are not treated as a gas leak-detection automatic-shutoff witness."
+      },
+      {
+        "field": "preoperation_notification_evidence",
+        "candidate_assignment": "withheld",
+        "reason": "EPA approval and required submissions are not coerced into the frozen contract's pre-operation notification evidence field."
+      },
+      {
+        "field": "warning_signs_installed",
+        "candidate_assignment": "withheld",
+        "reason": "The selected records do not establish warning-sign installation."
+      }
+    ],
+    "unrepresentable_or_differently_scoped_semantics": [
+      "prerequisite-to-transition dependencies",
+      "staged regulatory approval before a physical/process boundary may be crossed",
+      "personnel training certification as a release prerequisite",
+      "a pre-boundary partial review followed by a post-boundary final-review submission deadline",
+      "timed post-transition evidence obligations",
+      "continuing reporting and compliance obligations after release"
+    ]
+  },
+  "paygod_execution": {
+    "status": "not_run",
+    "reason": "No faithful complete frozen Gas Site Readiness input can be produced from the selected EPA records without inventing unrelated readiness booleans."
+  },
+  "trust_dimensions": {
+    "integrity": "not_evaluated",
+    "issuer_authenticity": "not_verified",
+    "time_authority": "not_verified",
+    "source_attestation": "not_verified"
+  },
+  "gap_assessment": {
+    "classification_status": "under_evaluation",
+    "primary_class": null,
+    "secondary_subtype": null,
+    "architecture_defect_inferred": false,
+    "candidate_interpretations": [
+      "out_of_contract_scope",
+      "contract_gap",
+      "cross_domain_compositional_hypothesis"
+    ],
+    "diagnostic_observation": "The EPA workflow links pre-transition prerequisites to written approval, permits a bounded operational transition, and imposes a timed post-transition evidence obligation. Whether that pattern belongs inside Gas Site Readiness, a separate domain Pack, or a reusable cross-domain extension must not be decided before mapping review.",
+    "future_hypothesis_only": "conditional_release_and_post_transition_evidence",
+    "requires_kernel_change": false,
+    "gap_register_entry_created": false
+  },
+  "non_claims": [
+    "PayGod does not substitute for EPA, issue regulatory approvals, or prove legal compliance.",
+    "The selected EPA records do not establish every frozen Gas Site Readiness boolean.",
+    "A Phase 1 test plan is not silently treated as proof that each planned test was completed exactly as specified unless a later source explicitly establishes that fact.",
+    "EPA's report that Phase 1 was successfully completed is not expanded into unsupported field-level technical claims.",
+    "The exact Flare #8 unblinding timestamp is not asserted.",
+    "The final post-unblinding PSR submission is not claimed as retrieved or independently verified in this challenge.",
+    "The separate OSHA Big West Oil training-record example is not imported into this Limetree case.",
+    "No conditional-release primitive, timed-evidence primitive, Pack change, or kernel change is authorized by this challenge.",
+    "This case does not count toward the B2 real-case minimum."
+  ]
+}
