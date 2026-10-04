@@ -1,0 +1,138 @@
+{
+  "case_id": "B2-EXT-CSB-002",
+  "case_class": "B2-EXT",
+  "gating": false,
+  "title": "BP Texas City refinery — measurement-validity and calibration-context challenge",
+  "source": {
+    "issuer": "U.S. Chemical Safety and Hazard Investigation Board",
+    "source_class": "independent_public_investigation",
+    "incident": "BP America Texas City Refinery Explosion",
+    "incident_date": "2005-03-23",
+    "final_report_release_date": "2007-03-20",
+    "investigation_url": "https://www.csb.gov/bp-america-texas-city-refinery-explosion/",
+    "report_url": "https://www.csb.gov/assets/1/20/csbfinalreportbp.pdf",
+    "binding_method": "official CSB domain + incident identity + report release date + section/page locators",
+    "content_digest_status": "not_recorded_in_initial_challenge"
+  },
+  "historical_evidence_cutoff": {
+    "basis": "Evidence and observations available before the explosion at approximately 1:20 p.m. local time on 2005-03-23.",
+    "rule": "Post-incident testing, calculations, and causal findings are not backfilled into the historical decision state."
+  },
+  "source_locators": [
+    {
+      "section": "2.5.2.2 Needed Pre-Startup Instrumentation and Equipment Repairs",
+      "pdf_page_index_zero_based": 47,
+      "report_page_label": 48,
+      "fact": "Before startup, operations personnel had reported that the splitter level transmitter gave inaccurate readings and needed calibration; the sight glass was dirty and could not provide a visual level check. The transmitter was not repaired because supervisors judged there was insufficient turnaround time, and required alarm/instrument functionality checks were not completed."
+    },
+    {
+      "section": "2.5.6 Tower Overfills",
+      "pdf_page_index_zero_based": 53,
+      "report_page_label": 54,
+      "fact": "During startup the transmitter remained below 100 percent. The board operator considered the condition safe while the indicated level remained within the transmitter span, and the known-unreadable sight glass was not used for independent visual confirmation."
+    },
+    {
+      "section": "3.3 Instrumentation",
+      "pdf_page_index_zero_based": 81,
+      "report_page_label": 82,
+      "fact": "The board operator believed the declining transmitter reading was accurate; the redundant high-level alarm's silence reinforced that belief, and no functional independent level measurement was available."
+    },
+    {
+      "section": "7.1 Instrumentation Failures",
+      "pdf_page_index_zero_based": 130,
+      "report_page_label": 131,
+      "fact": "The CSB later found that the level transmitter was not calibrated for the actual process-fluid specific gravity at operating temperature and falsely indicated a level below 100 percent and falling while the tower was overfilling."
+    },
+    {
+      "section": "7.3 Summary",
+      "pdf_page_index_zero_based": 134,
+      "report_page_label": 135,
+      "fact": "The CSB concluded that stale or incorrect equipment data and inadequate testing/repair practices contributed to miscalibration and startup with malfunctioning instrumentation."
+    },
+    {
+      "section": "Appendix S.2.2 Raffinate Splitter Level Transmitter LT-5100",
+      "pdf_page_index_zero_based": 321,
+      "report_page_label": 322,
+      "fact": "The CSB found that the transmitter calibration depended on fluid specific gravity at operating temperature; the instrument data sheet had not been updated since 1975 for the later ISOM process, technicians said the data sheets were not normally available to them, and the transmitter was not calibrated before startup."
+    }
+  ],
+  "four_layer_evidence_deconstruction": {
+    "contemporaneous_observations": [
+      "The level transmitter displayed readings below 100 percent and later a declining trend during startup.",
+      "The level sight glass was known to be dirty and unreadable.",
+      "The redundant high-level alarm did not provide the expected independent warning."
+    ],
+    "contemporaneous_known_deficiencies": [
+      "Operations personnel had reported before startup that the level transmitter produced inaccurate readings and needed calibration.",
+      "The level transmitter was not repaired before startup because supervisors determined there was insufficient turnaround time.",
+      "Required alarm and instrument functionality checks were not completed before startup, despite procedure sign-off indicating checks had been completed."
+    ],
+    "human_beliefs_and_actions": [
+      "The board operator considered the condition safe while the indicated level remained within the transmitter's reading span.",
+      "The board operator believed the declining level indication was accurate, and the lack of a redundant high-level alarm reinforced that belief.",
+      "Startup operations continued; this record does not convert that continuation into a synthetic READY judgment."
+    ],
+    "post_incident_findings": [
+      "The actual tower level was rising and the tower overfilled while the transmitter indicated less than 100 percent and falling.",
+      "The transmitter was not calibrated for the actual process-fluid specific gravity at operating temperature.",
+      "The calibration data sheet had not been updated since 1975, when the tower was used in a different process with a different feed fluid.",
+      "Instrument technicians stated that the calibration data sheets were not typically made available to them.",
+      "The transmitter had not been worked on or calibrated before startup."
+    ]
+  },
+  "frozen_contract_mapping": {
+    "mapping_status": "no_faithful_measurement_validity_field",
+    "executable_b2_input_produced": false,
+    "coercion_prohibited": true,
+    "rejected_approximate_mappings": [
+      {
+        "field": "pressure_test_passed",
+        "reason": "A process level transmitter's calibration and measurement validity are not a pressure-test result."
+      },
+      {
+        "field": "leak_detection_auto_shutoff_ready",
+        "reason": "The historical instrument was a tower level transmitter, not a gas leak detector or automatic gas shutoff witness."
+      }
+    ],
+    "unrepresentable_evidence": [
+      "instrument calibration validity",
+      "measurement validity under operating conditions",
+      "reference-data currency and process applicability",
+      "known instrument health/maintenance state",
+      "availability of an independent corroborating measurement"
+    ]
+  },
+  "paygod_execution": {
+    "status": "not_run",
+    "reason": "The external record cannot be mapped faithfully into the frozen Gas Site Readiness fields without inventing a semantically incorrect boolean."
+  },
+  "trust_dimensions": {
+    "integrity": "not_evaluated",
+    "issuer_authenticity": "not_verified",
+    "time_authority": "not_verified",
+    "source_attestation": "not_verified"
+  },
+  "gap": {
+    "classification_basis": "Assigned only after source deconstruction and frozen-contract mapping.",
+    "primary_class": "contract_gap",
+    "secondary_subtype": "missing_field_semantics",
+    "diagnostic_signals": [
+      "calibration_provenance",
+      "reference_data_currency",
+      "instrument_health",
+      "independent_cross_check_availability"
+    ],
+    "observed_fact": "The historical startup decision depended on instrument readings whose calibration validity, reference-data applicability, known maintenance state, and independent corroboration materially affected reliance, but the frozen Gas Site Readiness contract has no faithful field for those semantics.",
+    "why_current_contract_cannot_resolve_it": "The frozen contract models pressure testing, isolation valves, fire protection, leak detection, pre-operation notification, and warning signs. None of those fields can represent whether a process measurement is valid for current operating conditions or whether its calibration reference is current and applicable.",
+    "layer_candidate": "pack",
+    "requires_kernel_change": false
+  },
+  "non_claims": [
+    "PayGod did not discover, reproduce, or independently validate the BP Texas City incident findings.",
+    "No pressure-test or leak-detection boolean is inferred from the level-transmitter evidence.",
+    "The CSB's post-incident findings are not treated as evidence available to the operator before the explosion.",
+    "This case does not establish that a reusable calibration Evidence Profile is required; that remains a post-B2 design hypothesis subject to recurrence.",
+    "This case does not count toward the B2 real-case minimum.",
+    "No kernel change is authorized by this challenge."
+  ]
+}
