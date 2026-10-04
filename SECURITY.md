@@ -1,49 +1,80 @@
-# Security Policy
+# Security Policy & Governance Boundary Contract
 
-## Supported Versions
+## Architectural Governance
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
-| < 1.0   | :x:                |
+Security and architectural merge witnesses are evaluated independently within the repository CI boundary.
+
+- The current `main` development boundary is subject to the repository's active required CI and security gates.
+- A passing integrity or authenticity witness establishes only the property and scope explicitly tested by that witness.
+- Integrity does not establish provenance, external truth, regulatory authorization, or production fitness.
+- Production support lifecycle commitments, externally attested release provenance, institutional key-distribution governance, and independent release-signing infrastructure have not yet been declared or proven.
+
+## Current Security Testing Boundary
+
+Current automated security evaluation applies to the code and artifacts exercised by the active `main` branch CI contract.
+
+Historical artifacts are outside the current main-branch assurance boundary unless explicitly covered by a maintained regression witness.
+
+## Current Proven Claims
+
+The repository currently includes automated witnesses for areas including:
+
+- source/build regression testing;
+- dependency and source-code security scanning;
+- repository-boundary enforcement;
+- portable evidence integrity verification;
+- fail-closed tamper rejection;
+- detached Ed25519 receipt authentication against a recipient-supplied trust store.
+
+Each witness remains bounded by its documented non-claims.
+
+## Not Yet Proven
+
+The repository does not currently claim:
+
+- production-grade release provenance through GitHub Artifact Attestations;
+- universal Cosign/Sigstore release signing;
+- institutional key rotation or revocation governance;
+- regulator authorization;
+- production operational fitness;
+- commercial support lifecycle guarantees.
 
 ## Reporting a Vulnerability
 
-We take the security of Paygod Kernel seriously. If you discover a security vulnerability, please follow these steps:
+We take the security of Paygod Kernel seriously. If you discover a security vulnerability:
 
-1.  **Do NOT open a public GitHub issue.**
-2.  Email our security team at `security@paygod.org`.
-3.  Include a detailed description of the vulnerability and steps to reproduce it.
-4.  We will acknowledge your report within 48 hours.
+1. **Do NOT open a public GitHub issue.**
+2. Email `security@paygod.org`.
+3. Include a detailed description of the vulnerability and steps to reproduce it.
+4. Allow reasonable time for investigation and remediation before public disclosure.
 
 ## Disclosure Policy
-We follow a **Responsible Disclosure** policy:
-*   We ask that you give us a reasonable amount of time (90 days) to fix the issue before making it public.
-*   We will notify you when the fix is ready and coordinate the release of the advisory.
-*   We will credit you in the release notes (unless you prefer to remain anonymous).
 
-## Supply Chain Security
-To ensure the integrity of the Paygod Kernel:
-*   All releases are signed with **Cosign/Sigstore**.
-*   We publish **SBOMs** (Software Bill of Materials) in CycloneDX format for every release.
-*   The CI pipeline runs automated secret scanning (Gitleaks) and dependency checks.
+We follow a responsible-disclosure process:
 
+- Please avoid public disclosure while a reported vulnerability is being investigated and remediated.
+- We will coordinate disclosure when a fix is available.
+- Reporter credit may be included unless anonymity is requested.
 
-## Ledger & Evidence Data Minimization (MVP policy)
+## Ledger & Evidence Data Minimization
 
-**Ledger = immutable facts only, strictly non-PII.**  
+**Ledger = immutable decision facts only, strictly non-PII.**  
 **Evidence = references only (hashes, pointers, minimal metadata), never raw sensitive data.**
 
 Requirements:
-- Truth ledger entries MUST NOT contain PII, secrets, or raw payloads.
-- Evidence in MVP MUST be stored as references (IDs/URIs) plus integrity material (hashes/attestations).
-- Any sensitive content must remain outside the repo/ledger and be referenced only by pointer + hash.
+
+- Ledger entries MUST NOT contain PII, secrets, or raw payloads.
+- Evidence in the current MVP boundary MUST be stored as references (IDs/URIs) plus integrity material (hashes/attestations).
+- Sensitive source material must remain outside the repository and ledger and be represented only by the minimum required reference/commitment material.
 
 Rationale:
-- Minimizes breach impact.
-- Enables deterministic verification without storing sensitive material.
 
-## Branch Protection (required)
+- minimizes breach impact;
+- preserves the decision-evidence boundary;
+- enables deterministic verification without storing sensitive source payloads.
 
-For the Security Gate to be **merge-blocking**, `main` must enforce **Required status checks**.
-See `docs/SECURITY_ROADMAP.md` for exact check names and setup steps.
+## Required Merge Governance
+
+The canonical required merge-witness contract is defined in [GATES.md](GATES.md).
+
+A witness intended to be required MUST report a terminal status on every pull request targeting `main`. The effective GitHub ruleset and the written contract in `GATES.md` must remain aligned. Ruleset drift is a governance defect.
