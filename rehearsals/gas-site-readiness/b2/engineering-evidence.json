@@ -27,5 +27,26 @@
     "tamper_detection": true,
     "description": "The tested evidence path detects manifested-byte tamper and external receipt-commitment mismatch; a plain unsigned checklist/spreadsheet baseline does not supply this cryptographic commitment check by itself."
   },
-  "real_case_evidence_substitute": false
+  "real_case_evidence_substitute": false,
+  "p0_workflow_pilot": {
+    "classification": "simulated_shadow_pilot",
+    "status": "closed_pass_with_boundary",
+    "external_pilot": false,
+    "counts_as_b2_real": false,
+    "simulated_cases": 15,
+    "reviewer_outcomes": {
+      "READY": 0,
+      "HOLD": 9,
+      "REJECT": 6
+    },
+    "executable_cases": 0,
+    "paygod_run_cases": 0,
+    "not_run_cases": 15,
+    "evidence_admission_observation": "Missing, UNPROVEN, or semantically insufficient evidence was not coerced into false in order to execute the frozen boolean contract.",
+    "kernel_changed": false,
+    "pack_changed": false,
+    "manifest": "rehearsals/gas-site-readiness/p0-maintenance-workflow/ARTIFACT_MANIFEST.json",
+    "mapping_register": "rehearsals/gas-site-readiness/p0-maintenance-workflow/p0-mapping-register.json",
+    "architecture_record": "adrs/0003-evidence-admission-before-decision-execution.md"
+  }
 }
