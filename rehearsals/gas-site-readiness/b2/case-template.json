@@ -1,8 +1,14 @@
 {
   "case_id": "B2-REAL-XX",
+  "candidate_status": "candidate",
   "source_type": "real_deidentified",
   "deidentified": true,
   "decision_owner_role": "",
+  "historical_cutoff": {
+    "decision_date": "",
+    "custodian_cutoff_frozen": true,
+    "notes": ""
+  },
   "evidence_at_decision_time": {
     "site_id": "",
     "evidence_site_id": "",
@@ -17,10 +23,20 @@
   "human_judgment_before_paygod": {
     "decision": "",
     "evidence_refs": [],
-    "unrepresentable_evidence": []
+    "unrepresentable_evidence": [],
+    "normative_professional_basis": [],
+    "positive_nonconformance_evidence_refs": [],
+    "mandatory_absence_rule_ids": []
+  },
+  "evidence_admission": {
+    "withheld_fields": [],
+    "unrepresentable_evidence": [],
+    "executability_gate": "PENDING",
+    "not_run_reason": ""
   },
   "paygod_result": {
-    "decision": "",
+    "execution": "",
+    "decision": null,
     "integrity_verified": null,
     "issuer_authenticity": ""
   },
