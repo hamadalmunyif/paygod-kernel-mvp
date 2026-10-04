@@ -1,0 +1,149 @@
+{
+  "case_id": "B2-EXT-FERC-001",
+  "case_class": "B2-EXT",
+  "gating": false,
+  "title": "Iron Bank Meter Station — external regulatory release-boundary challenge",
+  "source": {
+    "issuer": "Federal Energy Regulatory Commission",
+    "source_class": "official_regulatory_record",
+    "docket_id": "CP18-499-000",
+    "project": "Iron Bank Meter Station Project",
+    "operator": "Rover Pipeline LLC",
+    "environmental_assessment_url": "https://www.ferc.gov/sites/default/files/2020-04/CP18-499-EA.pdf",
+    "later_official_record_url": "https://www.ferc.gov/sites/default/files/2025-10/CP25-535-000.pdf",
+    "binding_method": "official FERC domain + docket identity + Environmental Assessment conditions + later official FERC record quoting the May 23, 2019 authorization and its stated evidentiary basis",
+    "original_2019_authorization_artifact_directly_retrieved": false
+  },
+  "historical_evidence_cutoff": {
+    "basis": "Evidence available before issuance of the May 23, 2019 Authorization to Commence Service.",
+    "exact_issuance_time_established": false,
+    "rule": "No hour-level cutoff is invented. Later descriptions of the authorization may corroborate what FERC says it relied upon but are not backfilled as contemporaneous evidence."
+  },
+  "source_locators": [
+    {
+      "source": "CP18-499 Environmental Assessment",
+      "location": "A.1 Introduction / A.2 Purpose and Need",
+      "fact": "The project is the Iron Bank Meter Station Project in Docket CP18-499-000. FERC staff prepared the Environmental Assessment for use in the Commission's decision process concerning whether to authorize Rover's proposal."
+    },
+    {
+      "source": "CP18-499 Environmental Assessment",
+      "location": "Recommended Environmental Condition 8",
+      "fact": "Rover was required to file recurring status reports covering construction status, problems and noncompliance, corrective actions, complaints, and related regulatory correspondence until construction and restoration activities were complete."
+    },
+    {
+      "source": "CP18-499 Environmental Assessment",
+      "location": "Recommended Environmental Condition 10",
+      "fact": "Rover was required to receive written authorization from the Director of the Office of Energy Projects before placing the project into service; such authorization would be granted only after a determination that rehabilitation and restoration of affected areas were proceeding satisfactorily."
+    },
+    {
+      "source": "CP25-535-000 official FERC record",
+      "location": "footnote 52 quoting the May 23, 2019 CP18-499 authorization",
+      "fact": "FERC's later official record states that the May 23, 2019 authorization was granted on the basis of Commission staff's April 1, 2019 field inspection and Rover's May 21, 2019 construction status report, which included photographic evidence and reported progress for restoration activities."
+    }
+  ],
+  "evidence_deconstruction": {
+    "contemporaneous_evidence_and_observations": [
+      "Commission staff field inspection dated April 1, 2019, as identified by FERC's later official record.",
+      "Rover construction status report dated May 21, 2019, as identified by FERC's later official record.",
+      "Photographic evidence included with the May 21 status report, as described by FERC.",
+      "Reported progress for restoration activities, as described by FERC."
+    ],
+    "contemporaneous_known_requirements_and_controls": [
+      "Written OEP authorization was required before the project could be placed into service.",
+      "The stated predicate for that authorization was a determination that rehabilitation and restoration of the right-of-way and other project-affected areas were proceeding satisfactorily.",
+      "Recurring construction/restoration status reporting was part of the environmental compliance control structure."
+    ],
+    "human_or_regulatory_decision": {
+      "decision": "Authorization to Commence Service",
+      "issuance_date": "2019-05-23",
+      "decision_source_status": "confirmed by later official FERC record quoting the original authorization",
+      "exact_signatory_not_asserted_from_selected_sources": true,
+      "effect": "permission to cross the FERC in-service authorization boundary under the cited environmental condition"
+    },
+    "subsequent_operational_state": {
+      "actual_in_service_transition_date_established_by_selected_sources": false,
+      "note": "The selected sources establish the authorization boundary and its issuance, not the exact later physical service-transition timestamp."
+    }
+  },
+  "frozen_contract_mapping": {
+    "mapping_status": "out_of_contract_scope",
+    "executable_b2_input_produced": false,
+    "coercion_prohibited": true,
+    "candidate_identifiers": {
+      "site_id": "Iron_Bank_Meter_Station",
+      "evidence_site_id": "ferc_cp18_499_release_record"
+    },
+    "field_probes": [
+      {
+        "field": "pressure_test_passed",
+        "candidate_assignment": "withheld",
+        "reason": "The selected authorization evidence concerns restoration progress and regulatory release, not a qualifying pressure-test witness."
+      },
+      {
+        "field": "isolation_valves_ready",
+        "candidate_assignment": "withheld",
+        "reason": "The selected sources do not establish isolation-valve physical state."
+      },
+      {
+        "field": "fire_protection_ready",
+        "candidate_assignment": "withheld",
+        "reason": "The selected sources do not establish fire-protection readiness."
+      },
+      {
+        "field": "leak_detection_required",
+        "candidate_assignment": "withheld",
+        "reason": "The selected sources do not establish the frozen contract's leak-detection requirement fact."
+      },
+      {
+        "field": "leak_detection_auto_shutoff_ready",
+        "candidate_assignment": "withheld",
+        "reason": "The selected sources do not establish automatic leak-detection shutoff readiness."
+      },
+      {
+        "field": "preoperation_notification_evidence",
+        "candidate_assignment": "withheld",
+        "reason": "A written regulatory authorization to enter service is not coerced into a notification-evidence boolean."
+      },
+      {
+        "field": "warning_signs_installed",
+        "candidate_assignment": "withheld",
+        "reason": "The selected sources do not establish warning-sign installation."
+      }
+    ],
+    "unrepresentable_in_frozen_gas_site_contract": [
+      "external regulatory authority identity and role",
+      "requirement for written authorization before service",
+      "relationship between bounded evidence and an external authorization decision",
+      "permission-to-enter-service state transition",
+      "environmental rehabilitation/restoration progress as the stated release predicate"
+    ]
+  },
+  "paygod_execution": {
+    "status": "not_run",
+    "reason": "No faithful complete frozen Gas Site Readiness input can be produced from the selected FERC release record without inventing unrelated readiness booleans."
+  },
+  "trust_dimensions": {
+    "integrity": "not_evaluated",
+    "issuer_authenticity": "not_verified",
+    "time_authority": "not_verified",
+    "source_attestation": "not_verified"
+  },
+  "gap_assessment": {
+    "classification_status": "no_gap_classification",
+    "primary_class": null,
+    "secondary_subtype": null,
+    "architecture_defect_inferred": false,
+    "reason": "The selected FERC record demonstrates a valid external regulatory release workflow that is materially different from the frozen Gas Site Readiness decision. Absence of FERC authority/release semantics from that domain-specific frozen contract is not, by itself, evidence of a contract or kernel defect.",
+    "diagnostic_observation": "The record exposes an evidence-to-authority-to-permission relationship that may be relevant to future cross-domain extension design if the same requirement recurs in qualifying operational workflows.",
+    "future_hypothesis_only": "decision_authority_and_release",
+    "requires_kernel_change": false
+  },
+  "non_claims": [
+    "PayGod does not substitute for FERC, issue federal authorizations, or prove legal compliance.",
+    "The selected FERC materials do not establish the frozen Gas Site Readiness pressure, valve, fire-protection, leak-detection, notification, or warning-sign booleans.",
+    "The May 23, 2019 authorization is not treated as proof of complete mechanical or physical readiness.",
+    "The later FERC record is used to identify FERC's stated evidentiary basis for the 2019 authorization; it is not silently treated as a contemporaneous 2019 artifact.",
+    "No decision-authority primitive, release primitive, Pack change, or kernel change is authorized by this challenge.",
+    "This case does not count toward the B2 real-case minimum."
+  ]
+}
