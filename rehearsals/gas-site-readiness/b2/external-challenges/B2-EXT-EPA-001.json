@@ -80,8 +80,8 @@
     }
   },
   "frozen_contract_mapping": {
-    "mapping_status": "no_faithful_complete_frozen_input",
-    "domain_scope_status": "under_evaluation",
+    "mapping_status": "out_of_contract_scope",
+    "domain_scope_status": "out_of_contract_scope",
     "executable_b2_input_produced": false,
     "coercion_prohibited": true,
     "candidate_identifiers": {
@@ -145,16 +145,14 @@
     "source_attestation": "not_verified"
   },
   "gap_assessment": {
-    "classification_status": "under_evaluation",
+    "classification_status": "no_gap_classification",
     "primary_class": null,
     "secondary_subtype": null,
     "architecture_defect_inferred": false,
     "candidate_interpretations": [
-      "out_of_contract_scope",
-      "contract_gap",
       "cross_domain_compositional_hypothesis"
     ],
-    "diagnostic_observation": "The EPA workflow links pre-transition prerequisites to written approval, permits a bounded operational transition, and imposes a timed post-transition evidence obligation. Whether that pattern belongs inside Gas Site Readiness, a separate domain Pack, or a reusable cross-domain extension must not be decided before mapping review.",
+    "diagnostic_observation": "The EPA workflow links pre-transition prerequisites to written approval, permits a bounded operational transition, and imposes a timed post-transition evidence obligation. Those semantics are materially different from the frozen Gas Site Readiness decision contract. Their absence from that domain-specific contract is therefore not classified as a contract or kernel defect. The recurring prerequisite-to-authority-to-transition pattern remains only a cross-domain architecture hypothesis for later testing against qualifying B2-REAL workflows.",
     "future_hypothesis_only": "conditional_release_and_post_transition_evidence",
     "requires_kernel_change": false,
     "gap_register_entry_created": false
