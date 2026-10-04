@@ -34,7 +34,7 @@ Current evidence fields:
 - `preoperation_notification_evidence`
 - `warning_signs_installed`
 
-If a real human decision depends on evidence outside these fields, record it as a **contract gap** or **provenance gap**. Do not silently translate it into an existing field.
+If a real human decision depends on evidence outside these fields, record that evidence as **unrepresentable** and do not silently translate it into an existing field. Any later `contract_gap` or `provenance_gap` classification requires the normal diagnostic/comparison process; non-executability alone does not create a formal gap.
 
 ### Pre-kernel evidence admission boundary
 
