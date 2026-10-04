@@ -53,6 +53,10 @@ Acceptable exclusion reasons include:
 
 PayGod output MUST NOT be used as an inclusion or exclusion criterion.
 
+All cases selected by the frozen sampling rule enter candidate-register.csv before PayGod output is observed.
+
+Candidate status is preserved even if a case later fails representability, evidence admission, or the Executability Gate. Such a case may be NOT RUN and does not count toward the minimum qualifying B2 cases, but it MUST NOT disappear from the candidate history or be silently replaced because of incompleteness or an inconvenient outcome.
+
 ## 3. Two-Zone Evidence Handling Model
 
 ### Zone A — Restricted Source Vault
@@ -112,6 +116,16 @@ Evidence discovered or created later MUST be classified separately as `post_deci
 
 The case custodian establishes an evidence cut-off before the independent reviewer begins.
 
+Cut-off classification is frozen as follows:
+
+- document date earlier than the historical decision date → BEFORE/AT;
+- document date later than the historical decision date → AFTER;
+- document date on the same calendar day → BEFORE/AT only when the original record itself proves that the document/action preceded the decision or formed part of it, for example by an original timestamp or explicit source wording;
+- same-day evidence without that proof → UNPROVEN;
+- date not visible in the original → UNPROVEN.
+
+AFTER and UNPROVEN evidence remain preserved but are not promoted into the historical frozen input.
+
 ## 6. Frozen PayGod Input
 
 Only the existing B2 fields may enter the frozen decision contract:
@@ -135,15 +149,36 @@ Examples:
 
 Record such facts as unrepresentable evidence.
 
-## 7. Independent Human Judgment
+## 7. Evidence Admission and Executability Gate
+
+Evidence admission occurs after source capture and human-judgment freeze, but before PayGod execution.
+
+For each frozen field:
+
+- TRUE may be assigned only when evidence admissible at the historical cut-off directly supports the field meaning;
+- FALSE may be assigned only when evidence admissible at the historical cut-off directly supports failure, non-readiness, or an explicit not-required condition represented by that field;
+- missing evidence, an absent document, an invisible date, UNPROVEN timing, or evidence that does not prove the frozen field meaning MUST NOT be silently converted to FALSE;
+- a fact that cannot be faithfully represented by a frozen field is recorded as unrepresentable rather than approximated.
+
+WITHHELD is the workflow label for a required frozen value that cannot be assigned without inference or coercion. WITHHELD is not a kernel value and does not modify the boolean contract.
+
+If any required frozen field remains WITHHELD, the Executability Gate fails:
+
+Evidence Admission → WITHHELD → NOT RUN.
+
+NOT RUN is a pre-kernel orchestration result. It is not a PayGod verdict and MUST NOT be recorded as READY, HOLD, REJECT, allow, flag, or deny.
+
+Only an executable candidate proceeds to the canonical PayGod decision path.
+
+## 8. Independent Human Judgment
 
 The independent reviewer MUST record a judgment before seeing PayGod output.
 
 Allowed decisions:
 
-- `READY`
-- `HOLD`
-- `REJECT`
+- `READY` — evidence available at the cut-off is sufficient for the reviewer to permit the transition;
+- `HOLD` — evidence is insufficient, missing, unproven, or ambiguous and there is no positive evidence of failure;
+- `REJECT` — there is positive evidence in the package of non-conformance/failure, or a pre-frozen policy rule explicitly makes absence of a specified required artifact a rejection condition.
 
 Record:
 
@@ -152,26 +187,35 @@ Record:
 - evidence references actually relied upon;
 - important evidence considered;
 - evidence that affected the decision but cannot be represented in the frozen PayGod contract.
+- normative/professional basis used by the reviewer, separately from case evidence;
+- whether positive evidence of non-conformance was present and its evidence reference;
+- whether a pre-frozen mandatory-absence rejection rule was invoked and its rule identifier.
+
+Case Evidence, Professional/Normative Knowledge, Decision Semantics, and the Kernel Decision are separate records. Professional thresholds or standards used by the reviewer MUST NOT be relabeled as facts contained in the case evidence.
 
 The pre-PayGod judgment MUST NOT be overwritten after PayGod output is revealed. A later interpretation may be recorded separately.
 
-## 8. PayGod Execution
+## 9. PayGod Execution
 
-After the human judgment is frozen:
+After the human judgment is frozen and the Executability Gate passes:
 
 1. Produce the normalized frozen B2 input.
 2. Run PayGod.
-3. Record `READY`, `HOLD`, or `REJECT`.
+3. Record READY, HOLD, or REJECT.
 4. Produce the evidence bundle.
 5. Verify bundle integrity independently.
-6. Record issuer-authenticity state as `verified`, `not_verified`, or `failed`.
+6. Record issuer-authenticity state as verified, not_verified, or failed.
 7. Preserve the original machine-readable result.
+
+If the Executability Gate fails, record NOT RUN and do not synthesize missing booleans merely to obtain a PayGod output.
 
 The operator MUST NOT modify case input to force agreement.
 
-## 9. Agreement and Gap Classification
+## 10. Agreement and Gap Classification
 
-Every case records `agreement=true|false`.
+Every executed qualifying case records agreement=true|false.
+
+For a NOT RUN candidate, agreement and disagreement classification are N/A because no PayGod comparison occurred. Diagnostic observations may still be recorded, but they MUST NOT be promoted into a formal disagreement class merely because admission was withheld.
 
 A disagreement MUST receive exactly one primary classification from the existing B2 contract:
 
@@ -200,7 +244,7 @@ Recommended secondary subtypes include:
 
 Secondary subtypes are diagnostic only and do not alter the primary class consumed by the current readiness checker.
 
-## 10. Timing Protocol
+## 11. Timing Protocol
 
 Use the same start/stop definition for every case.
 
@@ -226,7 +270,7 @@ Stop: recipient can identify the decision, commitments, and verification boundar
 
 Do not compare unlike timing categories as if they measured the same operational activity.
 
-## 11. Recipient Comprehension
+## 12. Recipient Comprehension
 
 Recipient testing occurs without producer coaching during the verification task.
 
@@ -243,7 +287,7 @@ Any misunderstanding that could materially change reliance on the result is reco
 
 The current B2 readiness contract measures qualifying independent non-developer verification events and must not be silently changed during collection.
 
-## 12. Non-gating Gap Register
+## 13. Non-gating Gap Register
 
 Maintain a separate diagnostic gap register with:
 
@@ -267,7 +311,7 @@ Suggested `layer_candidate` values:
 
 This field is diagnostic only. It does not authorize implementation.
 
-## 13. Stop-Build Rule During B2
+## 14. Stop-Build Rule During B2
 
 A discovered gap does not authorize immediate coding.
 
@@ -279,7 +323,7 @@ No kernel change may be made unless the evidence supports `kernel_defect`.
 
 Contract, provenance, time, source-authentication, and workflow deficiencies remain recorded for post-B2 design.
 
-## 14. B2 Exit Evidence
+## 15. B2 Exit Evidence
 
 B2 produces:
 
