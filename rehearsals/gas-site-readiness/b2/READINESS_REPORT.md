@@ -61,6 +61,25 @@ Recipient must explain:
 
 These are engineering witnesses. They do not substitute for real B2 cases.
 
+## P0 workflow / evidence-admission witness
+
+P0 — Gas Maintenance Workflow & Evidence-Admission Pilot is closed as a simulated shadow pilot with a bounded PASS.
+
+- classification: simulated_shadow_pilot
+- external pilot: false
+- counts as B2 real: false
+- simulated cases: 15
+- frozen reviewer outcomes: READY 0 / HOLD 9 / REJECT 6
+- executable cases after strict mapping/admission: 0 / 15
+- PayGod executions for the P0 15-case sample: 0
+- NOT RUN cases: 15 / 15
+- kernel change: none
+- frozen Gas Site Readiness pack change: none
+
+P0 demonstrated the workflow boundary that missing, temporally unproven, or semantically insufficient evidence is not silently coerced into a boolean merely to make the kernel executable. It does not substitute for the B2 real/de-identified case minimum.
+
+Source records and detailed mapping are referenced by the P0 manifest and registers under rehearsals/gas-site-readiness/p0-maintenance-workflow/.
+
 ## Remaining non-claims
 
 Even a passing B2 does not prove:
