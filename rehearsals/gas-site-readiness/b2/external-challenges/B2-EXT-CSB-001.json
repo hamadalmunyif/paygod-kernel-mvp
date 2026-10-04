@@ -1,0 +1,89 @@
+{
+  "case_id": "B2-EXT-CSB-001",
+  "case_class": "B2-EXT",
+  "gating": false,
+  "title": "Giant Industries Ciniza refinery — isolation-state verification challenge",
+  "source": {
+    "issuer": "U.S. Chemical Safety and Hazard Investigation Board",
+    "source_class": "independent_public_investigation",
+    "report_number": "2004-08-I-NM",
+    "incident_date": "2004-04-08",
+    "report_release_date": "2005-10-26",
+    "investigation_url": "https://www.csb.gov/giant-industries-refinery-explosions-and-fire/",
+    "report_url": "https://www.csb.gov/assets/1/20/giant_case_study.pdf",
+    "binding_method": "official CSB domain + report number + release date + source locators",
+    "content_digest_status": "not_recorded_in_initial_challenge"
+  },
+  "source_locators": [
+    {
+      "pdf_page_index_zero_based": 2,
+      "fact": "The operator used wrench orientation to infer valve state; the valve was actually open. A mechanic observed the valve position indicator showing open and did not communicate that observation."
+    },
+    {
+      "pdf_page_index_zero_based": 3,
+      "fact": "Locks and tags were applied and the mechanics believed the valve-closing task had been completed, although they had not observed the operator closing the valve."
+    },
+    {
+      "pdf_page_index_zero_based": 4,
+      "fact": "After flow through the vent hose subsided, personnel believed the pump was depressurized; the CSB later found the vent line was plugged and the pump was not depressurized."
+    },
+    {
+      "pdf_page_index_zero_based": 9,
+      "fact": "The CSB concluded that isolation and depressurization had not been adequately verified before lockout/tagout."
+    },
+    {
+      "pdf_page_index_zero_based": 10,
+      "fact": "The lessons learned call for effective verification that equipment is isolated, depressurized, and drained."
+    }
+  ],
+  "historical_boundary": {
+    "workflow_context": "maintenance isolation and pump removal",
+    "human_belief_at_time": "The pump was treated as isolated and depressurized and therefore ready for removal.",
+    "contemporaneous_evidence_used": [
+      "valve wrench orientation",
+      "locks and tags",
+      "vent flow that subsided"
+    ],
+    "contemporaneous_counterevidence": [
+      "a mechanic observed the valve position indicator showing the suction valve open but did not communicate the observation"
+    ],
+    "post_incident_findings": [
+      "the suction valve was open",
+      "the vent line was plugged",
+      "the pump was not depressurized",
+      "isolation and depressurization were not adequately verified"
+    ],
+    "post_incident_findings_must_not_be_backfilled_as_historical_input": true
+  },
+  "trust_dimensions": {
+    "integrity": "not_evaluated",
+    "issuer_authenticity": "not_verified",
+    "time_authority": "not_verified",
+    "source_attestation": "not_verified"
+  },
+  "frozen_contract_probe": {
+    "field": "isolation_valves_ready",
+    "candidate_assignment": "withheld",
+    "reason": "The public record contains a human belief of closed/isolation, contradictory contemporaneous position-indicator evidence, and later findings about the actual physical state. Assigning a historical boolean would collapse evidence provenance and knowledge state or import hindsight."
+  },
+  "paygod_execution": {
+    "status": "not_run",
+    "reason": "No faithful frozen B2 input is produced by coercing this maintenance-isolation record into a Gas Site Readiness boolean. The challenge is diagnostic and non-gating."
+  },
+  "gap": {
+    "primary_class": "provenance_gap",
+    "secondary_subtype": "physical_state_verification",
+    "observed_fact": "Personnel treated the equipment as isolated and depressurized, while contemporaneous physical-state evidence conflicted with that belief and was not effectively incorporated into the decision.",
+    "why_current_contract_cannot_resolve_it": "The frozen boolean can carry a declared isolation-readiness state, but it does not encode how the physical state was observed, whether observations conflict, or what evidence was available to the decision maker.",
+    "layer_candidate": "evidence_profile",
+    "requires_kernel_change": false
+  },
+  "mapping_status": "partial_semantic_analogy",
+  "non_claims": [
+    "This maintenance-isolation workflow is not identical to the frozen Gas Site Readiness workflow.",
+    "This case does not count toward the B2 real-case minimum.",
+    "PayGod did not discover the incident cause and no automated physical-state detection is claimed.",
+    "The CSB report is used as an independent historical challenge source, not as proof of production source attestation or trusted time.",
+    "No kernel change is authorized by this single challenge."
+  ]
+}

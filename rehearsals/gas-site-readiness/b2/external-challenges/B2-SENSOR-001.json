@@ -1,0 +1,73 @@
+{
+  "case_id": "B2-SENSOR-001",
+  "case_class": "B2-SENSOR",
+  "gating": false,
+  "title": "Public prototype repository — software-to-physical provenance challenge",
+  "source": {
+    "repository": "RSN601KRI/GasDetection",
+    "repository_url": "https://github.com/RSN601KRI/GasDetection",
+    "master_commit": "abfb2d9e915ea67e71ee2ec72cfb9edaffeacd4e",
+    "main_commit": "af850f475e8374cb6b24567a6793dd7e76a1ff40",
+    "artifacts": [
+      {
+        "path": "ardino.cpp",
+        "ref": "master",
+        "git_blob_sha": "eff0150c3e412f094f19b9cb29b0004b556da470",
+        "sha256": "a95cf0db11755203075813ba2f82f73f78a1290632ca7d0c7df4e9f87458d10b"
+      },
+      {
+        "path": "GasDetection-master/wifi.ino",
+        "ref": "main",
+        "git_blob_sha": "bf5ecbda9252df87ed11d3b4ea4b7fb3bfa1c650",
+        "sha256": "d5fc4026d726f550a105c4d0a5f144026df2e51d520fe6908951728448472830"
+      }
+    ],
+    "third_party_code_copied": false,
+    "secret_values_reproduced": false
+  },
+  "observed_repository_facts": {
+    "digital_gas_detection_path_present": true,
+    "analog_threshold_logic_present": true,
+    "configured_threshold": 100,
+    "remote_event_path_present": true,
+    "actuation_logic_present": true,
+    "repository_secret_exposure_observed": true
+  },
+  "not_established": [
+    "sensor identity",
+    "calibration status",
+    "measurement units",
+    "sensor health",
+    "trusted observation time",
+    "physical actuator binding",
+    "physical valve state",
+    "historical runtime telemetry",
+    "historical operator decision"
+  ],
+  "trust_dimensions": {
+    "integrity": "not_evaluated",
+    "issuer_authenticity": "not_verified",
+    "time_authority": "not_verified",
+    "source_attestation": "not_verified"
+  },
+  "frozen_contract_probe": {
+    "field": "leak_detection_auto_shutoff_ready",
+    "candidate_assignment": "withheld",
+    "reason": "The inspected source establishes software paths but does not establish that a particular calibrated physical sensor and actuator produced and executed a particular event. Promoting the code path to physical readiness would exceed the evidence."
+  },
+  "gap": {
+    "primary_class": "provenance_gap",
+    "secondary_subtype": "sensor_identity_and_calibration",
+    "observed_fact": "The public prototype contains gas-sensor read paths, a fixed analog threshold, remote event routing, and actuation logic, but the inspected repository does not establish hardware identity, calibration, health, physical binding, or historical runtime telemetry.",
+    "why_current_contract_cannot_resolve_it": "The frozen decision contract can represent a declared readiness state, but the inspected source does not establish the provenance required to promote the observed software path into a trusted physical-readiness fact.",
+    "layer_candidate": "evidence_profile",
+    "requires_kernel_change": false
+  },
+  "non_claims": [
+    "The presence of sensor and actuation code does not establish physical site readiness.",
+    "The repository does not establish that a specific physical sensor or actuator produced or executed a specific event.",
+    "The observed repository secret exposure does not prove the absence of every external hardware-bound provenance control.",
+    "This case does not count toward the B2 real-case minimum.",
+    "No automatic kernel rejection is claimed; the B2 evidence protocol withholds the unsupported physical-readiness assertion."
+  ]
+}
