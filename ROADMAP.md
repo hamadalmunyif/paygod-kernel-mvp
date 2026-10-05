@@ -95,13 +95,18 @@ Current SDK configuration targets Base chain 8453 at `0x238E541BfefD82238730D00a
 
 Initial preferred current-rail transition: evaluator-mediated `SUBMITTED → COMPLETED` for jobs with an explicit non-zero evaluator.
 
-X1 begins at Level 0:
-- pin source/deployment facts;
-- identify live chain/contracts before operational claims;
-- determine whether real jobs and predecessor state can be reconstructed;
-- freeze transition, evidence-cutoff, and candidate-sampling rules before PayGod outcomes;
-- keep PayGod shadow-only;
-- prohibit kernel mutation.
+**Level 0 is CLOSED.** PR #99 captured and preserved the frozen block-bound deployment-binding method against Base reference block `52189048`, including the proxy/implementation binding and non-empty deployed-code identities. Every later real X1 case must repeat that binding at its own predecessor block.
+
+The next X1 step is **X1-R0 — one bounded instrumentation case**:
+- capture the exact live provider/offering object and requirement schema before purchase;
+- freeze request, acceptance criteria, actors, evidence cut-off, and native-decision commitment;
+- approve a separate maximum total economic exposure before any wallet funding, USDC transfer, or paid job creation;
+- preserve participant-visible pre-decision evidence prospectively;
+- keep PayGod shadow-only and commit its output only after the native evaluator decision is committed;
+- observe the actual successor state and economic outcome;
+- diagnose what PayGod could observe, represent, admit, decide, verify, and add beyond the native transition.
+
+R0 measures the current capability boundary; it is not proof of protocol independence, market value, causal PayGod authority, or production readiness.
 
 X1 may falsify or support hypotheses such as predecessor-state binding and post-flight conformance. It does not promote them to current primitives.
 
