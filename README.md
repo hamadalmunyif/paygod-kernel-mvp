@@ -108,8 +108,8 @@ The repository-wide **stop-build is ACTIVE**. Feature and security-capability ex
 Current validation work is:
 
 1. **B2-REAL** — collect qualifying real/de-identified Gas Site Readiness cases under the frozen evidence-admission protocol. Current qualifying count remains 0 / 10.
-2. **Virtuals X1** — open a separate, non-gating external consequential-transition research track. It may observe and challenge the architecture but may not mutate the kernel merely to fit Virtuals.
-3. Promote predecessor-state binding, post-flight conformance, next-transition eligibility, or other new primitives only after a new external witness demonstrates recurrence and operational value.
+2. **Virtuals X1** — Level 0 research freeze is **CLOSED** after the block-bound Base deployment witness in PR #99. The next step is one bounded **X1-R0 instrumentation case** under the frozen method. R0 remains shadow-only, the Kernel remains unchanged, and paid execution is not authorized until a separate explicit economic cap is approved.
+3. Promote predecessor-state binding, post-flight conformance, next-transition eligibility, conditional-release authority, or other new primitives only after external witnesses demonstrate recurrence and operational value.
 
 Do not treat P0, B2, or Virtuals X1 research as evidence of market demand, regulator approval, external evidence truth, or autonomous execution authority.
 
