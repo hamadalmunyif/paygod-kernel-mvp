@@ -1,6 +1,6 @@
 # X1 Deployment Binding Method — Current ACP Rail
 
-Status: FROZEN METHOD — EXECUTION WITNESS STILL REQUIRED  
+Status: FROZEN METHOD — LEVEL 0 REFERENCE WITNESS CAPTURED; CASE REPEAT REQUIRED  
 Applies to: Base mainnet / current ACP Node v2 / AgenticCommerceV3  
 Chain id: `8453`  
 Current ACP proxy candidate: `0x238E541BfefD82238730D00a2208E5497F1832E0`
@@ -111,6 +111,29 @@ raw evidence references
 method/version
 limitations
 ```
+
+## Level 0 reference witness
+
+The frozen method was executed successfully against Base mainnet block `52189048` (`0x31c5778`) with block hash:
+
+`0x565c9c7f6ac17d383f14c8453c1d369c0ffb55a2afcbe31d55c5daa39bf55151`
+
+The ERC-1967 implementation slot returned:
+
+`0x0000000000000000000000008e86fbef4a4c927561cb6447ced77fffbf3b77bc`
+
+therefore binding the sampled proxy to implementation:
+
+`0x8e86fbef4a4c927561cb6447ced77fffbf3b77bc`
+
+Recorded code identities at that same block:
+
+- proxy Keccak-256: `0xfc16c7f571d8b1443fb5ef7a46304acb87f7a1f6d065d9d3162ec0af13f42aae`;
+- implementation Keccak-256: `0xc47c1f4ca03bd0be464d0a94eb2b6e4c9c112306b42b22d8400b8dada47848b5`.
+
+Canonical witness material is under `witnesses/DEPLOYMENT_WITNESS_001/`.
+
+This closes only the Level 0 reference-witness requirement. It does not waive case-specific repetition.
 
 ## Case repetition
 
