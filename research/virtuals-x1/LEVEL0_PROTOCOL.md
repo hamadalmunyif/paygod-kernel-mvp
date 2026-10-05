@@ -1,6 +1,6 @@
 # X1 Level 0 Protocol — Research Freeze
 
-Status: OPEN — METHOD FROZEN; DEPLOYMENT WITNESS BLOCKING
+Status: CLOSED — RESEARCH FREEZE COMPLETE; R0 SPEND STILL UNAUTHORIZED
 
 Purpose: establish external facts and freeze the first current-rail experiment before observing PayGod outcomes.
 
@@ -20,7 +20,7 @@ A source constant is not proof of historical/live implementation identity.
 | Question | Current disposition |
 | --- | --- |
 | Current rail/source pins | RESOLVED |
-| Current ACP address from pinned SDK | RESOLVED AS SOURCE FACT — not yet block-bound deployment proof |
+| Current ACP address from pinned SDK | RESOLVED AS SOURCE FACT; reference deployment binding captured separately |
 | Target transition | FROZEN: `SUBMITTED → COMPLETED` with explicit non-zero evaluator |
 | Zero-evaluator completion ambiguity | RESOLVED by current-runtime exclusion witness |
 | Public chain vs ACP history boundary | RESOLVED at authentication boundary; unrelated-job authorization scope remains unclaimed |
@@ -31,7 +31,7 @@ A source constant is not proof of historical/live implementation identity.
 | Provider/offering selection method | FROZEN |
 | Case register / reconstruction record | FROZEN |
 | Deployment/proxy/implementation method | FROZEN in `DEPLOYMENT_BINDING_METHOD.md` |
-| Independent deployment witness at a Base reference block | **OPEN — BLOCKER** |
+| Independent deployment witness at a Base reference block | **CAPTURED — block 52189048** |
 | Paid R0 execution | NOT AUTHORIZED; economic cap remains separate human approval |
 
 ## Current target transition
@@ -84,7 +84,7 @@ Level 0 does not close merely because the official SDK names the current contrac
 
 The repository now freezes the binding method in `DEPLOYMENT_BINDING_METHOD.md`.
 
-Before Level 0 closure, X1 MUST capture one independent current Base reference-block witness containing at least:
+Level 0 captured one independent current Base reference-block witness containing:
 
 ```text
 chain_id = 8453
@@ -103,7 +103,9 @@ implementation bytecode hash @ B
 raw evidence references
 ```
 
-This reference witness demonstrates that the method works and independently binds the current deployment at that block.
+The canonical pinned witness is stored under `witnesses/DEPLOYMENT_WITNESS_001/` and records block `52189048`, block hash `0x565c9c7f6ac17d383f14c8453c1d369c0ffb55a2afcbe31d55c5daa39bf55151`, implementation `0x8e86fbef4a4c927561cb6447ced77fffbf3b77bc`, and non-empty proxy/implementation bytecode hashes.
+
+This demonstrates that the method works and independently binds the sampled deployment at that block.
 
 Every later real case MUST repeat the same binding at its own predecessor block.
 
@@ -167,9 +169,11 @@ The repository now has or has frozen:
 - explicit exclusions/non-claims;
 - no kernel change.
 
-The remaining exit artifact is:
+The final Level 0 exit artifact has now been captured:
 
-- **one raw current Base deployment-binding witness produced with the frozen method.**
+- **one raw current Base deployment-binding witness produced with the frozen method and re-run against an exact pinned block.**
+
+Level 0 is methodologically CLOSED. This closure does not authorize a paid R0 action; the live spending cap remains a separate explicit human gate.
 
 ## Stop conditions
 
