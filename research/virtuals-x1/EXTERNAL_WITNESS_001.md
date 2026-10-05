@@ -77,7 +77,7 @@ Therefore this record MUST NOT be used as the first current-rail X1 comparison c
 After this witness was recorded, Level 0 identified a newer official ACP stack:
 
 - `Virtual-Protocol/acp-node-v2`
-- Base current SDK contract `0x238E541BefD82238730D00a2208E5497F1832E0`
+- Base current SDK contract `0x238E541BfefD82238730D00a2208E5497F1832E0`
 - current workflow `submitted → completed/rejected`
 
 The historical witness remains preserved; the target rail changes rather than rewriting the old observation.
