@@ -2,57 +2,71 @@
 
 Status: OPEN
 
-Purpose: establish external facts and freeze the first experiment before observing PayGod outcomes.
+Purpose: establish external facts and freeze the first current-rail experiment before observing PayGod outcomes.
 
-## External reference
+## Current source references
 
-- protocol repository: `Virtual-Protocol/agent-commerce-protocol`
-- initial observed commit: `7b490591b2162dbcebed7af47845cad2b0e29cc7`
-- source license: MIT
+- `Virtual-Protocol/acp-node-v2@0f4b678516c354c1541b92aa08db11ece3506261`
+- `Virtual-Protocol/acp-cli@5c01771b964e0e431e6c4bea5a4d481514a30e24`
 
-The repository commit is a source-code reference only. It is not proof of a particular live deployment or upgrade state.
+Current official SDK configuration identifies Base chain 8453 and ACP contract `0x238E541BefD82238730D00a2208E5497F1832E0`.
 
-## Questions to resolve before acquiring cases
+Earlier modular ACP v2 references are retained as historical witnesses, not the default rail for new case acquisition.
 
-1. Which ACP deployment(s), chain(s), router addresses, and module addresses are live and relevant?
-2. Which implementation identities are active for the upgradeable contracts at sampled blocks?
-3. Can historical Job, Memo, payment, evaluator, and phase-transition state be reconstructed from native/public records?
-4. Which transition path is evaluator-mediated in the live version?
-5. What evidence is available before the evaluator decision, and what appears only after it?
-6. Can the evidence cut-off be defined without relying on PayGod output?
-7. Can a candidate sample be frozen before PayGod results are observed?
-8. Can the same case be independently reconstructed from the pinned external state?
-9. If historical cases are insufficient, can a bounded real service be purchased from an independent provider at low economic risk?
+A source constant is not proof of historical/live implementation identity. X1 must bind source/deployment state at sampled blocks before making stronger claims.
+
+## Questions to resolve before freezing the first case sample
+
+1. Independently confirm the current Base contract and its deployed implementation/proxy state.
+2. Confirm the native current-rail transition semantics around SUBMITTED, COMPLETED, and REJECTED.
+3. Determine which fields of `getJob`, transaction logs, and hook state are reconstructable at a historical block.
+4. Determine exactly what evaluator identity/authority can be proved from native state.
+5. Separate public on-chain evidence from participant-authenticated ACP history.
+6. Define what requirement, deliverable, reason, and message evidence is available before evaluator action.
+7. Define a cut-off that excludes information created after the evaluator decision.
+8. Decide whether public historical cases can satisfy the evidence package.
+9. If not, define a bounded real purchased workflow with an independent provider.
+10. Freeze the candidate selection rule before observing PayGod outputs.
 
 ## Initial preferred transition
 
-`EVALUATION → COMPLETED`, explicit non-zero evaluator only.
+```text
+SUBMITTED → COMPLETED
+```
 
-This remains provisional until the live deployment/version is verified.
+Requirements:
+
+- current Node v2 rail;
+- explicit non-zero evaluator;
+- evidence available before evaluator action;
+- economically consequential job where practical;
+- no PayGod control of execution during the first comparison.
+
+`SUBMITTED → REJECTED` remains a useful companion outcome but is not required for the first case.
 
 ## Required Level 0 exit artifacts
 
 Level 0 does not close until the repository records:
 
-- deployment inventory;
-- chain and contract/module identity record;
-- upgrade/implementation identity method;
+- current-rail deployment inventory;
+- chain/contract and implementation identity method;
 - event/state reconstruction notes;
 - target transition confirmation;
-- evidence-cutoff definition;
+- public-vs-authenticated evidence boundary;
+- historical cut-off definition;
 - frozen candidate sampling rule;
 - explicit exclusions;
-- a statement of what is not observable;
+- a statement of what cannot be observed or independently verified;
 - no kernel change.
 
 ## Stop conditions
 
 Pause X1 rather than coding around the problem if:
 
-- no live or reconstructable workflow can be verified;
+- current rail cannot be independently identified;
 - target transition semantics cannot be pinned;
-- necessary evidence exists only after the decision;
-- a faithful state snapshot cannot be reconstructed;
+- the required pre-decision evidence cannot be obtained lawfully as observer/participant;
+- a faithful predecessor snapshot cannot be reconstructed;
 - the first useful experiment would require kernel mutation before observational evidence exists.
 
 A Level 0 STOP is a valid research result.
