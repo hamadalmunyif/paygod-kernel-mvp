@@ -34,17 +34,39 @@ Every candidate case records:
 - expiry;
 - offering/service identifier where available.
 
-## Evidence surfaces
+## Evidence classification
 
-Each evidence item is classified exactly once as:
+Evidence is not forced into one mutually exclusive label. Each item is classified across separate dimensions.
+
+### Source
+
+One of:
 
 - `PUBLIC_CHAIN`
 - `AUTHENTICATED_ACP`
 - `EXTERNAL_REFERENCE`
-- `POST_DECISION`
-- `UNAVAILABLE`
+- `EXPERIMENT_RECORD`
+- `UNKNOWN_SOURCE`
 
-Evidence source class is separate from evidence truth.
+### Timing
+
+One of:
+
+- `PRE_CUTOFF`
+- `POST_CUTOFF`
+- `UNKNOWN_TIMING`
+
+### Availability
+
+One of:
+
+- `AVAILABLE`
+- `UNAVAILABLE`
+- `UNPROVEN`
+
+These dimensions are independent. For example, an evaluator transaction may be both `PUBLIC_CHAIN` and `POST_CUTOFF`; authenticated ACP history may be `AUTHENTICATED_ACP` and `UNAVAILABLE` if it was not successfully preserved.
+
+Source class, timing, and availability do not establish truth, authenticity, or semantic admissibility.
 
 ## Pre-decision cut-off
 
@@ -60,12 +82,39 @@ For a prospective R0 case:
    - deliverable/reference;
    - any external references permitted by the frozen criteria;
 3. hash/commit the captured evidence package;
-4. freeze the native human/evaluator decision without exposing the PayGod result;
-5. only then perform PayGod mapping/admission and shadow decision;
-6. native evaluator action is executed according to the already-frozen native decision;
-7. observe the resulting transaction and successor state.
+4. create the native human/evaluator decision artifact without exposing the PayGod result;
+5. canonicalize and commit that decision artifact before any PayGod evaluation by recording:
+   - exact canonical artifact bytes or canonicalization rule;
+   - SHA-256 digest;
+   - immutable/versioned reference;
+   - commitment timestamp/reference;
+6. only after the native-decision commitment exists, perform PayGod mapping/admission and any shadow decision;
+7. native evaluator action is executed according to the already-committed native decision;
+8. observe the resulting transaction and successor state.
 
-This ordering prevents PayGod output from contaminating the native comparison decision.
+The native decision is not considered frozen merely because an editable field says COMPLETE or REJECT. The pre-PayGod commitment must make later alteration detectable.
+
+## Native decision commitment
+
+The committed artifact MUST contain at least:
+
+- x1_case_id;
+- evidence_cutoff_ref;
+- native evaluator decision: COMPLETE | REJECT | HOLD-NO-ACTION;
+- evaluator reason;
+- evidence references relied upon;
+- evaluator identity/role;
+- decision timestamp;
+- `paygod_output_visible_before_commit = false`.
+
+The record MUST additionally preserve:
+
+- artifact SHA-256;
+- immutable or versioned artifact reference created before PayGod evaluation.
+
+A Git commit/object, append-only evidence store entry, signed artifact, or equivalent versioned commitment is acceptable if the later comparison can prove that the committed bytes predate PayGod evaluation.
+
+If this commitment cannot be produced, the case MUST NOT claim a blinded native comparison.
 
 ## Evidence Admission
 
@@ -88,7 +137,9 @@ NOT RUN is not a PayGod verdict.
 
 Only if PayGod runs, record:
 
-- frozen native evaluator decision;
+- native decision artifact reference;
+- native decision artifact SHA-256;
+- native decision commitment reference/time;
 - PayGod shadow decision;
 - agreement/disagreement;
 - decision reasons;
