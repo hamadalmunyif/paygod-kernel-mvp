@@ -73,7 +73,7 @@ Evaluator MUST be explicit and non-zero for the intended R0 decision boundary.
 - maximum total approved exposure:
 - approval record/reference:
 
-If maximum total approved exposure is blank, **STOP**.
+If maximum total approved economic exposure is blank, **STOP**.
 
 ## Evidence capture
 
@@ -91,17 +91,36 @@ Before evaluator action capture and commit:
 - cut-off block/time;
 - evidence-package digest.
 
+For each preserved evidence item also record independent classification dimensions:
+
+- source: PUBLIC_CHAIN | AUTHENTICATED_ACP | EXTERNAL_REFERENCE | EXPERIMENT_RECORD | UNKNOWN_SOURCE;
+- timing: PRE_CUTOFF | POST_CUTOFF | UNKNOWN_TIMING;
+- availability: AVAILABLE | UNAVAILABLE | UNPROVEN.
+
 ## Decision freeze
 
-Before PayGod evaluation:
+Before any PayGod evaluation, create a native decision artifact containing:
 
+- x1_case_id:
+- evidence cut-off reference:
 - native evaluator decision: COMPLETE / REJECT / HOLD-NO-ACTION
 - native evaluator reason:
-- decision artifact/reference:
-- decision frozen at:
-- PayGod output visible before freeze: MUST BE NO
+- evidence refs relied upon:
+- evaluator identity/role:
+- decision timestamp:
+- PayGod output visible before commitment: MUST BE NO
 
-Only after this block is frozen may the X1 PayGod shadow mapping/admission begin.
+Then preserve and record:
+
+- canonicalization rule or exact committed bytes:
+- native decision artifact SHA-256:
+- immutable/versioned native decision artifact reference:
+- native decision commitment reference:
+- native decision commitment time:
+
+**STOP** if the native decision is only stored in an editable field without a digest and immutable/versioned commitment that predates PayGod evaluation.
+
+Only after this commitment exists may the X1 PayGod shadow mapping/admission begin.
 
 ## PayGod shadow
 
@@ -115,7 +134,7 @@ Only after this block is frozen may the X1 PayGod shadow mapping/admission begin
 
 ## Native execution / outcome
 
-Execute only the already-frozen native evaluator decision.
+Execute only the already-committed native evaluator decision.
 
 Record:
 
@@ -127,6 +146,7 @@ Record:
 ## Comparison / diagnosis
 
 - comparison applicable:
+- native decision commitment verified:
 - agreement/disagreement:
 - primary diagnostic class:
 - operational importance:
