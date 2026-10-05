@@ -60,9 +60,12 @@ jobs:
           assert witness["proxy_code_bytes"] > 0
           assert witness["implementation_code_bytes"] > 0
           assert witness["block_hash"].startswith("0x")
+          assert witness["post_read_block_hash_verified"] is True
           assert witness["raw_rpc_sha256"].startswith("0x")
 
-      - uses: actions/upload-artifact@v4
+      - name: Preserve capture evidence
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: virtuals-x1-deployment-witness-001
           path: deployment-witness-out/
