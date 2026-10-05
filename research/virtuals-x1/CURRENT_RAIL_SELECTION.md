@@ -12,7 +12,7 @@ Pinned current references:
 - `Virtual-Protocol/acp-node-v2@0f4b678516c354c1541b92aa08db11ece3506261`
 - `Virtual-Protocol/acp-cli@5c01771b964e0e431e6c4bea5a4d481514a30e24`
 - Base chain id `8453`
-- SDK-configured ACP contract `0x238E541BefD82238730D00a2208E5497F1832E0`
+- SDK-configured ACP contract `0x238E541BfefD82238730D00a2208E5497F1832E0`
 
 Preferred transition:
 
