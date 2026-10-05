@@ -2,71 +2,81 @@
 
 Status: OPEN
 
-Purpose: establish external facts and freeze the first current-rail experiment before observing PayGod outcomes.
+Purpose: establish external facts and freeze the first experiment before observing PayGod outcomes.
 
-## Current source references
+## Primary current references
 
-- `Virtual-Protocol/acp-node-v2@0f4b678516c354c1541b92aa08db11ece3506261`
-- `Virtual-Protocol/acp-cli@5c01771b964e0e431e6c4bea5a4d481514a30e24`
+- current runtime SDK: `Virtual-Protocol/acp-node-v2@0f4b678516c354c1541b92aa08db11ece3506261`
+- current CLI: `Virtual-Protocol/acp-cli@5c01771b964e0e431e6c4bea5a4d481514a30e24`
+- Base mainnet chain id: `8453`
+- current SDK Base ACP core: `0x238E541BfefD82238730D00a2208E5497F1832E0`
 
-Current official SDK configuration identifies Base chain 8453 and ACP contract `0x238E541BfefD82238730D00a2208E5497F1832E0`.
+Historical/legacy references are recorded separately in `VERSION_BOUNDARY.md`.
 
-Earlier modular ACP v2 references are retained as historical witnesses, not the default rail for new case acquisition.
+A repository commit or SDK constant is a source/config reference. It is not by itself proof of the implementation that executed a historical transaction.
 
-A source constant is not proof of historical/live implementation identity. X1 must bind source/deployment state at sampled blocks before making stronger claims.
+## Current preferred transition
 
-## Questions to resolve before freezing the first case sample
+`SUBMITTED → COMPLETED`, explicit non-zero evaluator only.
 
-1. Independently confirm the current Base contract and its deployed implementation/proxy state.
-2. Confirm the native current-rail transition semantics around SUBMITTED, COMPLETED, and REJECTED.
-3. Determine which fields of `getJob`, transaction logs, and hook state are reconstructable at a historical block.
-4. Determine exactly what evaluator identity/authority can be proved from native state.
-5. Separate public on-chain evidence from participant-authenticated ACP history.
-6. Define what requirement, deliverable, reason, and message evidence is available before evaluator action.
-7. Define a cut-off that excludes information created after the evaluator decision.
-8. Decide whether public historical cases can satisfy the evidence package.
-9. If not, define a bounded real purchased workflow with an independent provider.
-10. Freeze the candidate selection rule before observing PayGod outputs.
+The pinned current SDK defines the on-chain JobStatus values as OPEN=0, FUNDED=1, SUBMITTED=2, COMPLETED=3, REJECTED=4, EXPIRED=5.
 
-## Initial preferred transition
+The CLI's `budget_set` label is a derived workflow status and is not a separate current on-chain JobStatus value.
 
-```text
-SUBMITTED → COMPLETED
-```
+## Questions to resolve before acquiring the frozen comparison sample
 
-Requirements:
+1. What proxy/implementation identity was active for the ACP core at each sampled block?
+2. Can `JobCreated`, `BudgetSet`, `JobFunded`, `JobSubmitted`, and `JobCompleted/Rejected` be reconstructed reliably from public chain data?
+3. Can the client, provider, evaluator, expiry, hook, budget, description, and deliverable commitment be reconstructed at the predecessor block?
+4. Which evidence is public on-chain, which evidence is only in authenticated ACP job-room history, and which evidence is unavailable?
+5. Can the evaluator's evidence cut-off be defined before completion/rejection without using later state?
+6. Can a candidate population be frozen before PayGod output is observed?
+7. Can a second independent reconstruction of the same case reproduce the same decision-relevant snapshot?
+8. Can explicit non-zero-evaluator jobs be located in sufficient number?
+9. If historical public cases do not expose the full evidence basis, can a bounded real service be purchased from an independent provider while capturing requirements, messages, deliverable, and evaluator-visible evidence prospectively?
+10. Can all of the above be done without kernel mutation?
 
-- current Node v2 rail;
-- explicit non-zero evaluator;
-- evidence available before evaluator action;
-- economically consequential job where practical;
-- no PayGod control of execution during the first comparison.
+## Evidence-surface rule
 
-`SUBMITTED → REJECTED` remains a useful companion outcome but is not required for the first case.
+Do not treat the authenticated ACP API/chat history as equivalent to public chain evidence.
+
+The current SDK's `getHistory(chainId, jobId)` authenticates to the ACP server before retrieving room history.
+
+For every X1 case, record each evidence item as one of:
+
+- PUBLIC_CHAIN;
+- AUTHENTICATED_ACP;
+- EXTERNAL_REFERENCE;
+- UNAVAILABLE;
+- POST_DECISION.
+
+Only evidence demonstrably available at the frozen decision cut-off may enter Evidence Admission.
 
 ## Required Level 0 exit artifacts
 
 Level 0 does not close until the repository records:
 
-- current-rail deployment inventory;
-- chain/contract and implementation identity method;
+- current runtime/version boundary;
+- deployment/core identity record;
+- proxy/implementation identity method;
 - event/state reconstruction notes;
 - target transition confirmation;
-- public-vs-authenticated evidence boundary;
-- historical cut-off definition;
+- evidence-surface classification;
+- evidence-cutoff definition;
 - frozen candidate sampling rule;
-- explicit exclusions;
-- a statement of what cannot be observed or independently verified;
+- explicit exclusions, including evaluator-zero auto-completion;
+- a statement of what is not observable;
 - no kernel change.
 
 ## Stop conditions
 
 Pause X1 rather than coding around the problem if:
 
-- current rail cannot be independently identified;
-- target transition semantics cannot be pinned;
-- the required pre-decision evidence cannot be obtained lawfully as observer/participant;
+- the current runtime/deployment cannot be pinned;
+- the target transition semantics cannot be bound to the sampled deployment;
+- necessary evidence exists only after the decision;
 - a faithful predecessor snapshot cannot be reconstructed;
+- historical cases require private evidence that cannot be accessed or captured prospectively;
 - the first useful experiment would require kernel mutation before observational evidence exists.
 
 A Level 0 STOP is a valid research result.
