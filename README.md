@@ -101,15 +101,19 @@ See [GATES.md](GATES.md). The governance contract defines stable required check 
 
 ## Next boundary
 
-1. Complete v0.5.2 minimal issuer-authentication proof without storing a real private key in the repository.
-2. Complete **Internal Rehearsal B2** with real/de-identified cases, independent human decisions, recipient comprehension, timing, and browser parity.
-3. Derive provenance requirements only from evidence gaps observed in the real workflow.
-4. Move to design-partner discovery only after the Internal Rehearsal readiness gate passes.
-5. Run a shadow external pilot only after internal readiness evidence exists.
+P0 — Gas Maintenance Workflow & Evidence-Admission Pilot is closed as `CLOSED — PASS WITH BOUNDARY`. It is a simulated workflow witness and contributes zero cases to B2-REAL.
 
-Do not treat an Internal Rehearsal as evidence of market demand or willingness to pay.
+The repository-wide **stop-build is ACTIVE**. Feature and security-capability expansion is frozen except for confirmed defect/security remediation and evidence-backed architecture changes. See [Stop-Build Rule](docs/STOP_BUILD_RULE.md).
 
-See [ROADMAP.md](ROADMAP.md).
+Current validation work is:
+
+1. **B2-REAL** — collect qualifying real/de-identified Gas Site Readiness cases under the frozen evidence-admission protocol. Current qualifying count remains 0 / 10.
+2. **Virtuals X1** — open a separate, non-gating external consequential-transition research track. It may observe and challenge the architecture but may not mutate the kernel merely to fit Virtuals.
+3. Promote predecessor-state binding, post-flight conformance, next-transition eligibility, or other new primitives only after a new external witness demonstrates recurrence and operational value.
+
+Do not treat P0, B2, or Virtuals X1 research as evidence of market demand, regulator approval, external evidence truth, or autonomous execution authority.
+
+See [ROADMAP.md](ROADMAP.md) and [Virtuals X1](research/virtuals-x1/README.md).
 
 ## README contract
 
