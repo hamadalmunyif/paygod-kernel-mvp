@@ -9,7 +9,7 @@ Purpose: establish external facts and freeze the first current-rail experiment b
 - `Virtual-Protocol/acp-node-v2@0f4b678516c354c1541b92aa08db11ece3506261`
 - `Virtual-Protocol/acp-cli@5c01771b964e0e431e6c4bea5a4d481514a30e24`
 
-Current official SDK configuration identifies Base chain 8453 and ACP contract `0x238E541BefD82238730D00a2208E5497F1832E0`.
+Current official SDK configuration identifies Base chain 8453 and ACP contract `0x238E541BfefD82238730D00a2208E5497F1832E0`.
 
 Earlier modular ACP v2 references are retained as historical witnesses, not the default rail for new case acquisition.
 
