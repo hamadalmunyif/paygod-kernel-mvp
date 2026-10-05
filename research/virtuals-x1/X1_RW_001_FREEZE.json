@@ -1,0 +1,89 @@
+{
+  "artifact_type": "paygod/x1-real-workflow-freeze/v0.1",
+  "experiment_id": "X1-RW-001",
+  "status": "DRAFT_NO_PURCHASE_AUTHORIZED",
+  "track": "virtuals-x1",
+  "rail": {
+    "chain_id": 8453,
+    "acp_contract": "0x238E541BfefD82238730D00a2208E5497F1832E0",
+    "acp_node_v2_commit": "0f4b678516c354c1541b92aa08db11ece3506261",
+    "acp_cli_commit": "5c01771b964e0e431e6c4bea5a4d481514a30e24"
+  },
+  "task": {
+    "class": "structured_technical_verification",
+    "intent": "Independently verify the current Virtuals ACP Base deployment and evaluator/completion surface and return a structured evidence-backed report.",
+    "required_fields": [
+      "chain_id",
+      "acp_contract",
+      "payment_token",
+      "native_job_statuses",
+      "completion_function",
+      "rejection_function",
+      "evaluator_condition",
+      "sources",
+      "uncertainties"
+    ]
+  },
+  "selection": {
+    "query_order": [
+      "technical research",
+      "data analysis",
+      "research"
+    ],
+    "require_base_mainnet": true,
+    "require_external_provider": true,
+    "require_schema_fit": true,
+    "objective_ranking": [
+      "successful_job_count",
+      "success_rate",
+      "online_recency"
+    ],
+    "no_result_rule": "STOP_NO_ELIGIBLE_OFFERING"
+  },
+  "economic_control": {
+    "max_total_usdc": null,
+    "gas_policy": null,
+    "funding_authorized": false,
+    "explicit_human_approval_required": true
+  },
+  "roles": {
+    "provider_must_be_external": true,
+    "evaluator_non_zero": true,
+    "evaluator_must_not_equal_provider": true,
+    "evaluator_distinct_from_client_preferred": true,
+    "evaluator_address": null,
+    "client_address": null,
+    "provider_address": null
+  },
+  "cutoff": {
+    "definition": "Immediately before the human evaluator freezes native intent.",
+    "allowed_classification": "AVAILABLE_BEFORE_CUTOFF",
+    "excluded": [
+      "AFTER_CUTOFF",
+      "UNPROVEN_AT_CUTOFF"
+    ]
+  },
+  "human_decision": {
+    "allowed": [
+      "COMPLETE",
+      "REJECT",
+      "DEFER"
+    ],
+    "frozen_before_paygod": true,
+    "decision": null,
+    "evidence_refs": []
+  },
+  "paygod": {
+    "kernel_mutation_allowed": false,
+    "pack_implementation_authorized": false,
+    "execution_mode": "shadow_only_if_executable",
+    "admission_result": null,
+    "execution": null,
+    "decision": null
+  },
+  "native_outcome": {
+    "action_tx": null,
+    "successor_status": null,
+    "payment_outcome": null
+  }
+}
