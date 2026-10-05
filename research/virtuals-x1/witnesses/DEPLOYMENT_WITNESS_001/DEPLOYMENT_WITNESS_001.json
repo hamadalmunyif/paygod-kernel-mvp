@@ -17,12 +17,13 @@
     "It does not establish source equivalence, contract safety, evaluator quality, or PayGod authority."
   ],
   "method_version": "x1-deployment-binding/v0.1",
+  "post_read_block_hash_verified": true,
   "proxy_address": "0x238E541BfefD82238730D00a2208E5497F1832E0",
   "proxy_code_bytes": 163,
   "proxy_code_keccak256": "0xfc16c7f571d8b1443fb5ef7a46304acb87f7a1f6d065d9d3162ec0af13f42aae",
   "proxy_code_sha256": "0x59a13731d64cf07e388266971b295fc6c93c73f93cfe291d1752c88cb5bd7d3b",
   "raw_evidence_file": "raw_rpc.json",
-  "raw_rpc_sha256": "0xd68233c15e68b4e908eb92b9d2f56a13135cdce04cddab2c601bd582fc9262e3",
+  "raw_rpc_sha256": "0xdea036eebf237eeccfeb317b522d383ff3b6549e2a89eb571f930d5e110bf832",
   "raw_slot_value": "0x0000000000000000000000008e86fbef4a4c927561cb6447ced77fffbf3b77bc",
   "rpc_endpoint": "https://mainnet.base.org",
   "status": "BOUND"
