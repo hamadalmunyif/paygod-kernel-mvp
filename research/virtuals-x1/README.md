@@ -11,36 +11,48 @@ PayGod mode: observational / shadow only
 
 P0 established a pre-kernel evidence-admission boundary in a simulated gas-maintenance workflow.
 
-X1 asks a different question:
+X1 asks:
 
 > Can the same bounded PayGod primitives compose with a consequential state transition owned by an external protocol that PayGod did not design?
 
-The first target is Virtuals Agent Commerce Protocol (ACP).
+## Current rail selection
 
-Initial source reference:
+Level 0 found two distinct ACP generations. The default target for new X1 workflow acquisition is now the current official Node v2 rail:
 
-- repository: `Virtual-Protocol/agent-commerce-protocol`
-- observed commit: `7b490591b2162dbcebed7af47845cad2b0e29cc7`
-- license: MIT
-- observed modular components: ACPRouter, AccountManager, JobManager, MemoManager, PaymentManager, AssetManager
+- source/SDK: `Virtual-Protocol/acp-node-v2@0f4b678516c354c1541b92aa08db11ece3506261`
+- current CLI: `Virtual-Protocol/acp-cli@5c01771b964e0e431e6c4bea5a4d481514a30e24`
+- Base chain id: `8453`
+- SDK-configured Base ACP contract: `0x238E541BfefD82238730D00a2208E5497F1832E0`
+- current ACP server: `https://api.acp.virtuals.io`
 
-This source reference does not prove a particular live deployment. Level 0 must establish deployment facts before X1 makes operational claims.
+The earlier modular ACP v2 source/router remains a historical witness rail only.
 
-## Initial transition target
+See `CURRENT_RAIL_SELECTION.md` and `DEPLOYMENT_INVENTORY.md`.
+
+## Initial current-rail transition target
 
 Preferred first transition:
 
 ```text
-EVALUATION → COMPLETED
+SUBMITTED → COMPLETED
 ```
 
-Initial scope is limited to jobs with an explicit non-zero evaluator. X1 does not assume that every ACP completion follows this route.
+with an explicit non-zero evaluator.
 
-## External-system ownership
+The current SDK exposes evaluator tools only at `submitted`, where `complete` and `reject` become available. The underlying EVM ABI exposes `complete(uint256,bytes32,bytes)` and emits `JobCompleted`.
 
-ACP remains owner of its accounts, jobs, actors, phases, memos, approvals, escrow/payment handling, cross-chain transport, and transaction execution.
+X1 does not infer on-chain authority solely from SDK role gating; deployed-contract behavior must be independently bound.
 
-PayGod does not reimplement these functions.
+## Evidence zones
+
+Current ACP Node v2 separates evidence naturally:
+
+- public/native chain evidence;
+- authenticated participant history from ACP chat/event services.
+
+Because `getHistory` is authentication-gated, X1 must not assume arbitrary historical requirements and deliverables are public.
+
+If public historical cases cannot provide the frozen evidence package, Level 1 may deliberately create a bounded real job with an independent provider so X1 is a legitimate participant and can preserve the full pre-decision evidence.
 
 ## Candidate validation path
 
@@ -64,19 +76,19 @@ External State[n+1]
 Compare / Diagnose
 ```
 
-The existing kernel remains unchanged.
+The existing PayGod kernel remains unchanged.
 
 ## What a strong X1 result would show
 
-- a real external predecessor state can be reconstructed with a frozen method;
-- evidence can be admitted without semantic coercion;
-- a PayGod shadow decision can be reproduced from that state/evidence;
-- the external native transition can later be observed independently;
-- disagreement can be diagnosed without changing the kernel merely to obtain agreement.
+- real external predecessor state reconstructed with a frozen method;
+- evidence admitted without semantic coercion;
+- a reproducible PayGod shadow decision when executable;
+- an independently observable external native transition;
+- disagreement diagnosed without changing the kernel merely to obtain agreement.
 
 ## Hypothesis-only items
 
-The following are not current PayGod primitives or guarantees:
+Not current PayGod guarantees:
 
 - predecessor-state binding;
 - causal binding between PayGod decision and external execution;
@@ -99,7 +111,7 @@ No level may be skipped.
 
 ## Non-claims
 
-X1 does not currently establish a live Virtuals integration, production ACP deployment identity, real external workflow evidence, authority to block ACP transitions, payment-control authority, post-flight conformance, protocol independence, market demand, or willingness to pay.
+X1 does not currently establish a production PayGod/Virtuals integration, authority to block ACP transitions, payment-control authority, post-flight conformance, protocol independence, market demand, or willingness to pay.
 
 ## Stop-build interaction
 
