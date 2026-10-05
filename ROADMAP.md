@@ -89,9 +89,11 @@ Exit artifact: one-page Internal Rehearsal Readiness Report.
 
 This is a separate non-gating research/validation track, not a B2 substitute and not yet an external authority integration.
 
-Initial source target: Virtuals Agent Commerce Protocol at observed commit `7b490591b2162dbcebed7af47845cad2b0e29cc7`.
+Current source target: `Virtual-Protocol/acp-node-v2@0f4b678516c354c1541b92aa08db11ece3506261`, with current CLI `Virtual-Protocol/acp-cli@5c01771b964e0e431e6c4bea5a4d481514a30e24`.
 
-Initial preferred transition: evaluator-mediated `EVALUATION → COMPLETED` for jobs with an explicit non-zero evaluator.
+Current SDK configuration targets Base chain 8453 at `0x238E541BefD82238730D00a2208E5497F1832E0`. The earlier modular ACP v2 rail is retained only as a historical witness.
+
+Initial preferred current-rail transition: evaluator-mediated `SUBMITTED → COMPLETED` for jobs with an explicit non-zero evaluator.
 
 X1 begins at Level 0:
 - pin source/deployment facts;
