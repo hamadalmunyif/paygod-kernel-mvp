@@ -60,7 +60,11 @@ class RpcRecorder:
         request = Request(
             self.url,
             data=request_bytes,
-            headers={"content-type": "application/json"},
+            headers={
+                "content-type": "application/json",
+                "accept": "application/json",
+                "user-agent": "paygod-x1-research/0.1 (+https://github.com/hamadalmunyif/paygod-kernel-mvp)",
+            },
             method="POST",
         )
         with urlopen(request, timeout=30) as response:
