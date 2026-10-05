@@ -2,6 +2,8 @@
 
 This document records future security-hardening work separately from the repository's current proven assurance boundary. Roadmap items are not current capability claims unless explicitly backed by an active witness.
 
+**Stop-build status: ACTIVE.** New security-capability expansion is paused. Only critical vulnerability remediation, preservation of existing required witnesses, and separately approved evidence-backed changes are in scope. A roadmap item is not implementation authorization.
+
 ## 1. Container Hardening (Priority: High)
 
 **Objective:** Mitigate container breakout risks by enforcing least-privilege principles at the runtime level.
