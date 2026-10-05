@@ -131,6 +131,25 @@ Only after this commitment exists may the X1 PayGod shadow mapping/admission beg
 - PayGod run:
 - PayGod decision:
 - receipt/bundle refs if run:
+- PayGod run artifact reference:
+- PayGod run artifact SHA-256:
+- PayGod run commitment reference:
+- shared chronology reference:
+
+If PayGod runs, its output artifact MUST reference the native decision commitment and be committed after it in the same append-only/versioned chronology.
+
+Required recorded order:
+
+```text
+evidence package commitment
+→ native decision commitment
+→ PayGod run commitment
+→ native ACP action / successor observation
+```
+
+The shared chronology demonstrates recorded ordering only. It does not constitute trusted external time.
+
+**STOP** if the chronology cannot substantiate that the native decision commitment precedes the PayGod run commitment.
 
 ## Native execution / outcome
 
@@ -147,6 +166,8 @@ Record:
 
 - comparison applicable:
 - native decision commitment verified:
+- PayGod run commitment verified:
+- chronology order verified:
 - agreement/disagreement:
 - primary diagnostic class:
 - operational importance:
