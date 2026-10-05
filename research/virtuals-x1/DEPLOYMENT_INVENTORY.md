@@ -145,7 +145,7 @@ A current repository commit MUST NOT be treated as proof that a historical trans
 
 Level 0 remains open because X1 still needs:
 
-- independent current-rail on-chain binding for `0x238E541BefD82238730D00a2208E5497F1832E0` at sampled blocks;
+- independent current-rail on-chain binding for `0x238E541BfefD82238730D00a2208E5497F1832E0` at sampled blocks;
 - a reproducible historical proxy/implementation identity method;
 - a frozen current-rail candidate sampling rule;
 - a complete current job reconstruction method;
