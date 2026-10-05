@@ -1,6 +1,6 @@
 # X1 Deployment Inventory — Level 0
 
-Status: PARTIAL — DEPLOYMENT BINDING WITNESS OPEN  
+Status: LEVEL 0 DEPLOYMENT BINDING CAPTURED — R0 SPEND STILL UNAUTHORIZED  
 Observed/reconciled: 2026-10-05  
 Purpose: establish external deployment facts and preserve the exact remaining boundary before Level 1 acquisition.
 
@@ -158,7 +158,7 @@ Reference:
 
 X1 does NOT promote those statements into deployment facts merely because they are plausible and independently published.
 
-They remain corroborating research leads until X1 captures the raw block-bound storage/code witness defined in `DEPLOYMENT_BINDING_METHOD.md`.
+They remain corroborating research leads only. The independent block-bound witness is now captured separately; the external analysis is not promoted into source-equivalence or upgrade-history proof.
 
 ## Level 0 status reconciliation
 
@@ -181,24 +181,23 @@ The repository now records:
 - a reproducible ERC-1967 deployment-binding method;
 - no kernel/pack/schema/receipt/ledger mutation.
 
-### Still open — blocking Level 0 closure
+### Level 0 deployment witness — captured
 
-One core witness remains:
-
-**Execute the deployment-binding method against a current Base reference block and preserve the raw result.**
-
-At minimum:
+The frozen method was executed and then re-executed against the exact pinned reference block:
 
 ```text
-block number + block hash
-proxy address
-ERC-1967 implementation slot @ block
-implementation address
-proxy code hash @ block
-implementation code hash @ block
+chain_id = 8453
+block_number = 52189048
+block_hash = 0x565c9c7f6ac17d383f14c8453c1d369c0ffb55a2afcbe31d55c5daa39bf55151
+proxy = 0x238E541BfefD82238730D00a2208E5497F1832E0
+implementation = 0x8e86fbef4a4c927561cb6447ced77fffbf3b77bc
+proxy_keccak256 = 0xfc16c7f571d8b1443fb5ef7a46304acb87f7a1f6d065d9d3162ec0af13f42aae
+implementation_keccak256 = 0xc47c1f4ca03bd0be464d0a94eb2b6e4c9c112306b42b22d8400b8dada47848b5
 ```
 
-Until that witness exists, Level 0 remains OPEN.
+Canonical material is preserved under `witnesses/DEPLOYMENT_WITNESS_001/`.
+
+The reference deployment-binding blocker is therefore closed. This does not authorize spending and does not replace case-specific binding at the real R0 predecessor block.
 
 ### Unresolved but not required to guess before prospective R0
 
