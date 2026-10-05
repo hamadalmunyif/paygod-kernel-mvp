@@ -1,6 +1,6 @@
 # Paygod Kernel — Architecture Audit
 
-Status: audit baseline after PR #53. This document records the current architecture before any new product or domain expansion.
+Status: architecture baseline with repository-wide stop-build active after P0 closure in PR #92.
 
 ## Executive finding
 
@@ -118,21 +118,28 @@ A shadow pilot must compare Paygod output with actual human decisions before Pay
 6. Hosting is not a trust root. A future web verifier must preserve offline/independent verification semantics.
 7. Do not claim external truth merely because bundle integrity verifies.
 
-## Stop-build rule
+## Stop-build rule — ACTIVE
 
-After the first real domain pack is implemented, stop generic feature development and run a shadow pilot.
+The repository-wide stop-build is active from main commit `6b65d0d97ce61111b9eb77762de03f4a518c0d21`, immediately after P0 closure.
 
-Do not add tokenization, agent-payment rails, an Open Banking aggregator, AI underwriting, a large dashboard, or domain-specific platform features until evidence from a real workflow shows they are necessary.
+Feature development and security-capability expansion are frozen except for confirmed defect/security remediation, CI or reproducibility repair, evidence/documentation work, B2-REAL collection, and external observational validation that does not mutate the kernel merely to fit an external system.
 
-## Proposed sequence
+The governing sequence is:
 
-1. Close v0.5.1 verification-contract repair (Issue #67).
-2. Run an Internal Verification Challenge against adversarial cases and relevant open standards/implementations.
-3. Run one bounded Internal Workflow Rehearsal; this is not a market pilot.
-4. Produce a one-page readiness report and evidence inventory.
-5. Only then select a design partner and derive provenance requirements from the partner's real evidence sources.
-6. Run a 20–50 case shadow external pilot where practical.
-7. Add issuer signing, replay material, or conditional execution only when the workflow demonstrates the need.
+**Observe → classify → count recurrence → assess operational importance → then earn the right to build.**
+
+See [STOP_BUILD_RULE.md](STOP_BUILD_RULE.md).
+
+## Current sequence
+
+1. B1 engineering rehearsal — completed.
+2. P0 Gas Maintenance Workflow & Evidence-Admission Pilot — closed PASS WITH BOUNDARY.
+3. ADR 0003 Evidence Admission Before Decision Execution — accepted.
+4. Repository-wide stop-build — active.
+5. B2-REAL — open; qualifying real/de-identified cases remain required.
+6. Virtuals X1 — non-gating external consequential-transition research/validation track with no kernel mutation.
+7. Architecture promotion occurs only when real workflow evidence demonstrates recurrence and operational value.
+8. Predecessor-state binding, post-flight conformance, next-transition eligibility, and higher-authority integration remain hypotheses until separately witnessed.
 
 ## README rule
 

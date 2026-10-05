@@ -37,7 +37,7 @@ This roadmap separates proven repository capabilities from rehearsal evidence, e
 - strict transferred-member contract;
 - manual production-browser receipt-pin witness.
 
-## Current gate
+## Proven security/authentication boundary
 
 ### v0.5.2 — Minimal Issuer Authentication
 Goal: authenticate the receipt commitment without confusing key authentication with external truth.
@@ -51,7 +51,19 @@ Goal: authenticate the receipt commitment without confusing key authentication w
 - private key remains outside the repository;
 - no claim of regulator authorization, source truth, replay, or trusted time.
 
-## Next gate
+## Current validation gates
+
+### P0 — Gas Maintenance Workflow & Evidence-Admission Pilot — CLOSED
+
+Classification: `simulated_shadow_pilot`  
+Status: `CLOSED — PASS WITH BOUNDARY`  
+Counts as B2-REAL: false
+
+P0 established a pre-kernel boundary: evidence that cannot be represented and admitted faithfully is WITHHELD, and a required WITHHELD value causes NOT RUN before the canonical kernel path. ADR 0003 records this without adding tri-state semantics to the kernel.
+
+### Repository stop-build — ACTIVE
+
+From main commit `6b65d0d97ce61111b9eb77762de03f4a518c0d21`, new feature development and security-capability expansion are frozen except for confirmed defect/security remediation, CI/reproducibility repair, evidence collection, and separately approved evidence-backed architecture changes.
 
 ### v0.6 — Internal Rehearsal B2
 This is **not a pilot** and does not prove demand or willingness to pay.
@@ -72,6 +84,26 @@ Measure:
 - whether a non-developer can explain what was and was not verified.
 
 Exit artifact: one-page Internal Rehearsal Readiness Report.
+
+### X1 — Virtuals External Consequential Transition Validation — RESEARCH TRACK
+
+This is a separate non-gating research/validation track, not a B2 substitute and not yet an external authority integration.
+
+Initial source target: Virtuals Agent Commerce Protocol at observed commit `7b490591b2162dbcebed7af47845cad2b0e29cc7`.
+
+Initial preferred transition: evaluator-mediated `EVALUATION → COMPLETED` for jobs with an explicit non-zero evaluator.
+
+X1 begins at Level 0:
+- pin source/deployment facts;
+- identify live chain/contracts before operational claims;
+- determine whether real jobs and predecessor state can be reconstructed;
+- freeze transition, evidence-cutoff, and candidate-sampling rules before PayGod outcomes;
+- keep PayGod shadow-only;
+- prohibit kernel mutation.
+
+X1 may falsify or support hypotheses such as predecessor-state binding and post-flight conformance. It does not promote them to current primitives.
+
+See `research/virtuals-x1/`.
 
 ### v0.7 — Workflow-derived provenance contract
 Only after rehearsal evidence:
