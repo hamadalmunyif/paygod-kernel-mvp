@@ -1,0 +1,36 @@
+{
+  "artifact_type": "paygod/p0-gas-maintenance-workflow-source-manifest/v0.1",
+  "classification": "simulated_shadow_pilot",
+  "status": "closed_pass_with_boundary",
+  "repository_mapping_snapshot": "5f680d8c1d2aa6d1290e03ed0501c390c050175d",
+  "source_records_stored_in_public_repository": false,
+  "artifacts": [
+    {
+      "name": "B2_Gas_Employee_Master_Intake_SIMULATION_3_FROZEN.docx",
+      "role": "frozen_custodian_intake",
+      "sha256": "8815233420f79e2ff0d5e272be03ef646943d5cbd81b52443207e988555b3847",
+      "size_bytes": 65869,
+      "stored_in_repository": false
+    },
+    {
+      "name": "B2_Gas_Reviewer_Report_SIM_REVIEW_001_FROZEN.md",
+      "role": "frozen_reviewer_report",
+      "sha256": "6240f14d559ec9ceafc80499b441d6f2a66540af605562d6c1e698b0d3970cfd",
+      "size_bytes": 9548,
+      "stored_in_repository": false
+    },
+    {
+      "name": "B2_Gas_SIM_MAP_001_Frozen_Mapping_PayGod_Comparison.docx",
+      "role": "frozen_mapping_and_executability_record",
+      "sha256": "c5655120466990e18db9a9b6ebb32c1ab45c7da5379b14e6d9c9226e67a003f4",
+      "size_bytes": 47732,
+      "stored_in_repository": false
+    }
+  ],
+  "preservation_rules": [
+    "Do not rewrite frozen source records retrospectively.",
+    "Do not use post-decision evidence to backfill the historical state.",
+    "Do not coerce missing or UNPROVEN evidence into false.",
+    "Future protocol improvements apply prospectively."
+  ]
+}
