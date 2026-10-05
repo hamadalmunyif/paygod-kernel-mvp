@@ -1,0 +1,70 @@
+name: Virtuals X1 Deployment Binding Witness
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'research/virtuals-x1/tools/capture_deployment_witness.py'
+      - 'research/virtuals-x1/DEPLOYMENT_REFERENCE_BLOCK.txt'
+      - '.github/workflows/virtuals-x1-deployment-witness.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    name: Capture Base deployment witness
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install research-only Keccak dependency
+        run: python -m pip install --disable-pip-version-check pycryptodome==3.23.0
+
+      - name: Capture block-bound raw witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          ref="$(tr -d '[:space:]' < research/virtuals-x1/DEPLOYMENT_REFERENCE_BLOCK.txt)"
+          if [ "$ref" = "AUTO_FINALIZED" ]; then
+            python research/virtuals-x1/tools/capture_deployment_witness.py
+          else
+            python research/virtuals-x1/tools/capture_deployment_witness.py --block "$ref"
+          fi
+
+      - name: Assert witness boundary
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          witness = json.loads(
+              Path("deployment-witness-out/DEPLOYMENT_WITNESS_001.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+
+          assert witness["status"] == "BOUND"
+          assert witness["chain_id"] == 8453
+          assert witness["proxy_address"].lower() == (
+              "0x238e541bfefd82238730d00a2208e5497f1832e0"
+          )
+          assert witness["implementation_address"] != "0x" + ("0" * 40)
+          assert witness["proxy_code_bytes"] > 0
+          assert witness["implementation_code_bytes"] > 0
+          assert witness["block_hash"].startswith("0x")
+          assert witness["raw_rpc_sha256"].startswith("0x")
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: virtuals-x1-deployment-witness-001
+          path: deployment-witness-out/
+          if-no-files-found: error
+          retention-days: 90
