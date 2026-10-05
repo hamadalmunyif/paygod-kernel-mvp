@@ -52,7 +52,9 @@ Current ACP Node v2 separates evidence naturally:
 
 Because `getHistory` is authentication-gated, X1 must not assume arbitrary historical requirements and deliverables are public.
 
-If public historical cases cannot provide the frozen evidence package, Level 1 may deliberately create a bounded real job with an independent provider so X1 is a legitimate participant and can preserve the full pre-decision evidence.
+Level 0 therefore selects a **prospective bounded real ACP job** as the preferred route to the first fully reconstructable workflow if public historical evidence remains incomplete. The first such job is classified `X1-R0` and is an instrumentation case, not architecture proof.
+
+No live purchase is authorized until the maximum economic exposure, provider/offering, requirement criteria, evaluator identity, and capture procedure are explicitly frozen. See `LEVEL0_ACQUISITION_DECISION.md` and `CASE_PROTOCOL.md`.
 
 ## Candidate validation path
 

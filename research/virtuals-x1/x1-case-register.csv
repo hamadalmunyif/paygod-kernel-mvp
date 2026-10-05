@@ -1,0 +1,1 @@
+x1_case_id,status,rail,chain_id,job_id,client,provider,evaluator,offering_ref,requirement_commitment,submission_tx,evaluator_action_tx,evidence_cutoff_ref,native_decision_frozen,evidence_admission,executable,paygod_execution,paygod_decision,actual_successor_state,economic_outcome,diagnostic_class,notes
