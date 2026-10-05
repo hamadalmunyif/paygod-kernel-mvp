@@ -1,10 +1,10 @@
-# X1 Deployment Inventory — Preliminary
+# X1 Deployment Inventory — Level 0
 
-Status: PARTIAL — LEVEL 0
-Observed: 2026-10-05
-Purpose: establish external deployment facts before selecting or evaluating X1 cases.
+Status: PARTIAL — DEPLOYMENT BINDING WITNESS OPEN  
+Observed/reconciled: 2026-10-05  
+Purpose: establish external deployment facts and preserve the exact remaining boundary before Level 1 acquisition.
 
-This record now distinguishes two ACP generations that MUST NOT be conflated:
+This record distinguishes two ACP generations that MUST NOT be conflated:
 
 1. the **current ACP Node v2 / AgenticCommerceV3 rail** used by the current official Node SDK/CLI; and
 2. the **earlier modular ACP v2 rail** used by the older Python SDK and represented by the separate `agent-commerce-protocol` repository.
@@ -63,7 +63,7 @@ The current Node v2 SDK exposes role-gated tools:
 - provider / funded → `submit`
 - evaluator / submitted → `complete` or `reject`
 
-The preferred first current-rail X1 transition is therefore:
+The preferred first current-rail X1 transition is:
 
 ```text
 on-chain: SUBMITTED → COMPLETED
@@ -73,22 +73,30 @@ action: complete(jobId, reason, optParams)
 
 with an explicit non-zero evaluator.
 
-This SDK role gating is useful evidence about the intended workflow. X1 still requires independent binding to the deployed contract semantics before treating SDK behavior alone as proof of on-chain authorization.
+`CURRENT_RUNTIME_WITNESS_001.md` separately records a real current-rail job that submitted, completed, and released payment with evaluator = zero. That witness is intentionally excluded from evaluator-mediated comparison and establishes that `COMPLETED` alone does not prove evaluator judgment.
 
-## Authenticated off-chain history boundary
+SDK role gating remains evidence about intended workflow. X1 still requires block-bound deployment identity and must not promote SDK behavior alone into a stronger historical on-chain authorization claim.
+
+## Authentication-gated off-chain history boundary
 
 The current Node v2 transport's `getHistory(chainId, jobId)` first authenticates the agent by signing an `acp-auth:<timestamp>` message, then calls:
 
 `/chats/{chainId}/{jobId}/history`.
 
-Therefore X1 MUST NOT assume that full requirements, messages, or deliverables for arbitrary historical jobs are publicly reconstructable.
+Established:
 
-This creates two evidence zones for X1:
+- history retrieval is authentication-gated in the pinned client;
+- arbitrary public reconstructability of requirements/messages/deliverables MUST NOT be assumed.
 
-- public/native chain evidence: contract state, transactions, logs, commitments;
-- participant-authorized ACP history: requirements/messages/deliverable context available to an authenticated participant.
+Not established:
 
-This is a strong reason to prefer a deliberately created, bounded real job if public historical cases cannot supply a faithful pre-decision evidence package.
+- whether every authenticated agent may read every job;
+- whether access is restricted to job participants;
+- the exact authorization result for an unrelated job.
+
+Therefore this inventory uses **authenticated ACP history**, not **participant-authorized history**, unless a specific access test proves the narrower scope.
+
+For the prospective R0 path selected in `LEVEL0_ACQUISITION_DECISION.md`, X1 will operate as a legitimate participant and preserve the history actually available to that participant. Authorization scope for unrelated jobs is not required to be guessed.
 
 ## Current hook surface observed in the pinned SDK
 
@@ -124,33 +132,84 @@ This rail is retained only for historical/external-witness analysis. It is NOT t
 
 ## Upgradeability / source-binding boundary
 
-Both the current ABI and the earlier modular source expose upgradeability concerns. An address or SDK constant alone is insufficient to prove historical implementation identity.
+An address or SDK constant alone is insufficient to prove implementation identity at a sampled block.
 
-For every future sampled X1 case, bind as far as the external system permits:
+The reproducible method is now frozen in `DEPLOYMENT_BINDING_METHOD.md`.
+
+For every qualifying current-rail case it requires, at the sampled predecessor block:
 
 - chain id;
 - block number and block hash;
-- ACP contract address;
-- implementation/proxy identity at that block where applicable;
-- job id;
-- client/provider/evaluator;
-- native job status before action;
-- relevant hook configuration;
-- budget/payment token;
-- evidence commitments available before the evaluator action.
+- ACP proxy address;
+- ERC-1967 implementation-slot response;
+- recovered implementation address;
+- proxy bytecode and hash;
+- implementation bytecode and hash;
+- raw evidence references.
 
 A current repository commit MUST NOT be treated as proof that a historical transaction executed that exact source.
 
-## Still unresolved
+## External corroboration — non-qualifying research lead
 
-Level 0 remains open because X1 still needs:
+A 2026-09-24 independent technical analysis of AgenticCommerceV3 reports that the same Base address is a UUPS proxy, gives deployment block `44,427,013`, describes an implementation abbreviated as `0x8e86…77bc`, and reports no observed upgrade.
 
-- independent current-rail on-chain binding for `0x238E541BfefD82238730D00a2208E5497F1832E0` at sampled blocks;
-- a reproducible historical proxy/implementation identity method;
-- a frozen current-rail candidate sampling rule;
-- a complete current job reconstruction method;
-- a decision on whether public historical evidence is sufficient or a participant-controlled real job is required;
-- an explicit evidence cut-off for authenticated ACP chat/history material;
-- a statement of which off-chain evidence is mutable, unavailable, or unverifiable outside ACP.
+Reference:
+`https://llm4agents.com/blog/erc-8183-agentic-commerce-job-escrow-audit`
 
+X1 does NOT promote those statements into deployment facts merely because they are plausible and independently published.
+
+They remain corroborating research leads until X1 captures the raw block-bound storage/code witness defined in `DEPLOYMENT_BINDING_METHOD.md`.
+
+## Level 0 status reconciliation
+
+### Resolved / frozen
+
+The repository now records:
+
+- current rail and source pins;
+- current ACP contract candidate from official SDK configuration;
+- target transition `SUBMITTED → COMPLETED` with explicit non-zero evaluator;
+- a current-runtime exclusion witness showing why evaluator = zero does not qualify;
+- public/native-chain vs authentication-gated ACP evidence separation;
+- a prospective bounded real job as the preferred first fully reconstructable path;
+- pre-purchase provider/offering selection controls;
+- evidence cut-off and Evidence Admission ordering;
+- native-decision commitment before PayGod;
+- PayGod-run commitment after the native decision in a common recorded chronology;
+- independent evidence source/timing/availability classification;
+- a machine-readable case register;
+- a reproducible ERC-1967 deployment-binding method;
+- no kernel/pack/schema/receipt/ledger mutation.
+
+### Still open — blocking Level 0 closure
+
+One core witness remains:
+
+**Execute the deployment-binding method against a current Base reference block and preserve the raw result.**
+
+At minimum:
+
+```text
+block number + block hash
+proxy address
+ERC-1967 implementation slot @ block
+implementation address
+proxy code hash @ block
+implementation code hash @ block
+```
+
+Until that witness exists, Level 0 remains OPEN.
+
+### Unresolved but not required to guess before prospective R0
+
+These remain explicit limitations rather than silently inferred facts:
+
+- exact authorization scope of authenticated ACP history for unrelated jobs;
+- full reconstructability of arbitrary historical job-room evidence;
+- historical implementation identity for the old modular witness beyond evidence already recorded;
+- source-code equivalence to deployed implementation unless separately reproduced.
+
+Case-specific deployment binding MUST be repeated at the real R0 predecessor block even after the Level 0 reference witness succeeds.
+
+No paid action is authorized by this inventory.
 No PayGod code change is authorized by this inventory.
