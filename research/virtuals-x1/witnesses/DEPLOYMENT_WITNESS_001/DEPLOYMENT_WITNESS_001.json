@@ -1,0 +1,29 @@
+{
+  "anchor_source": "explicit_block",
+  "artifact_type": "paygod/x1-deployment-binding-witness/v0.1",
+  "block_hash": "0x565c9c7f6ac17d383f14c8453c1d369c0ffb55a2afcbe31d55c5daa39bf55151",
+  "block_number": 52189048,
+  "block_number_hex": "0x31c5778",
+  "block_timestamp_chain_metadata": 1791167443,
+  "chain_id": 8453,
+  "implementation_address": "0x8e86fbef4a4c927561cb6447ced77fffbf3b77bc",
+  "implementation_code_bytes": 14185,
+  "implementation_code_keccak256": "0xc47c1f4ca03bd0be464d0a94eb2b6e4c9c112306b42b22d8400b8dada47848b5",
+  "implementation_code_sha256": "0x8cb96ee50556886ef0490020a74acd08863f49cf5aa6d43255ad6d0dfe4019e5",
+  "implementation_slot": "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc",
+  "limitations": [
+    "Block timestamp is chain metadata, not independent trusted time.",
+    "This witness binds deployed proxy/implementation bytecode identity at the sampled block only.",
+    "It does not establish source equivalence, contract safety, evaluator quality, or PayGod authority."
+  ],
+  "method_version": "x1-deployment-binding/v0.1",
+  "proxy_address": "0x238E541BfefD82238730D00a2208E5497F1832E0",
+  "proxy_code_bytes": 163,
+  "proxy_code_keccak256": "0xfc16c7f571d8b1443fb5ef7a46304acb87f7a1f6d065d9d3162ec0af13f42aae",
+  "proxy_code_sha256": "0x59a13731d64cf07e388266971b295fc6c93c73f93cfe291d1752c88cb5bd7d3b",
+  "raw_evidence_file": "raw_rpc.json",
+  "raw_rpc_sha256": "0xd68233c15e68b4e908eb92b9d2f56a13135cdce04cddab2c601bd582fc9262e3",
+  "raw_slot_value": "0x0000000000000000000000008e86fbef4a4c927561cb6447ced77fffbf3b77bc",
+  "rpc_endpoint": "https://mainnet.base.org",
+  "status": "BOUND"
+}
