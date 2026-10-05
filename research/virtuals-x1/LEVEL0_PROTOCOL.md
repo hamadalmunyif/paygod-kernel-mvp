@@ -1,6 +1,6 @@
 # X1 Level 0 Protocol — Research Freeze
 
-Status: OPEN
+Status: OPEN — METHOD FROZEN; DEPLOYMENT WITNESS BLOCKING
 
 Purpose: establish external facts and freeze the first current-rail experiment before observing PayGod outcomes.
 
@@ -13,22 +13,28 @@ Current official SDK configuration identifies Base chain 8453 and ACP contract `
 
 Earlier modular ACP v2 references are retained as historical witnesses, not the default rail for new case acquisition.
 
-A source constant is not proof of historical/live implementation identity. X1 must bind source/deployment state at sampled blocks before making stronger claims.
+A source constant is not proof of historical/live implementation identity.
 
-## Questions to resolve before freezing the first case sample
+## Level 0 resolution matrix
 
-1. Independently confirm the current Base contract and its deployed implementation/proxy state.
-2. Confirm the native current-rail transition semantics around SUBMITTED, COMPLETED, and REJECTED.
-3. Determine which fields of `getJob`, transaction logs, and hook state are reconstructable at a historical block.
-4. Determine exactly what evaluator identity/authority can be proved from native state.
-5. Separate public on-chain evidence from participant-authenticated ACP history.
-6. Define what requirement, deliverable, reason, and message evidence is available before evaluator action.
-7. Define a cut-off that excludes information created after the evaluator decision.
-8. Decide whether public historical cases can satisfy the evidence package.
-9. If not, define a bounded real purchased workflow with an independent provider.
-10. Freeze the candidate selection rule before observing PayGod outputs.
+| Question | Current disposition |
+| --- | --- |
+| Current rail/source pins | RESOLVED |
+| Current ACP address from pinned SDK | RESOLVED AS SOURCE FACT — not yet block-bound deployment proof |
+| Target transition | FROZEN: `SUBMITTED → COMPLETED` with explicit non-zero evaluator |
+| Zero-evaluator completion ambiguity | RESOLVED by current-runtime exclusion witness |
+| Public chain vs ACP history boundary | RESOLVED at authentication boundary; unrelated-job authorization scope remains unclaimed |
+| Pre-decision evidence cut-off | FROZEN |
+| Native evaluator blindness | FROZEN as committed decision artifact before PayGod |
+| PayGod shadow chronology | FROZEN after native-decision commitment |
+| Historical-vs-prospective acquisition choice | RESOLVED: prospective bounded real job preferred |
+| Provider/offering selection method | FROZEN |
+| Case register / reconstruction record | FROZEN |
+| Deployment/proxy/implementation method | FROZEN in `DEPLOYMENT_BINDING_METHOD.md` |
+| Independent deployment witness at a Base reference block | **OPEN — BLOCKER** |
+| Paid R0 execution | NOT AUTHORIZED; economic cap remains separate human approval |
 
-## Initial preferred transition
+## Current target transition
 
 ```text
 SUBMITTED → COMPLETED
@@ -44,29 +50,134 @@ Requirements:
 
 `SUBMITTED → REJECTED` remains a useful companion outcome but is not required for the first case.
 
+## Evidence / decision ordering now frozen
+
+For any prospective qualifying R0 case:
+
+```text
+freeze request + acceptance criteria
+→ real provider submission
+→ predecessor-state/evidence capture
+→ evidence package commitment
+→ native evaluator decision artifact
+→ native decision commitment
+→ Evidence Admission
+→ NOT RUN or PayGod shadow
+→ PayGod run commitment
+→ execute already-committed native ACP action
+→ successor-state / settlement observation
+```
+
+If a required PayGod input is not semantically representable/admissible:
+
+`WITHHELD → NOT RUN`
+
+NOT RUN is not a PayGod verdict.
+
+If native-decision commitment cannot be shown to precede the PayGod-run commitment in the recorded chronology, the case MUST NOT claim a blinded comparison.
+
+The chronology does not establish trusted external time.
+
+## Deployment binding gate
+
+Level 0 does not close merely because the official SDK names the current contract.
+
+The repository now freezes the binding method in `DEPLOYMENT_BINDING_METHOD.md`.
+
+Before Level 0 closure, X1 MUST capture one independent current Base reference-block witness containing at least:
+
+```text
+chain_id = 8453
+block_number = B
+block_hash = H(B)
+
+proxy_address =
+  0x238E541BfefD82238730D00a2208E5497F1832E0
+
+ERC-1967 implementation slot @ B
+raw storage word
+implementation address
+
+proxy bytecode hash @ B
+implementation bytecode hash @ B
+raw evidence references
+```
+
+This reference witness demonstrates that the method works and independently binds the current deployment at that block.
+
+Every later real case MUST repeat the same binding at its own predecessor block.
+
+## Authentication boundary
+
+The pinned ACP client proves that history retrieval authenticates an agent before calling:
+
+`/chats/{chainId}/{jobId}/history`.
+
+It does NOT by itself prove the authorization scope for unrelated jobs.
+
+Therefore Level 0 records only:
+
+```text
+AUTHENTICATION-GATED HISTORY
+```
+
+and does not claim:
+
+```text
+PARTICIPANT-ONLY HISTORY
+```
+
+unless separately tested.
+
+Because the selected prospective R0 path operates as a legitimate participant, unrelated-job authorization scope is not a reason to invent a claim or mutate PayGod.
+
+## Acquisition decision already frozen
+
+The preferred first fully reconstructable case is a prospective bounded real ACP job with:
+
+- an independent external provider;
+- explicit non-zero evaluator;
+- low economic exposure;
+- no unnecessary execution/trading/bridge action;
+- objective acceptance criteria where practical;
+- complete participant-visible evidence preserved before evaluator action;
+- PayGod shadow only.
+
+The first live workflow remains `X1-R0 — instrumentation case`, not proof of protocol independence or market value.
+
+The live spend gate remains separate:
+
+`UNSET — EXPLICIT USER APPROVAL REQUIRED`
+
+Level 0 methodological closure MUST NOT be interpreted as authorization to spend.
+
 ## Required Level 0 exit artifacts
 
-Level 0 does not close until the repository records:
+The repository now has or has frozen:
 
 - current-rail deployment inventory;
-- chain/contract and implementation identity method;
-- event/state reconstruction notes;
-- target transition confirmation;
-- public-vs-authenticated evidence boundary;
-- historical cut-off definition;
-- frozen candidate sampling rule;
-- explicit exclusions;
-- a statement of what cannot be observed or independently verified;
+- deployment-binding method;
+- event/state reconstruction protocol;
+- target transition;
+- public-vs-authentication-gated evidence boundary;
+- pre-decision cut-off;
+- frozen acquisition/sampling method;
+- native-decision commitment rule;
+- PayGod-run chronology rule;
+- explicit exclusions/non-claims;
 - no kernel change.
+
+The remaining exit artifact is:
+
+- **one raw current Base deployment-binding witness produced with the frozen method.**
 
 ## Stop conditions
 
 Pause X1 rather than coding around the problem if:
 
-- current rail cannot be independently identified;
-- target transition semantics cannot be pinned;
+- the current deployment cannot be independently bound at a reference block;
 - the required pre-decision evidence cannot be obtained lawfully as observer/participant;
-- a faithful predecessor snapshot cannot be reconstructed;
+- a faithful predecessor snapshot cannot be reconstructed for the real case;
 - the first useful experiment would require kernel mutation before observational evidence exists.
 
 A Level 0 STOP is a valid research result.
