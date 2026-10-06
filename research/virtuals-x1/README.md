@@ -1,6 +1,6 @@
 # X1 — Virtuals External Consequential Transition Validation
 
-Status: OPEN — LEVEL 0 RESEARCH  
+Status: OPEN — LEVEL 0 CLOSED; X1-R0 PREPURCHASE FREEZE; SPEND UNAUTHORIZED  
 Classification: external_architecture_validation_research  
 Gating for B2-REAL: false  
 Kernel mutation: prohibited  
@@ -17,10 +17,10 @@ X1 asks:
 
 ## Current rail selection
 
-Level 0 found two distinct ACP generations. The default target for new X1 workflow acquisition is now the current official Node v2 rail:
+Level 0 found two distinct ACP generations. The default target for new X1 workflow acquisition is the official Node v2 rail captured by the frozen Level 0 references below. These pins preserve the research baseline; they are not a claim that the pinned commits are the latest upstream HEADs.
 
-- source/SDK: `Virtual-Protocol/acp-node-v2@0f4b678516c354c1541b92aa08db11ece3506261`
-- current CLI: `Virtual-Protocol/acp-cli@5c01771b964e0e431e6c4bea5a4d481514a30e24`
+- Level 0 pinned SDK: `Virtual-Protocol/acp-node-v2@0f4b678516c354c1541b92aa08db11ece3506261`
+- Level 0 pinned CLI: `Virtual-Protocol/acp-cli@5c01771b964e0e431e6c4bea5a4d481514a30e24`
 - Base chain id: `8453`
 - SDK-configured Base ACP contract: `0x238E541BfefD82238730D00a2208E5497F1832E0`
 - current ACP server: `https://api.acp.virtuals.io`
