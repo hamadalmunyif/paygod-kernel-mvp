@@ -1,13 +1,13 @@
 # X1 Current Rail Selection
 
-Status: PROVISIONAL — LEVEL 0
+Status: SELECTED — LEVEL 0 CLOSED; X1-R0 PREPURCHASE FREEZE; SPEND UNAUTHORIZED
 Decision date: 2026-10-05
 
 ## Decision
 
-For new X1 workflow acquisition, use the current official ACP Node v2 rail as the primary target unless Level 0 verification disproves the configuration.
+For new X1 workflow acquisition, use the official ACP Node v2 rail captured by the frozen Level 0 baseline as the primary target. Level 0 verification is complete; X1-R0 remains the next bounded instrumentation step and no purchase is authorized by this selection.
 
-Pinned current references:
+Level 0 pinned references (frozen research baseline; not a claim of latest upstream HEAD):
 
 - `Virtual-Protocol/acp-node-v2@0f4b678516c354c1541b92aa08db11ece3506261`
 - `Virtual-Protocol/acp-cli@5c01771b964e0e431e6c4bea5a4d481514a30e24`
@@ -51,7 +51,7 @@ External Witness 001 is therefore classified as a legacy-rail witness and retain
 
 Because current ACP chat/history access is participant-authenticated, the strongest first X1 case may require X1 to become a legitimate client/evaluator in a bounded real job with an independent provider.
 
-That is not yet authorized as a purchase by this document. Level 0 must first freeze:
+That is not authorized as a purchase by this document. Level 0 has frozen:
 
 - offering selection criteria;
 - maximum economic exposure;
@@ -62,7 +62,7 @@ That is not yet authorized as a purchase by this document. Level 0 must first fr
 - candidate retention;
 - data capture plan.
 
-Only after that freeze may Level 1 workflow acquisition begin.
+That freeze is complete. Level 1 workflow acquisition still requires the separate explicit economic authorization defined by the X1-R0 pre-purchase gate.
 
 ## Non-decision
 
@@ -73,4 +73,4 @@ This selection does not authorize:
 - automated payments;
 - authority gating;
 - post-flight conformance;
-- any purchase before Level 0 experimental controls are frozen.
+- any purchase without the separate explicit X1-R0 economic authorization.
