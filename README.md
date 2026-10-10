@@ -33,6 +33,12 @@ Experimental research and the canonical public implementation have different evi
 - **Numeric interoperability:** fractional temperatures, emission factors and other external decimals need a separately versioned and tested admission/representation contract. None is shipped as a generic industrial profile.
 - **One public software reference:** this repository is the canonical implementation source; research may inform it without automatically changing code or becoming a website feature.
 
+## Core Packs: implemented is not production-ready
+
+The repository contains **real executable** Scope 1/2 GHG, critical CVE, and ISO 27001 policy-review Packs with versioned policy-unit tests. These tests demonstrate decisions on declared fixtures, not live-source truth or production admission. The current `run` path does **not** apply the embedded `spec.inputs.schema` as a mandatory pre-decision gate.
+
+See the [Core Pack Readiness Register](research/pack-readiness/README.md) for the exact blockers. A [GHG shape-admission research prototype](research/pack-readiness/ghg-scope12-v0/README.md) demonstrates fail-closed upstream `WITHHELD / NOT_RUN`, synthetic canonical CLI execution and independent bundle integrity verification. It is **optional, bypassable and not production-certified**; it cannot substantiate actual measurements, emission factors or institutional reliance.
+
 ## What is not yet proven
 
 The repository does **not** yet prove:
