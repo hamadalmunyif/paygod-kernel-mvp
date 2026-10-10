@@ -88,8 +88,10 @@ Minimum provenance contract should eventually bind:
 - signature/API attestation or equivalent source proof;
 - payload digest.
 
-### 3. Issuer authenticity / trust root
-Receipt integrity must eventually be complemented by an explicit issuer identity/signing and key-rotation model before relying parties treat a receipt as an authenticated institutional assertion.
+### 3. Issuer authenticity / institutional trust-root governance
+A **minimal optional detached Ed25519 receipt-signature profile is already implemented** and verified against a recipient-supplied key set (see [Issuer Authenticity](ISSUER_AUTHENTICITY.md)). It authenticates a receipt commitment to a chosen key, not an institution's mandate.
+
+Production organization-level issuer identity, key rotation/revocation, operational custody and authoritative trust roots remain **unproven future work**. Do not relabel their absence as absence of the implemented minimal signature verifier.
 
 ### 4. Real domain authority pack
 No current pack proves a production financial release workflow. A first bounded pack should model a real workflow without changing kernel semantics.
