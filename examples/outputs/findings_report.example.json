@@ -1,0 +1,21 @@
+{
+  "api_version": "paygod/v1",
+  "kind": "FindingsReport",
+  "generated_at": "2026-01-29T00:00:00Z",
+  "pack": {
+    "name": "critical-cve-blocker",
+    "version": "1.0.0"
+  },
+  "findings": [
+    {
+      "kind": "flag",
+      "severity": "high",
+      "code": "EVAL_ERROR",
+      "message": "Example finding.",
+      "rule_name": "example",
+      "evidence_refs": [
+        "ref:evidence/1"
+      ]
+    }
+  ]
+}
