@@ -14,3 +14,5 @@ In `spec.standard`:
 
 ## Example
 See: `packs/core/iso27001-policy-review`
+
+> **Status clarification (2026-10-10).** A pack referencing a standard is not official certification, regulator accreditation, or evidence that all clauses of the referenced standard are enforced. See [current implementation](../README.md) and [research transfer register](OBSERVATORY_TRANSFER_ACCEPTANCE_2026-10-10.md).
