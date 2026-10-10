@@ -1,67 +1,38 @@
-# Repository Structure & Open Core Architecture
+# PayGod Kernel Repository Structure — Current Implementation
 
-This document explains the organization of the Paygod Kernel repository, highlighting the separation between the **Public Core** and the **Extension Points** that enable the Open Core model.
+Status: current code-oriented map. Historical `src/Paygod.*.Service` scaffolds are not evidence of independent, deployed microservices or available proprietary implementations.
 
-## 📂 Root Directory
-
+```text
+README.md / START_HERE.md         canonical public claims and onboarding
+contracts/                       versioned JSON schemas and schema governance
+spec/test-vectors/               canonicalization and ledger reference vectors
+packs/core/, packs/providers/    policy-pack samples; drafts under packs/_drafts/
+src/PayGod.Cli/                  canonical .NET policy run/pack CLI
+api/server.js                    fail-closed demo HTTP surface
+deploy/docker/api/app/Program.cs canonical CLI delegation adapter
+tools/                           Python verifier, issuer-auth and CI checks
+tests/                           .NET/contract/integrity test fixtures
+adrs/                            accepted design decisions
+docs/                            implemented boundary, experiments and historical plans
+rehearsals/                      synthetic and external-readiness checks
+research/                        bounded research cases, not shipped products
+.github/workflows/               runnable verification and governance gates
 ```
-/
-├── contracts/          # 📜 Canonical JSON Schemas (The Law)
-├── docs/               # 📚 Documentation & Governance
-├── packs/              # 📦 Policy Bundles (Starter Packs)
-├── spec/               # ⚖️ Compliance Test Vectors (Golden Fixtures)
-├── src/                # 🧠 Core Kernel Source Code (.NET)
-├── tools/              # 🛠️ CLI & Verification Scripts (Python)
-├── LICENSE             # ⚖️ Apache 2.0 License
-├── SECURITY.md         # 🛡️ Security Policy & Disclosure
-├── TRADEMARK.md        # ™️ Trademark Usage Guidelines
-└── CONTRIBUTING.md     # 🤝 Contribution Guidelines
-```
 
-## 🏗️ Key Components
+## Practical entry points
 
-### 1. `spec/` (The Standard)
-This is the "Constitution" of the system. It defines the mathematical truth that all implementations must adhere to.
-*   **`test-vectors/`**: JSON files containing "Golden Fixtures" for Canonicalization and Hashing.
-*   **Role**: Ensures that a Rust CLI, a .NET Server, and a Python Script all produce the *exact same* ledger hashes.
+- [README](../README.md): implementation and explicit non-claims.
+- [START_HERE](../START_HERE.md): developer build, example packs, evidence witness.
+- [Architecture](02_ARCHITECTURE.md): canonical decision path vs external evidence/authority.
+- [Repository Boundary Closure](REPOSITORY_BOUNDARY.md): which adapters may delegate and how mutations are rejected.
+- [Standalone Verifier](STANDALONE_VERIFIER.md): integrity vs recipient-key issuer-authentication.
+- [Research acceptance register](OBSERVATORY_TRANSFER_ACCEPTANCE_2026-10-10.md): what a separate experiment established and what it did **not** promote.
+- [Current stop-build rule](STOP_BUILD_RULE.md): feature work requires evidence-backed governance.
 
-### 2. `contracts/` (The Law)
-Contains the versioned JSON Schemas that define valid data structures.
-*   **`schemas/`**: `observation.schema.json`, `decision.schema.json`, etc.
-*   **Role**: Enforces "Strict Mode" validation at the API boundary.
+## Explicitly not shown as shipped architecture
 
-### 3. `packs/` (The Value)
-Contains the "Starter Packs" that solve real business problems.
-*   **`security/`**: `secrets-in-repo-guard`, `critical-cve-blocker`.
-*   **`compliance/`**: `admin-drift-detection`.
-*   **Role**: Drives adoption by providing immediate value ("Drop-in Security").
+Do not infer that `src/Paygod.Ledger.Service`, `src/Paygod.Metrics.Service` or `src/Paygod.Kernel.Api` scaffolding implements a persistent distributed backend. Similarly, interfaces and potential extensions mentioned in early plans (cloud object store, panic switch, enterprise admin UI, hosted support, RBAC, OAuth/SSO) are neither verified production features nor a guaranteed commercial SKU.
 
-### 4. `src/` (The Engine)
-The core execution logic, designed as a set of decoupled services.
-*   **`Paygod.Contracts`**: Shared C# models generated from JSON Schemas.
-*   **`Paygod.ControlEngine`**: The stateless runtime that evaluates Policy Packs.
-*   **`Paygod.Ledger.Service`**: The immutable append-only log.
-*   **Interfaces**: `ILedgerStore`, `IPolicySource` (The Extension Points for Enterprise).
+## Public project identity
 
-### 5. `docs/` (The Strategy)
-*   **`OPEN_CORE_POLICY.md`**: Defines the boundary between Community and Enterprise.
-*   **`PUBLIC_API_POLICY.md`**: Defines the stable surface area (SemVer).
-*   **`adrs/`**: Architectural Decision Records (Why we did what we did).
-
-## 🔄 The Open Core Flow
-
-1.  **Community User**:
-    *   Downloads `paygod` CLI (built from `src/`).
-    *   Uses `packs/security` to scan their repo.
-    *   Stores results in a local `ledger.jsonl` file (Default `ILedgerStore`).
-
-2.  **Enterprise User**:
-    *   Uses the *same* `paygod` CLI.
-    *   Configures it to use the `S3LedgerStore` (Proprietary Extension).
-    *   Connects to `Paygod Cloud` for centralized dashboards.
-
-## 🛡️ Trust & Verification
-*   **`tools/verify_spec.py`**: Runs in CI to prove that the code complies with `spec/`.
-*   **`tools/dev/mock/test_pack.py (NOT source of truth)`**: Runs in CI to prove that the Packs logic is correct.
-
-This structure ensures that **Paygod Kernel** is a complete, standalone open-source product, while leaving clear, architectural "sockets" for commercial features.
+The canonical public implementation is this repository. A separate observatory may run experiments against pinned Kernel commits, but does not become a second supported public execution engine merely because its local tests pass. `paygod.net` should link to this repository for public capability and contribution claims.
