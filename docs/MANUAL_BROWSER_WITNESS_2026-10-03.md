@@ -1,5 +1,10 @@
 # Manual Browser Witness — 2026-10-03
 
+
+**Document status (2026-10-11):** DATED MANUAL REHEARSAL WITNESS — synthetic example, not an external pilot.  
+Preserve its exact observations and timestamps. A browser receipt-pin test supports only the named fixture, not real issuer mandates, truthful measurements or institutional acceptance.  
+Current claim baseline: [Verified Claims Register](CLAIMS_REGISTER.md).
+
 ## Scope
 
 Manual recipient-side verification of the production browser verifier at:

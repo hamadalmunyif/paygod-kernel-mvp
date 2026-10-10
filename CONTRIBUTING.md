@@ -17,13 +17,13 @@ The public website should point to **this** repository as the canonical implemen
 - **No silent breaking changes:** follow `contracts/versioning/SCHEMA_SEMVER_POLICY.md`.
 
 ## 📜 Open Core Guidelines
-Paygod operates under an **Open Core** model. This means:
+PayGod's source is distributed under Apache-2.0. **Open Core is an optional future commercial strategy, not a delivered enterprise edition.** For ordinary upstream code review:
 
-*   **We accept** contributions to the Kernel, CLI, Public Schemas, and Community Packs.
+*   **We can review** proposed contributions to the Kernel, CLI, Public Schemas, and Community Packs under the repo's existing review and Stop-Build rules; proposing a Pack does not guarantee acceptance.
 *   **We do NOT accept** features that are strictly "Enterprise-only" (e.g., closed-source backend dependencies) into this repository.
 *   All contributions must be compatible with the **Apache 2.0 License**.
 
-See [OPEN_CORE_POLICY.md](docs/OPEN_CORE_POLICY.md) for more details on the boundary between Community and Enterprise editions.
+A merged Community Pack is **not** a production certification or a guaranteed place in a curated Pack catalog. A future creator-benefit/revenue-sharing/accreditation process has **not** been approved. Any rights or compensation beyond the existing code license require separate explicit terms. See [OPEN_CORE_POLICY.md](docs/OPEN_CORE_POLICY.md) and the [claims register](docs/CLAIMS_REGISTER.md).
 
 ## Sign your commits (DCO)
 We use the **Developer Certificate of Origin (DCO)**. Every commit must include a `Signed-off-by` line.

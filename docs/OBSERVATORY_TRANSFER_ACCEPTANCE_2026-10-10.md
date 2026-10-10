@@ -8,6 +8,8 @@ This document explains what the canonical Kernel **already accepts and verifies*
 
 It is an evidence and documentation record, **not** an ADR approving a new primitive, proof of an external institution's acceptance, or approval to change frozen Kernel semantics. The current [Stop-Build Rule](STOP_BUILD_RULE.md) remains ACTIVE.
 
+> **Review annotation (2026-10-11):** The Observatory remains publicly readable for independent inspection of **research records**. The pinned T0 source document at `dea10136` records 98/98 harness tests, 13/13 rejected E1 attempts and 23 local post-flight positive checks; this annotation confirms **source-record agreement only**, not independent re-execution or product delivery. The current [Kernel claims register](CLAIMS_REGISTER.md) records actual CI check-run results and the repository ruleset for the pinned `18b57ff` baseline. No historical frozen source text or claim class is changed by this annotation.
+
 ## Two responsibilities
 
 - **Canonical Kernel:** owns policy-decision and canonical artifact semantics. It emits decision, receipt, manifest and bundle identity through the one registered canonical path; adapters delegate; independent verifiers check what the transferred evidence supports.

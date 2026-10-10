@@ -1,5 +1,10 @@
 # Belloop Artifact Protocol (BAP)
 
+
+**Document status (2026-10-11):** LEGACY MVP PROTOCOL REFERENCE — consult current schemas, README, and repository boundary for canonical execution authority.  
+This document records an MVP artifact-envelope framing. It is not a blanket claim that every described artifact type is emitted by the current CLI; canonical decision/receipt/bundle authority belongs to the Kernel.  
+Current claim baseline: [Verified Claims Register](CLAIMS_REGISTER.md).
+
 ## Scope (MVP)
 BAP defines the stable, schema-validated artifacts that power Belloop.
 In MVP, only three artifact kinds are mandatory:

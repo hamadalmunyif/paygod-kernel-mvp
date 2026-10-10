@@ -1,5 +1,10 @@
 # Paygod Kernel MVP - Phase 1 Closed Handover
 
+
+**Document status (2026-10-11):** ARCHIVED HISTORICAL PHASE-1 HANDOVER — not current repository HEAD.  
+The dates and HEAD references below describe their frozen historical snapshot, not the repository's present state. For current source and tested claim ceilings consult README.md and CLAIMS_REGISTER.md.  
+Current claim baseline: [Verified Claims Register](CLAIMS_REGISTER.md).
+
 ## Direction Lock (Non-Negotiable)
 
 - Phase 1: **CLOSED** at baseline commit 1b6be2e
