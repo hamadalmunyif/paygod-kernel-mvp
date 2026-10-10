@@ -79,6 +79,22 @@ public class CanonicalizerTests
         Assert.Throws<InvalidOperationException>(() => Canonicalizer.Canonicalize(node));
     }
 
+    // Synthetic Kernel-owned reproduction of the input-boundary class seen in external Witness 001.
+    // This does not revalidate the remote observation, its source identity, or ACP execution.
+    [Fact]
+    public void FractionalExternalDescriptorIsRejectedWhileSafeShadowAdmissionEnvelopeIsAccepted()
+    {
+        var externalDescriptor = JsonNode.Parse("{\"offering\":\"synthetic\",\"numeric_metadata\":0.125}");
+        Assert.Throws<InvalidOperationException>(
+            () => Canonicalizer.Canonicalize(externalDescriptor));
+
+        var admitted = JsonNode.Parse(
+            "{\"source_digest\":\"synthetic-external-hash\",\"request_status\":\"WITHHELD_NO_PAYLOAD\",\"execution_authority\":false}");
+        Assert.Equal(
+            "{\"execution_authority\":false,\"request_status\":\"WITHHELD_NO_PAYLOAD\",\"source_digest\":\"synthetic-external-hash\"}",
+            Canonicalizer.Canonicalize(admitted));
+    }
+
     [Theory]
     [InlineData("9007199254740991", "9007199254740991")]
     [InlineData("-9007199254740991", "-9007199254740991")]
