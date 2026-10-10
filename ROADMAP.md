@@ -51,6 +51,15 @@ Goal: authenticate the receipt commitment without confusing key authentication w
 - private key remains outside the repository;
 - no claim of regulator authorization, source truth, replay, or trusted time.
 
+## External research reconciliation — 2026-10-10
+
+The [Observatory transfer/acceptance register](docs/OBSERVATORY_TRANSFER_ACCEPTANCE_2026-10-10.md) distinguishes Kernel-owned implemented capabilities from live shadow input compatibility, closed-local-harness authority, and hypotheses.
+
+- Live ACP Witness 001: fractional external descriptor **rejected as designed**, then a compatible shadow evidence-admission path succeeded **without modifying the Kernel** or creating a paid job.
+- Controlled T0: 98/98 harness tests, 13/13 bounded E1 Gate Zero rejections, 23 postflight verifier checks in a frozen local environment. These results are **not** a Kernel-owned live Warrant/E1/E2/S0 feature, external enforcer acceptance or T1 proof.
+- Numeric/industrial observation profiles: requirement for future data interoperability, not an implemented decimal capability.
+- No public-website or investor claim may exceed the canonical implemented/CI boundary. Research can contribute to docs and future tests without changing the stop-build rule.
+
 ## Current validation gates
 
 ### P0 — Gas Maintenance Workflow & Evidence-Admission Pilot — CLOSED
