@@ -3,6 +3,8 @@
 Policy packs are the main extension surface of Paygod Kernel.
 This document defines a stable and auditable lifecycle.
 
+> **Current-status note:** The following pack lifecycle/trust levels specify proposed or required review behavior; they do not establish a running external certification program or confer regulatory acceptance. Canonical implementation and non-claims remain in [README](README.md).
+
 ## Lifecycle states
 
 - **Draft**: initial development; may change frequently.
