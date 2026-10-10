@@ -33,12 +33,14 @@ This is a Paygod-specific restricted profile. A future RFC 8785 profile, if adde
 
 ## 2. Decision-domain numeric rule
 
-Decision-critical domain inputs MUST avoid floating-point values. Use scaled integers with an explicit unit, for example:
+Decision-critical domain inputs MUST avoid floating-point values. A **domain admission contract that has been explicitly versioned and tested** may use scaled integers with units. The following are illustrative *representations*, not proof that a carbon, banking or temperature admission profile is implemented:
 
 - money: `amount_minor: 125050`, `currency: "SAR"`;
 - rates: `rate_bps: 250` for 2.50%;
 - CVSS: `cvss_score_tenths: 98` for 9.8;
 - emissions: integer mass units such as `scope1_kgco2e`.
+
+The representation must include source-byte commitments, declared conversion scale and rounding/overflow rules as needed by the domain; an example field name alone does not create a validated transformation. See [research acceptance register](OBSERVATORY_TRANSFER_ACCEPTANCE_2026-10-10.md).
 
 ## 3. Verification semantics
 
