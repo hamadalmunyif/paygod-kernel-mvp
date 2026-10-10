@@ -1,5 +1,10 @@
 # Developer Workflow
 
+
+**Document status (2026-10-11):** CURRENT REPOSITORY-HOSTED ADAPTER WORKFLOW — registered adapter scope only.  
+The Node demo does not issue canonical decisions; only the registered canonical adapter may delegate to the CLI. Consult REPOSITORY_BOUNDARY.md for current mutation-test scope.  
+Current claim baseline: [Verified Claims Register](CLAIMS_REGISTER.md).
+
 ## Current boundary
 
 Repository Boundary Closure v0.1 separates the deprecated Node demo API from the canonical execution adapter.
