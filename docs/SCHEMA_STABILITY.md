@@ -1,5 +1,10 @@
 ﻿# Schema Stability
 
+
+**Document status (2026-10-11):** ACTIVE SCHEMA HASH GOVERNANCE DESCRIPTION — bounded to declared schema files.  
+This is contract version/hash governance. Successful schema checks do not imply that the CLI run validates every Pack's embedded input schema or any external source truth.  
+Current claim baseline: [Verified Claims Register](CLAIMS_REGISTER.md).
+
 ## Hash Source of Truth (Governance)
 Schema hashes in `contracts/schema-manifest.json` are governed by Git, not by local files.
 - CI computes hashes from Git blobs (HEAD) as the canonical source of truth.
