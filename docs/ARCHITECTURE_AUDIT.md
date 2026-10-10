@@ -130,6 +130,12 @@ The governing sequence is:
 
 See [STOP_BUILD_RULE.md](STOP_BUILD_RULE.md).
 
+## Promotion from research into the canonical repository
+
+See [Observatory → Kernel evidence-transfer register](OBSERVATORY_TRANSFER_ACCEPTANCE_2026-10-10.md). Local controlled-harness conditional release is a research witness, not a public Kernel execution surface; an externally observed fractional JSON descriptor established an admission mismatch, not a Kernel canonicalization defect. Untrusted or unrepresentable external evidence is held outside the Kernel by ADR 0003.
+
+A public website, independent investor deck or other presentation must use the current Kernel README and accepted witnesses as its source of delivered capabilities. Historical architecture slides and research-harness results are not automatic feature authorization.
+
 ## Current sequence
 
 1. B1 engineering rehearsal — completed.
