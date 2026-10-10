@@ -3,6 +3,8 @@
 This repository is **open-source** and aims to close the gap between **verification**, **compliance**, and **proof**.
 The core principle is: **every change must be explainable**, and **every decision must be reproducible**.
 
+> **2026-10-10 scope note:** Pack trust tiers and maintainer review criteria are governance rules or aspirations, not certification of real-world evidence, institutions or compliance. The [Stop-Build Rule](docs/STOP_BUILD_RULE.md) currently governs technical expansion. The [evidence transfer register](docs/OBSERVATORY_TRANSFER_ACCEPTANCE_2026-10-10.md) distinguishes experiments from canonical Kernel capabilities.
+
 ## Operating model
 
 We run a hybrid model:
