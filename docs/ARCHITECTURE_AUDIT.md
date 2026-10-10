@@ -88,8 +88,10 @@ Minimum provenance contract should eventually bind:
 - signature/API attestation or equivalent source proof;
 - payload digest.
 
-### 3. Issuer authenticity / trust root
-Receipt integrity must eventually be complemented by an explicit issuer identity/signing and key-rotation model before relying parties treat a receipt as an authenticated institutional assertion.
+### 3. Issuer authenticity / institutional trust-root governance
+A **minimal optional detached Ed25519 receipt-signature profile is already implemented** and verified against a recipient-supplied key set (see [Issuer Authenticity](ISSUER_AUTHENTICITY.md)). It authenticates a receipt commitment to a chosen key, not an institution's mandate.
+
+Production organization-level issuer identity, key rotation/revocation, operational custody and authoritative trust roots remain **unproven future work**. Do not relabel their absence as absence of the implemented minimal signature verifier.
 
 ### 4. Real domain authority pack
 No current pack proves a production financial release workflow. A first bounded pack should model a real workflow without changing kernel semantics.
@@ -129,6 +131,12 @@ The governing sequence is:
 **Observe → classify → count recurrence → assess operational importance → then earn the right to build.**
 
 See [STOP_BUILD_RULE.md](STOP_BUILD_RULE.md).
+
+## Promotion from research into the canonical repository
+
+See [Observatory → Kernel evidence-transfer register](OBSERVATORY_TRANSFER_ACCEPTANCE_2026-10-10.md). Local controlled-harness conditional release is a research witness, not a public Kernel execution surface; an externally observed fractional JSON descriptor established an admission mismatch, not a Kernel canonicalization defect. Untrusted or unrepresentable external evidence is held outside the Kernel by ADR 0003.
+
+A public website, independent investor deck or other presentation must use the current Kernel README and accepted witnesses as its source of delivered capabilities. Historical architecture slides and research-harness results are not automatic feature authorization.
 
 ## Current sequence
 

@@ -11,7 +11,7 @@ Other artifacts (findings_report, impact, plan_report, measurement, metricspec, 
 
 ## Source of Truth
 The system is governed by validated artifacts (schemas), not by code or services.
-Any producer (CLI/service/pack) is interchangeable if it emits compliant artifacts.
+Generic producers may exchange artifacts that conform to a published schema. **This does not grant any producer authority to mint canonical PayGod decisions, receipts, manifests or bundle identities.** Those originate only from the canonical Kernel decision path; adapters may delegate or transport canonical outputs. See [Repository Boundary Closure](REPOSITORY_BOUNDARY.md).
 
 ## Envelope (Required)
 Every artifact MUST be wrapped in a common envelope defined by the canonical schema:

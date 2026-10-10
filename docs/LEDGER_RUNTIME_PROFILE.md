@@ -1,60 +1,19 @@
-﻿# Runtime Ledger Profile (Phase 2)
+# Runtime Ledger Profile — Historical Phase 2 Note
 
-## Purpose
-Provide an append-only *runtime* ledger trail **outside git**.
-This is NOT the repo proof ledger. Repo outputs remain deterministic and reproducible.
+Status: **HISTORICAL TOOLING PROFILE; NOT A PRODUCTION STORAGE OR TRUST GUARANTEE** (reconciled 2026-10-10).
 
-Runtime ledger is meant to support:
-- audit trail per run
-- traceability to a git commit (HEAD)
-- refs-only integrity (hashes) without storing sensitive content
+This page previously described an optional local `PAYGOD_LEDGER_PATH` output and an old PowerShell append-helper flow. It is retained as historical operational context; it is not a normative format for canonical decision-bundle identity and not proof of a production append-only/WORM service.
 
-## Enablement
-Set the environment variable:
+For supported portable evidence semantics use:
+- [Kernel README](../README.md)
+- [Current architecture](02_ARCHITECTURE.md)
+- [Standalone verifier](STANDALONE_VERIFIER.md)
+- [GATES](../GATES.md)
 
-- PAYGOD_LEDGER_PATH = path to a JSONL file (will be created if missing)
+## Historical concept
 
-When PAYGOD_LEDGER_PATH is set, running:
-- tools/run_proof.ps1
+Local scripts may be able to append one JSONL metadata entry per run to a user-selected local path, where each entry contains only record identifiers and digests. Such metadata is a local diagnostic convenience. A timestamp from a local file is **producer supplied**, not trusted third-party time. The local file can be deleted or replaced; it is not a cryptographically immutable audit vault.
 
-will append one JSON line (JSONL) per run by calling:
-- tools/append_ledger.ps1
+The original phase-2 example was not a completed, tested cross-platform quickstart and contained malformed PowerShell snippets. Do not copy that example into production runbooks or rely on it as current setup instructions.
 
-When PAYGOD_LEDGER_PATH is NOT set:
-- runtime ledger is disabled (no side effects outside git)
-
-## Format (JSONL)
-One line per entry (UTF-8, no BOM). Minimal refs-only record.
-
-Example (single JSON line):
-{"v":1,"at_utc":"2026-02-05T22:58:13Z","repo":"https://github.com/<org>/<repo>.git","head":"<git_sha>","decision":{"path":"docs/examples/proof_run/outputs/decision.json","sha256":"<sha256>"},"evidence":{"path":"docs/examples/proof_run/outputs/evidence.json","sha256":"<sha256>"},"ledger_entry":{"path":"docs/examples/proof_run/outputs/ledger_entry.json","sha256":"<sha256>"}}
-
-Fields:
-- v: record version (integer)
-- at_utc: runtime timestamp (UTC) — allowed because this file is outside git
-- repo: remote origin URL (informational)
-- head: git commit SHA (traceability)
-- decision/evidence/ledger_entry: refs-only paths + SHA256 digests
-
-## Policy (Hard Rules)
-- refs-only: never store raw payloads, secrets, or full evidence content
-- no PII: never write personal data into runtime ledger
-- runtime ledger MUST be outside git (not committed)
-
-## Notes on Time
-Repo proof outputs must remain deterministic and reproducible.
-Runtime ledger time (at_utc) is permitted because it is:
-- outside git
-- not part of proof hashing within the repo
-
-## Operational Example
-Windows PowerShell:
-
-# disable (default)
-Remove-Item Env:\PAYGOD_LEDGER_PATH -ErrorAction SilentlyContinue
-pwsh -File tools/run_proof.ps1
-
-# enable
- = "C:\Users\User\Desktop\paygod_runtime_ledger.jsonl"
-pwsh -File tools/run_proof.ps1
-Get-Content  -Tail 1
+Any durable ledger service, secure retention SLA, and independent timestamp/issuer chain require separate implementation and testing. A coordinated full rewrite of internally valid bundle artifacts requires an external receipt commitment to distinguish replacements.

@@ -23,6 +23,16 @@ The standalone verifier checks bundle **integrity**: manifest/file digests and b
 
 The single-authority witness is deliberately scoped: it covers adapters registered in `tools/check_repository_boundary.py`. New execution-facing surfaces must be registered and covered by the same boundary witness.
 
+## What was accepted from external research?
+
+Experimental research and the canonical public implementation have different evidentiary status. The [Observatory → Kernel evidence-transfer register](docs/OBSERVATORY_TRANSFER_ACCEPTANCE_2026-10-10.md) identifies what the Kernel **already accepted**, what was only proven in a bounded research harness, and what remains unresolved.
+
+- **Witnessed compatibility, not a new primitive:** a live external ACP descriptor with fractional JSON numbers failed closed at `paygod-c14n-v1`; a later shadow workflow preserved the captured external observation separately and supplied a compatible canonical input. This is an evidence-admission boundary, **not** a canonicalization defect or live ACP integration. A Kernel-owned synthetic regression tests decimal rejection and a safe shadow-envelope acceptance; it does not prove the external provider data.
+- **Already accepted:** [ADR 0003](adrs/0003-evidence-admission-before-decision-execution.md) requires pre-kernel evidence admission; missing, temporally unproven or unrepresentable mandatory facts remain `WITHHELD` and cause orchestration `NOT RUN`. Neither is a Kernel verdict.
+- **Not promoted:** local experimental Warrant/E1/E2/S0 controlled-release results, external-provider acceptance, cross-enforcer portability and financial authority are not current Kernel capabilities. A bounded local test does not grant any of these claims.
+- **Numeric interoperability:** fractional temperatures, emission factors and other external decimals need a separately versioned and tested admission/representation contract. None is shipped as a generic industrial profile.
+- **One public software reference:** this repository is the canonical implementation source; research may inform it without automatically changing code or becoming a website feature.
+
 ## What is not yet proven
 
 The repository does **not** yet prove:

@@ -1,8 +1,11 @@
-# MVP Backlog (GitHub Issues/Milestones)
+# MVP Backlog (Historical Planning Snapshot)
+
+> **Status (2026-10-10): SUPERSEDED PLANNING MATERIAL.** This document predates the current portable-evidence verifier, adapter boundary and active stop-build. It lists possible milestones, not completed product guarantees. Follow [README](../README.md), [ROADMAP](../ROADMAP.md) and [research acceptance register](OBSERVATORY_TRANSFER_ACCEPTANCE_2026-10-10.md) for current status.
+
 
 This document provides a copy-paste backlog aligned with the MVP agreements:
 - CLI is the source of truth for pack run/test.
-- Ledger is append-only, immutable, strictly non-PII.
+- Proposed ledger discipline was append-only/references-only; the current verified claim is scoped to portable hash-linked artifacts, not immutable physical storage.
 - Evidence is references only (hashes + pointers), no raw sensitive payloads.
 - Packs are split into `packs/core` (cloud-agnostic) and `packs/providers/<cloud>` (provider-specific).
 - Security is gated on PR via GitHub Actions.

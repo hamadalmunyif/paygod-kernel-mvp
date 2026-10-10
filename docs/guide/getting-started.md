@@ -1,44 +1,25 @@
-# Getting Started
+# Getting Started with PayGod Kernel
 
-This guide will walk you through the process of setting up and using the PayGod Kernel.
+**Authoritative onboarding:** [START_HERE.md](../../START_HERE.md). The commands below are introductory and do not replace the pinned witness and CI test instructions there.
 
-## Prerequisites
+## Build the canonical CLI
 
-Before you begin, make sure you have the following installed:
-
-*   .NET 8.0 SDK
-*   Git
-
-## Installation
-
-1.  Clone the repository:
-
-    ```bash
-    git clone https://github.com/hamadalmunyif/paygod-kernel-mvp.git
-    ```
-
-2.  Navigate to the project directory:
-
-    ```bash
-    cd paygod-kernel-mvp
-    ```
-
-3.  Build the project:
-
-    ```bash
-    dotnet build
-    ```
-
-## Usage
-
-To use the PayGod Kernel CLI, run the following command:
+Prerequisite: .NET SDK 8.
 
 ```bash
-dotnet run --project src/PayGod.Cli -- [command]
+git clone https://github.com/hamadalmunyif/paygod-kernel-mvp.git
+cd paygod-kernel-mvp
+dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -o out
 ```
 
-For a list of available commands, run:
+The canonical CLI can validate, test and run compatible policy packs. See the example commands in [START_HERE](../../START_HERE.md). Use the versioned `paygod-c14n-v1` profile: external fractional measurements cannot be silently passed as JSON decimal values into canonical decision hashes.
 
-```bash
-dotnet run --project src/PayGod.Cli -- --help
-```
+## Independent verification
+
+The standalone Python verifier can verify transferred manifest/receipt/ledger/file integrity without rerunning the originating policy. It supports an optional detached Ed25519 receipt signature under a **recipient-owned** trust store. See [Standalone Verifier](../STANDALONE_VERIFIER.md).
+
+For real/deidentified sources, apply [ADR 0003](../../adrs/0003-evidence-admission-before-decision-execution.md) before evaluation: unavailable/unrepresentable mandatory evidence produces orchestration `NOT RUN`, not a forged `FALSE`.
+
+## Contributing
+
+Read [Contributing](../../CONTRIBUTING.md), [Gates](../../GATES.md) and the active [Stop-Build](../STOP_BUILD_RULE.md). This repository is the canonical public implementation. External research results do not become installed Kernel features by publication alone.

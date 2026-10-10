@@ -1,117 +1,49 @@
-# Paygod Kernel Axioms
+# PayGod Kernel — Implemented Invariants and Unproven Aspirations
 
-This document defines the fundamental, non-negotiable truths (Axioms) that govern the design and operation of the Paygod Kernel. These are not merely guidelines; they are architectural constraints that must be upheld to ensure the system's integrity, security, and compliance.
+Status: **RECONCILED WITH CURRENT README** (2026-10-10).
 
-Each axiom is structured to provide clarity on its definition, rationale, enforcement, and tradeoffs.
+Earlier versions of this document described all requests as JWT/mTLS-authenticated, WORM ledger storage, universal encrypted service mesh, production panic switches and compliance certifications. Those were proposed architectural requirements, **not capabilities established in the current repository**. Do not market those statements as enforced axioms.
 
----
+The executable baseline remains the [Kernel README](../README.md), [Architecture Audit](ARCHITECTURE_AUDIT.md), [GATES](../GATES.md), and the frozen [Stop-Build Rule](STOP_BUILD_RULE.md).
 
-## Axiom 1: Schema Is Law
+## Enforced and witnessed within their stated scope
 
-### 1. What
-The JSON Schema definitions are the absolute and final authority on data validity. No code shall implement validation logic that contradicts or extends the schema without the schema itself being updated first.
+### 1. Versioned contracts and supported canonicalization
 
-### 2. Why
-To prevent "Shadow Validation" where the actual rules of the system diverge from the documented contract. This ensures that validation is consistent across all environments (Local, CI, Production) and languages.
+Inputs, artifacts and packs must respect their applicable schemas and the versioned `paygod-c14n-v1` profile. The canonicalization profile rejects fractional/exponent JSON numbers, unsafe integers, and non-NFC property names. Data invalid under that profile must fail closed rather than silently change representation.
 
-### 3. Counterexample
-A developer adds a check `if ($obj.amount > 1000)` in a PowerShell script but leaves the schema's `maximum` value as `undefined`. A third-party integrator validates against the schema, sends `2000`, and fails mysteriously in production. The contract was lied to.
+A schema describes structure; it does **not** prove source truth, sender mandate, or factual completeness.
 
-### 4. Enforcement
-- **CI Gate**: All PRs must pass `paygod-cli validate --schema` which strictly enforces the schema.
-- **Library**: The `Paygod.SchemaValidator` library is the only approved validation mechanism in the kernel code.
-- **Policy**: `SCHEMA_SEMVER_POLICY.md` mandates strict format assertions.
+### 2. One canonical decision and artifact authority
 
-### 5. Tradeoffs
-- **Rigidity**: Changing a rule requires a schema change and potentially a version bump, which is slower than "hot-patching" a script.
-- **Learning Curve**: Developers must learn JSON Schema vocabulary instead of writing ad-hoc `if` statements.
+The canonical Kernel originates decision/artifact/receipt/bundle-identity semantics. **Registered** hosted adapters can invoke or transport but cannot originate alternate decision truth. [Boundary mutation witness](REPOSITORY_BOUNDARY.md) limits this to actual adapters registered in `tools/check_repository_boundary.py`, not every possible plugin.
 
-### 6. Non-goals
-- Does not replace business logic validation that requires external state (e.g., "User has sufficient balance"). Schema validates the *shape* and *intrinsic* correctness of the message, not its *contextual* validity.
+### 3. Tamper-evident evidence is not immutable physical storage
 
-### 7. References
-- [SCHEMA_SEMVER_POLICY.md](../contracts/versioning/SCHEMA_SEMVER_POLICY.md)
-- [JSON Schema Validation Spec (Draft 2020-12)](https://json-schema.org/specification.html)
+The exported evidence bundle contains hash commitments, a manifest-locked ledger and receipt bindings that are independently checkable within the verifier contract. These checks detect tested mutations; they do **not** ensure WORM/S3 retention, prevent a coordinated full rewrite absent an independent receipt commitment, or certify a durable enterprise audit vault.
 
----
+### 4. Independent verification must remain scoped
 
-## Axiom 2: Ledger Immutability
+The standalone verifier can check transferred files without producer runtime/pack replay. Optional detached Ed25519 receipt authentication depends on the recipient's independent trust store. Integrity `verified` does not imply authentic source data, authorization to act, trusted external time, or correct original policy evaluation.
 
-### 1. What
-Once a decision or assessment is recorded in the Ledger, it can never be modified or deleted. Corrections are made only by appending new "Correction" records that reference the original.
+### 5. Missing/unrepresentable evidence must not be coerced
 
-### 2. Why
-To guarantee a tamper-evident audit trail that satisfies strict financial and regulatory compliance requirements (OSCAL, SOC2). Trust is built on the assurance that history cannot be rewritten.
+[ADR 0003](../adrs/0003-evidence-admission-before-decision-execution.md) requires admission before Kernel evaluation. `WITHHELD` and `NOT RUN` are **orchestration states outside the Kernel**. They are not new policy-DSL truth values.
 
-### 3. Counterexample
-An admin notices a typo in a risk assessment and runs a SQL `UPDATE` to fix it. The audit trail is broken; auditors can no longer verify what the state was at the time of the original decision, potentially hiding fraud or incompetence.
+### 6. Preserve test and claim boundaries
 
-### 4. Enforcement
-- **Cryptographic Chaining**: Each ledger entry contains a hash of the previous entry.
-- **WORM Storage**: Underlying storage media (e.g., S3 Object Lock, Append-only DB) is configured to Write-Once-Read-Many.
-- **API Constraints**: The Kernel API exposes no `PUT` or `DELETE` endpoints for ledger resources.
+CI, signed commitments, negative tests, deterministic output and schema checks are different witnesses; none should be promoted into universal guarantees. A tested local controlled-release harness does not establish independent production release authority. Research promotion is recorded in [the transfer register](OBSERVATORY_TRANSFER_ACCEPTANCE_2026-10-10.md).
 
-### 5. Tradeoffs
-- **Storage Growth**: The database grows indefinitely.
-- **Complexity**: "Reading" the current state requires replaying the history or maintaining a separate "State View" (CQRS pattern).
+## Aspirations requiring separate implementation evidence
 
-### 6. Non-goals
-- Does not apply to ephemeral data like user session caches or draft assessments that haven't been finalized.
+The following are **not** enforced by the current core merely because they appeared in historical architecture drafts:
 
-### 7. References
-- [NIST SP 800-53 (AU-9 Protection of Audit Information)](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final)
+- mTLS/JWT on every request, organization identity federation or SSO.
+- WORM/immutable retention guarantees on an external cloud ledger.
+- production HSM or remote signing, third-party trusted time.
+- globally effective panic/kill switches or circuit breakers.
+- SOC 2, OSCAL, ISO, HIPAA, FedRAMP or government certification.
+- automated financial execution and non-bypassable external enforcers.
+- multi-service HA/SLO commitments.
 
----
-
-## Axiom 3: Zero-Trust Execution
-
-### 1. What
-The Kernel assumes that no caller, internal or external, is implicitly trusted. Every request must carry verifiable cryptographic proof of identity and authorization (e.g., a signed token).
-
-### 2. Why
-Perimeter defense is insufficient for modern cloud-native architectures. If an attacker breaches the outer firewall, they should not have free reign over the internal microservices.
-
-### 3. Counterexample
-The `DecisionService` trusts any request coming from `localhost` or the internal subnet. An attacker gains shell access to a web server in the same subnet and can now issue fraudulent decisions without authentication.
-
-### 4. Enforcement
-- **mTLS**: Mutual TLS is required for all service-to-service communication.
-- **Token Validation**: Every endpoint validates the JWT signature, expiration, and scopes before processing.
-- **Identity Propagation**: User identity is propagated through the call chain; services do not act as "God Mode" superusers.
-
-### 5. Tradeoffs
-- **Latency**: Additional overhead for cryptographic handshakes and token validation on every hop.
-- **Management**: Requires robust PKI and Key Management infrastructure.
-
-### 6. Non-goals
-- Does not imply that we don't use firewalls. Network segmentation is still a valid defense-in-depth layer, just not the *only* one.
-
-### 7. References
-- [NIST SP 800-207 (Zero Trust Architecture)](https://csrc.nist.gov/publications/detail/sp/800-207/final)
-
----
-
-## Axiom 4: Evidence-Based Decisions
-
-### 1. What
-Every decision output by the DAA/Paygod system must be traceable back to specific input evidence (data points, user answers, external API responses). A decision cannot exist in a vacuum.
-
-### 2. Why
-To explain *why* a decision was made (Explainable AI / XAI) and to allow for auditing the quality of decisions. "Because the AI said so" is not an acceptable justification in financial compliance.
-
-### 3. Counterexample
-A loan application is rejected. The system logs "Rejected" but doesn't link it to the specific credit bureau report or the specific policy rule that triggered the rejection. Debugging or appealing the decision is impossible.
-
-### 4. Enforcement
-- **Data Model**: The `DecisionRecord` schema requires an `evidence` array containing references (IDs/Hashes) to all inputs used.
-- **Provenance**: Input data is stored with metadata about its source and timestamp.
-
-### 5. Tradeoffs
-- **Data Volume**: Storing full evidence chains increases storage requirements.
-- **Privacy**: Evidence may contain PII, requiring strict access controls and potentially redaction strategies for long-term storage.
-
-### 6. Non-goals
-- Does not require storing a full snapshot of the *entire world* state, only the specific inputs that influenced the calculation.
-
-### 7. References
-- [EU AI Act (Transparency and Record-Keeping)](https://artificialintelligenceact.eu/)
+Any new invariant requires a precise implementation contract, a counterexample and falsifiable tests under the current governance process. “Must be true in the future” is not “already proven in code.”
