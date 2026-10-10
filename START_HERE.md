@@ -57,3 +57,9 @@ See [GATES.md](GATES.md). The canonical required contexts are `Paygod Kernel CI`
 Do not silently change the versioned canonicalization profile, digest construction, receipt binding, ledger-chain rules, deterministic pack semantics, verifier fail-closed integrity behavior, or trust-dimension meanings merely to accommodate a domain feature.
 
 Try contracts, packs, or adapters first. Kernel-semantic changes require explicit justification and regression evidence.
+
+## 9. Research evidence is not a feature branch
+
+The [research-to-Kernel acceptance register](docs/OBSERVATORY_TRANSFER_ACCEPTANCE_2026-10-10.md) distinguishes a signed/verifiable Kernel artifact from an outside-world observation or controlled-harness transaction. Follow [ADR 0003](adrs/0003-evidence-admission-before-decision-execution.md) for missing/unrepresentable evidence. Do not change `paygod-c14n-v1` to ingest fractional measurements or equate `NOT RUN` with a Kernel policy decision.
+
+The source in this repository, not a separate research harness, is the authoritative public implementation reference.
