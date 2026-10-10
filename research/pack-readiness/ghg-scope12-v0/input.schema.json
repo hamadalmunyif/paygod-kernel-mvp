@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paygod.net/research/ghg-scope12-admission-v0",
+  "title": "GHG Scope 1 & 2 candidate shape-only admission profile (research, not certified)",
+  "type": "object",
+  "required": [
+    "ghg_report"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "ghg_report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reporting_year",
+        "scope1_kgco2e",
+        "scope2_kgco2e",
+        "methodology_ref",
+        "emission_factor_refs",
+        "evidence_refs"
+      ],
+      "properties": {
+        "reporting_year": {
+          "type": "integer",
+          "minimum": 1990,
+          "maximum": 2100
+        },
+        "scope1_kgco2e": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "scope2_kgco2e": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "methodology_ref": {
+          "type": "string",
+          "minLength": 5,
+          "pattern": "^ref:[A-Za-z0-9][A-Za-z0-9._/:\\-]*$"
+        },
+        "emission_factor_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^ref:[A-Za-z0-9][A-Za-z0-9._/:\\-]*$"
+          }
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^ref:[A-Za-z0-9][A-Za-z0-9._/:\\-]*$"
+          }
+        }
+      }
+    }
+  }
+}
