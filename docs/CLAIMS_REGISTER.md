@@ -42,11 +42,11 @@ A workflow **defined** is not necessarily a workflow **executed**. A Check Run m
 
 | ID | Finding | Source / evidence quality | Strict ceiling |
 |---|---|---|---|
-| R01 | Closed T0 harness claims **98/98** local tests, **13/13** declared E1 attempts rejected, **23** positive post-flight checks | **HARNESS_ONLY**; these counts were cross-checked against the pinned Observatory [T0 closure record](https://github.com/hamadalmunyif/paygod-workflow-observatory/blob/dea10136bbb79a155237bc1252aaf41d3961ca46/docs/CONTROLLED_HARNESS_T0_CLOSURE_V0.md), but not independently replayed | No generic non-bypassable financial rail, external verifier mandate, deployed Warrant, E1/E2/S0 Kernel feature, or real financial release. |
+| R01 | Historic T0 controlled-local-harness assertions; **source restricted** | **HARNESS_ONLY**; internal Observatory T0 closure is pinned in a private source. Its run totals and underlying artifacts are **not independently inspectable public evidence**. | No generic non-bypassable financial rail, external verifier mandate, Warrant/E1/E2/S0 Kernel feature, or real financial release. |
 | R02 | Experimental external ACP / observation compatibility | **OBSERVED_COMPATIBILITY**; [transfer review](OBSERVATORY_TRANSFER_ACCEPTANCE_2026-10-10.md) | Compatibility/shadow observation only; not production interoperability certification or an automatic import adapter. |
 | R03 | AP2 Collision Pass B; Warrant originality; downstream authority lineage | **UNRESOLVED**; [research-transfer register](OBSERVATORY_TRANSFER_ACCEPTANCE_2026-10-10.md) | Pass B prescribed but **not shown as completed in the cited handoff**. Warrant v0 does not directly commit the exact receipt in its signed body; later reviewer acceptance remains missing. |
 
-The Observatory is **public research at present**, not an internal-only GitHub repository and not a second canonical source. Publication of a research record does not promote its results into the Kernel. The frozen experimental SHA and classification remain visible for reviewers; sensitivity/access changes require a separately reviewed decision.
+**Privacy correction (2026-10-11):** Observatory is now **Private**. This supersedes earlier public-access descriptions. The public register does not link to inaccessible T0 records or present internal harness totals as third-party-verifiable public evidence. This local research remains HARNESS_ONLY and separate from Kernel authority. Earlier published clones or Git history cannot be recalled retrospectively.
 
 ## C. Non-claims and open gates
 
