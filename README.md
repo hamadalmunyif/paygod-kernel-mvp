@@ -4,7 +4,7 @@ Paygod Kernel is a deterministic policy-execution core built on **contracts-firs
 
 It produces schema-governed decision evidence that can be transferred and independently verified without replaying the original decision.
 
-> **Evidence status:** [Verified Claims Register](docs/CLAIMS_REGISTER.md) pins the 2026-10-10 main-branch test and ruleset results, lists claim ceilings and distinguishes executable Packs, published research and unproven institutional readiness. See [Starter Packs](docs/STARTER_PACKS.md) for source-linked rules, correct CLI commands and Pack-specific non-claims. The Observatory is a **public but separate research reference**, not a second Kernel decision authority; its closed-harness results are not shipped product capabilities.
+> **Evidence status:** [Verified Claims Register](docs/CLAIMS_REGISTER.md) pins the 2026-10-10 main-branch test and ruleset results, lists claim ceilings and distinguishes executable Packs, published research and unproven institutional readiness. See [Starter Packs](docs/STARTER_PACKS.md) for source-linked rules, correct CLI commands and Pack-specific non-claims. The Observatory is now a **private, separate research/validation workspace** (privacy confirmed 2026-10-11), not a second Kernel decision authority or publicly inspectable evidence repository; its controlled-harness results are not shipped product capabilities. Public capability claims must stand on this Kernel's code and named public witnesses.
 
 ## What is proven
 
