@@ -37,6 +37,22 @@ Fork budget: 1 active external code fork at a time for the first 30 days; maximu
 | [open-telemetry/opentelemetry-specification](https://github.com/open-telemetry/opentelemetry-specification) | Trace/span interoperability | Propagate source correlation identifiers; do not call tracing a verified financial receipt |
 | [open-policy-agent/opa](https://github.com/open-policy-agent/opa) | Mature policy execution | Compare policy decision records, without making OPA an unregistered second canonical PayGod decision authority |
 
+## Watchlist D — agent runtimes, industrial evidence and data spaces (NO FORK at this stage)
+
+These are open doors for future cross-sector workflows, not active joint projects. This layer matters if the same evidence/authority question recurs outside payments.
+
+| Repo | Potential partner-native benefit | PayGod shadow question | First evidence needed |
+| --- | --- | --- | --- |
+| [openai/openai-agents-python](https://github.com/openai/openai-agents-python) | Reproducible handoff, guardrail and external-action trace tests, if a maintainer requests a concrete fix | Can an action's owner mandate be carried separately from trace semantics? | Actual failing native test, not a generic wrapper |
+| [langchain-ai/langgraph](https://github.com/langchain-ai/langgraph) | Durable state, checkpoint/retry test vectors where external effects are involved | Can the outcome of a replayed consequential tool action be externally evidenced? | Native replay/side-effect fixture |
+| [microsoft/agent-framework](https://github.com/microsoft/agent-framework) | Typed workflow and executor interoperability tests, if a specific gap emerges | Can evaluator/workflow events be reconciled with external evidence? | Upstream-native event/actor baseline |
+| [open62541/open62541](https://github.com/open62541/open62541) | OPC UA data-quality/time/status capture tests without altering industrial device/control paths | Source measurement quality vs portable attested CEMS evidence | Deidentified or synthetic read-only industrial stream |
+| [eclipse-milo/milo](https://github.com/eclipse-milo/milo) | OPC UA client read-only evidence mapping and negative source-quality tests | Same CEMS ingestion question across Java implementation | Native OPC UA status/quality fixture |
+| [eclipse-edc/Connector](https://github.com/eclipse-edc/Connector) | Contract-controlled data exchange receipt/transfer interoperability | Does the received evidence remain independently verifiable without trusting sender-side dashboard? | Realistic, non-sensitive transfer fixture |
+| [ethereum/ERCs](https://github.com/ethereum/ERCs) | Standards analysis only when a concrete identity or wallet mandate interoperability issue emerges | Does protocol-standard authorization survive transfer to offchain evidence? | Existing EIP/ERC reference and working compliance vectors |
+
+Repositories were verified as public and non-archived at snapshot. Their inclusion does NOT authorize modifications to OPC UA control systems, production sensors, token/payment contracts, or model-agent deployments. Industrial integration begins read-only; no process-control commands, no public client telemetry, no regulatory certification claim.
+
 ## Explicit out-of-scope early targets
 
 A new cryptocurrency token, a replacement settlement chain, an ACP/TCLK fork with rewritten wire format, a mandatory PayGod SDK in upstream, a generic cross-industry DSL, or commercial bank integration without an authentic external partner witness. Reconsider only with concrete demand and ADR.
