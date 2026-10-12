@@ -8,6 +8,7 @@ Status: READ-ONLY SNAPSHOT as of 2026-10-12; always click through to GitHub befo
 | --- | --- | --- | --- | --- | --- |
 | INT-001 | hamadalmunyif/paygod-kernel-mvp | [PR #107](https://github.com/hamadalmunyif/paygod-kernel-mvp/pull/107) | Open, DRAFT, not merged | main | P0: clarify legal entity/trademark facts; require owner's approval and competent IP counsel before merge |
 | INT-002 | hamadalmunyif/paygod-kernel-mvp | [PR #103](https://github.com/hamadalmunyif/paygod-kernel-mvp/pull/103) | Open, DRAFT, not merged | main | P1: GHG admission research only; no runtime promotion without witness + ADR |
+| INT-003 | hamadalmunyif/paygod-kernel-mvp | [PR #108](https://github.com/hamadalmunyif/paygod-kernel-mvp/pull/108) | Open, DRAFT, not merged | main; branch docs/upstream-first-collaboration-2026-10-12 | P1: this documentation-only program; maintain owner review and do not auto-merge |
 | EXT-001 | Virtual-Protocol/acp-cli | [PR #105](https://github.com/Virtual-Protocol/acp-cli/pull/105) | Open, not merged; no recorded human reviews at snapshot | main; fork hamadalmunyif/acp-cli, branch fix/resource-headless-lifecycle, head 5526b606f55739aa675cd7e5a1e62ab4d45c0f59 | P1: fixes/negative tests in fork; ask upstream maintainer to assess after evidence, not market PayGod |
 | — | hamadalmunyif/paygod-cloud-starter | [PRs](https://github.com/hamadalmunyif/paygod-cloud-starter/pulls) | No open PR in authenticated user's current PR list | default branch master | Observe active website releases; no unrelated code changes |
 
