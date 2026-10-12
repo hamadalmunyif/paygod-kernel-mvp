@@ -1,21 +1,29 @@
-# Paygod Trademark Policy
+# PayGod Name and Logo — Interim Project Identity Notice
 
-This policy describes the conditions under which you may use the "Paygod" name and logo.
+**Status:** Interim governance notice, pending jurisdiction-specific legal review (2026-10-12). This file is **not** a certificate of trademark registration, a corporate filing, or legal advice.
 
-## 1. The Basics
-*   **"Paygod"** and the Paygod Logo are trademarks of Paygod, Inc.
-*   We want you to use the name to refer to the project, distribute the open source code, and build community.
-*   We **do not** want you to use the name in a way that confuses users about the origin of the software or implies official endorsement where none exists.
+## Project identity
 
-## 2. Permitted Uses (No Permission Needed)
-*   **Referring to the Project:** "I am using Paygod for compliance."
-*   **Distributing Unmodified Binaries:** Redistributing the official release binaries.
-*   **Community Packs:** "Security Pack for Paygod" (naming your pack).
+- The canonical open-source implementation is maintained at [hamadalmunyif/paygod-kernel-mvp](https://github.com/hamadalmunyif/paygod-kernel-mvp), currently under the personal GitHub account `hamadalmunyif`.
+- The project's public website is [paygod.net](https://paygod.net/).
+- **No incorporated entity named "Paygod, Inc." or registered trademark is asserted by this repository.** An earlier revision of this file named that entity without a supporting corporate record; that assertion is withdrawn. Git history remains available.
+- Repository administration, authorship, copyright ownership, domain control, and trademark rights are different matters. A GitHub account or domain registration, by itself, does not establish all such legal rights.
 
-## 3. Restricted Uses (Permission Required)
-*   **Commercial Hosting:** You may **NOT** use the "Paygod" name or logo to sell a hosted SaaS version of the software (e.g., "Paygod Cloud by MyCorp"). You must use your own brand (e.g., "MyCorp Compliance Service, powered by Paygod").
-*   **Modified Versions:** If you fork the code and make significant changes, you should call it something else (e.g., "MyFork, based on Paygod").
+## Open-source license versus brand identity
 
-## 4. Logo Usage
-*   Do not alter the colors or proportions of the logo.
-*   Do not combine it with your own logo in a way that implies a partnership.
+The software is distributed under the repository's [Apache License 2.0](LICENSE), subject to its terms. Section 6 does not grant general rights to use project trade names, trademarks, service marks or product names, except as required for reasonable and customary description of origin and reproduction of NOTICE content.
+
+This notice does **not** amend the Apache-2.0 software license, revoke previously granted software rights, or claim that commercial use or independent hosting of the licensed software requires a separate software license.
+
+## Responsible brand use
+
+- **Descriptive and attribution use:** You may accurately name PayGod to identify the project, describe compatibility, and comply with software attribution terms. Do not imply official endorsement, authorization, or affiliation that has not been established.
+- **Forks and modified products:** Clearly identify material modifications and the party responsible for them. Avoid branding likely to mislead users into believing a modified product is an official release.
+- **Official branding or logo use:** Before representing a service, product, or organization as the official PayGod project, obtain appropriate authorization from the lawful rights holder, to the extent such authorization is legally required. Trademark rights and exceptions depend on jurisdiction; nothing here purports to prohibit lawful descriptive, nominative, or other permitted uses.
+- **Security and evidence claims:** Use of the project name never implies regulatory certification, verified source truth, authorized financial release, or institutional accreditation. Refer to [the canonical claims register](docs/CLAIMS_REGISTER.md).
+
+## Governance follow-up
+
+Identify and document the lawful rights holder(s), check trademark conflicts in intended markets, evaluate appropriate registrations, and review this interim notice with qualified intellectual-property counsel **before** replacing it with an enforceable trademark policy or assigning brand rights to any future company.
+
+Do not fabricate a legal entity, trademark registration number, assignment, or corporate authorization in source files or on the website.
