@@ -31,6 +31,12 @@
       "limits": "Declared fixture behavior, not external source truth or universal admission."
     },
     {
+      "id": "eik-structural-preflight",
+      "status": "implemented_opt_in",
+      "path": "tools/eik_admit.py",
+      "limits": "Read-only typed shape check with WITHHELD_NOT_RUN for incomplete/invalid input; does not invoke Kernel, prove source completion/authenticity or grant execution authority."
+    },
+    {
       "id": "canonical-run",
       "status": "implemented_bounded",
       "path": "src/PayGod.Cli/Commands/RunCommand.cs",
