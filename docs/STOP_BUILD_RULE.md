@@ -1,6 +1,6 @@
 # Evidence-Governed Development — Scoped Stop-Build Amendment
 
-Status: **PROPOSED on PR #108; effective only upon approved merge to main**  
+Status: **OWNER-APPROVED DECISION (2026-10-14); effective in repository from the approved merge commit of PR #108**  
 Decision date: 2026-10-14  
 Original stop-build baseline: `6b65d0d97ce61111b9eb77762de03f4a518c0d21` (after P0 / PR #92).
 
