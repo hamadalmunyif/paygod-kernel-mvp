@@ -6,6 +6,22 @@ It produces schema-governed decision evidence that can be transferred and indepe
 
 > **Evidence status:** [Verified Claims Register](docs/CLAIMS_REGISTER.md) pins the 2026-10-10 main-branch test and ruleset results, lists claim ceilings and distinguishes executable Packs, published research and unproven institutional readiness. See [Starter Packs](docs/STARTER_PACKS.md) for source-linked rules, correct CLI commands and Pack-specific non-claims. The Observatory is now a **private, separate research/validation workspace** (privacy confirmed 2026-10-11), not a second Kernel decision authority or publicly inspectable evidence repository; its controlled-harness results are not shipped product capabilities. Public capability claims must stand on this Kernel's code and named public witnesses.
 
+## Choose your path
+
+| Goal | Entry |
+| --- | --- |
+| **Understand what PayGod does today** | [Documentation map](docs/DOCUMENTATION_MAP.md) · [Start Here](START_HERE.md) |
+| **Build a private Pack** | [EIK developer guide](docs/eik/README.md) · [Pack YAML contract](contracts/schemas/pack.schema.json) |
+| **Use a coding agent** | [AGENTS.md](AGENTS.md) · [capability description](docs/eik/capabilities.v0.json) |
+| **Run an integration reference** | [Synthetic GitHub Actions EIK example](examples/eik-github-actions/README.md) |
+| **Verify transferred evidence** | [Standalone verifier](docs/STANDALONE_VERIFIER.md) |
+| **Propose a contribution (optional)** | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| **See exact accepted versions and open gaps** | [EIK implementation status, 2026-10-14](docs/eik/STATUS_2026-10-14.md) · [dated claims](docs/CLAIMS_REGISTER.md) |
+
+**Build privately · Verify independently · Contribute optionally.**
+
+Pack definitions and fixture tests are useful extension points, not independent assurance that a real scanner ran or a customer authorized deployment. EIK's merged GitHub Actions reference uses **saved synthetic observations** and the existing canonical CLI/standalone verifier; it is not a hosted SDK, live scanner integration, external third-party acceptance, or operational authority. See [Issue #111](https://github.com/hamadalmunyif/paygod-kernel-mvp/issues/111) before evaluating unadmitted inputs through the generic `run` command.
+
 ## What is proven
 
 The repository currently has CI witnesses for:
