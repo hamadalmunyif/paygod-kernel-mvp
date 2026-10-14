@@ -4,6 +4,8 @@ Paygod Kernel is a deterministic policy-execution kernel that produces portable,
 
 Read [README.md](README.md) first for current guarantees and non-claims. See [docs/ARCHITECTURE_AUDIT.md](docs/ARCHITECTURE_AUDIT.md) for architecture boundaries.
 
+For independent private Pack development or coding-agent onboarding, see [EIK Learn/Build/Verify](docs/eik/README.md) and [AGENTS.md](AGENTS.md). EIK is not yet a shipped SDK or hosted service.
+
 ## 1. Prerequisites
 - .NET SDK 8
 - Docker Engine/Desktop

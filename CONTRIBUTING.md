@@ -7,7 +7,7 @@ This project adheres to the [Contributor Covenant Code of Conduct](https://www.c
 
 ## Current feature boundary
 
-The repository-wide [Stop-Build Rule](docs/STOP_BUILD_RULE.md) is ACTIVE. A proposal arising from external research does not authorize a Kernel primitive. First read the [research acceptance register](docs/OBSERVATORY_TRANSFER_ACCEPTANCE_2026-10-10.md), reproduce the behavior, classify the gap, and determine whether an existing contract/pack/admission adapter is sufficient. Any proposal to alter versioned canonicalization, receipt, ledger, authority or verifier semantics needs an explicit, reviewed and evidenced architecture decision.
+The former repository-wide stop-build was superseded on 2026-10-14 by the [scoped evidence-governed development rule](docs/STOP_BUILD_RULE.md), accepted in [PR #108](https://github.com/hamadalmunyif/paygod-kernel-mvp/pull/108). Developers may explore, author private Packs, run permitted local fixtures, write independent optional adapters, and contribute upstream-native fixes without waiting for unrelated research lanes. This permission does **not** waive consent, security, privacy, external execution authority, or protected Kernel gates. Consult the [research acceptance register](docs/OBSERVATORY_TRANSFER_ACCEPTANCE_2026-10-10.md) for claim boundaries; canonicalization, receipt, ledger, authority, and verifier semantic changes require a reproducible witness, reviewed ADR, compatibility/negative tests, and the protected merge process.
 
 The public website should point to **this** repository as the canonical implemented software. A bounded research-harness test is not a shipped Kernel product or third-party security validation.
 
@@ -19,7 +19,7 @@ The public website should point to **this** repository as the canonical implemen
 ## 📜 Open Core Guidelines
 PayGod's source is distributed under Apache-2.0. **Open Core is an optional future commercial strategy, not a delivered enterprise edition.** For ordinary upstream code review:
 
-*   **We can review** proposed contributions to the Kernel, CLI, Public Schemas, and Community Packs under the repo's existing review and Stop-Build rules; proposing a Pack does not guarantee acceptance.
+*   **We can review** proposed contributions to the Kernel, CLI, Public Schemas, and Community Packs under the repository's current scoped contribution and architectural-review rules; proposing a Pack does not guarantee acceptance.
 *   **We do NOT accept** features that are strictly "Enterprise-only" (e.g., closed-source backend dependencies) into this repository.
 *   All contributions must be compatible with the **Apache 2.0 License**.
 
@@ -39,6 +39,12 @@ If you forgot, you can amend:
 ## Architectural decisions
 - Use the existing [ADRs](adrs/) and versioned governance records for decisions affecting kernel contracts, ledger, metrics, or authority; avoid silently creating a conflicting ADR tree.
 - Prefer small ADRs that clearly state: context, decision, alternatives, consequences.
+
+## Build privately; contribute optionally
+
+You may write and test Packs in your own workspace and keep them private. A PayGod hosted account, public fork, upstream PR, or maintainer approval is **not** required for a local development experiment within your authorized environment. No guarantee of production fitness is implied.
+
+Start with [EIK developer/agent onboarding](docs/eik/README.md), [Pack examples](docs/STARTER_PACKS.md), and [ADR 0003](adrs/0003-evidence-admission-before-decision-execution.md). Missing mandatory source evidence is `WITHHELD / NOT RUN` in **pre-Kernel orchestration**, never a forged Kernel verdict. Pack schema validation and Pack unit tests do not establish source truth, complete admission, authorization, or institutional acceptance. If you choose to send a Pack upstream, include cases for missing/invalid data and an honest scope statement.
 
 ## Pull requests
 - Keep PRs small and focused.
