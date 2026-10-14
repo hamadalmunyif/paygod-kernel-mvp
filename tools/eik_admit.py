@@ -71,6 +71,14 @@ def main() -> int:
             isinstance(prop, str) and prop for prop in required
         ):
             return emit("WITHHELD_NOT_RUN", "INPUT_SCHEMA_INSUFFICIENT", f"{name}: required fields not declared")
+        properties = schema.get("properties")
+        if not isinstance(properties, dict) or any(
+            prop not in properties
+            or not isinstance(properties[prop], dict)
+            or not isinstance(properties[prop].get("type"), str)
+            for prop in required
+        ):
+            return emit("WITHHELD_NOT_RUN", "INPUT_SCHEMA_INSUFFICIENT", f"{name}: required fields lack explicit types")
         try:
             Draft202012Validator.check_schema(schema)
         except Exception as exc:
