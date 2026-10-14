@@ -5,8 +5,8 @@
 ## Project identity
 
 - The canonical open-source implementation is maintained at [hamadalmunyif/paygod-kernel-mvp](https://github.com/hamadalmunyif/paygod-kernel-mvp), currently under the personal GitHub account `hamadalmunyif`.
-- The project's public website is [paygod.net](https://paygod.net/).
-- **No incorporated entity named "Paygod, Inc." or registered trademark is asserted by this repository.** An earlier revision of this file named that entity without a supporting corporate record; that assertion is withdrawn. Git history remains available.
+- **Paygod.net** is the project's selected public-facing name and website identity, using the domain [paygod.net](https://paygod.net/). Use **Paygod.net** in public project identity references in place of the unsupported former designation **Paygod, Inc.** This is a project/website name, **not a representation that a legal entity named Paygod.net exists or that the domain itself owns trademarks, code or assets**.
+- **No incorporated entity named "Paygod, Inc." or registered trademark is asserted by this repository.** The earlier corporate ownership assertion is withdrawn for lack of supporting records; Git history is preserved. Any actual mark rights or lawful rights holder must be established from independent evidence.
 - Repository administration, authorship, copyright ownership, domain control, and trademark rights are different matters. A GitHub account or domain registration, by itself, does not establish all such legal rights.
 
 ## Open-source license versus brand identity
@@ -24,6 +24,6 @@ This notice does **not** amend the Apache-2.0 software license, revoke previousl
 
 ## Governance follow-up
 
-Identify and document the lawful rights holder(s), check trademark conflicts in intended markets, evaluate appropriate registrations, and review this interim notice with qualified intellectual-property counsel **before** replacing it with an enforceable trademark policy or assigning brand rights to any future company.
+The naming correction above is an **interim factual clarity update**, not a new trademark-rights determination. Identify and document the lawful rights holder(s), check trademark conflicts in intended markets, evaluate appropriate registrations, and obtain qualified jurisdiction-specific intellectual-property review **before issuing enforceable restrictions, assigning brand rights to any future company, or representing registration as complete**. This further legal work does not block unrelated engineering, research, open-source contributions or read-only integration tests.
 
 Do not fabricate a legal entity, trademark registration number, assignment, or corporate authorization in source files or on the website.
