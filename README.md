@@ -115,7 +115,7 @@ See [GATES.md](GATES.md). The governance contract defines stable required check 
 
 P0 — Gas Maintenance Workflow & Evidence-Admission Pilot is closed as `CLOSED — PASS WITH BOUNDARY`. It is a simulated workflow witness and contributes zero cases to B2-REAL.
 
-The repository-wide **stop-build is ACTIVE**. Feature and security-capability expansion is frozen except for confirmed defect/security remediation and evidence-backed architecture changes. See [Stop-Build Rule](docs/STOP_BUILD_RULE.md).
+**Governance update (2026-10-14):** owner-approved evidence-governed parallel development supersedes the former blanket stop-build **upon the approved merge of PR #108**. Independent research, authorized shadow integration, native upstream contribution, recipient verification and domain experiments do not wait on one another. Material canonical Kernel semantic or trust-contract changes still require evidence, an ADR, guarded tests and owner approval. See [Scoped Development Rule](docs/STOP_BUILD_RULE.md) and [Open Collaboration](docs/open-collaboration/README.md). The earlier stop-build is preserved in Git history; all frozen witness classifications remain unchanged.
 
 Current validation work is:
 
