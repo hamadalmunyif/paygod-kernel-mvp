@@ -1,0 +1,116 @@
+name: EIK GitHub Actions Reference (Synthetic)
+
+# Example reference only: saved synthetic report, no live scanner or deployment,
+# no external credentials, no payment, no authority to publish.
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'examples/eik-github-actions/**'
+      - 'tools/test_eik_github_reference.py'
+      - 'tools/eik_admit.py'
+      - '.github/workflows/eik-reference.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'examples/eik-github-actions/**'
+      - 'tools/test_eik_github_reference.py'
+      - 'tools/eik_admit.py'
+      - '.github/workflows/eik-reference.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  producer:
+    runs-on: ubuntu-latest
+    env:
+      PAYGOD_CLOCK: '2026-10-14T00:00:00Z'
+      PAYGOD_STRICT: '1'
+    outputs:
+      receipt_sha256: ${{ steps.pin.outputs.receipt_sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python3 -m pip install -r tools/requirements.txt
+      - run: dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -o out
+      - name: Run local synthetic positive and fail-closed negatives
+        run: python3 tools/test_eik_github_reference.py --cli ./out/PayGod.Cli
+      - name: Produce canonical evidence from a saved synthetic source
+        run: |
+          python3 examples/eik-github-actions/eik_reference.py \
+            --source examples/eik-github-actions/fixtures/clean.json \
+            --cli ./out/PayGod.Cli \
+            --out eik-output
+      - name: Pass the claimed receipt commitment out of band from bundle
+        id: pin
+        shell: python
+        run: |
+          import hashlib, os
+          from pathlib import Path
+          digest = hashlib.sha256(Path('eik-output/evidence/receipt.json').read_bytes()).hexdigest()
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as f:
+              f.write('receipt_sha256=' + digest + '\n')
+      - name: Package standalone verifier code for recipient
+        run: |
+          mkdir -p verifier-dist
+          cp tools/verify_portable_evidence.py verifier-dist/paygod-verify.py
+          cp tools/issuer_auth.py verifier-dist/issuer_auth.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: eik-synthetic-canonical-evidence
+          path: eik-output/evidence/
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: eik-standalone-verifier-code
+          path: verifier-dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  recipient-no-checkout:
+    needs: producer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert no producer source tree
+        shell: pwsh
+        run: |
+          foreach ($p in @('.git', 'src', 'packs', 'tools')) {
+            if (Test-Path $p) { throw "Producer source tree unexpectedly present: $p" }
+          }
+      - uses: actions/download-artifact@v4
+        with:
+          name: eik-synthetic-canonical-evidence
+          path: evidence
+      - uses: actions/download-artifact@v4
+        with:
+          name: eik-standalone-verifier-code
+          path: verifier
+      - name: Independently verify transferred Kernel bundle
+        shell: pwsh
+        env:
+          EXPECTED_RECEIPT_SHA: ${{ needs.producer.outputs.receipt_sha256 }}
+        run: |
+          python verifier/paygod-verify.py evidence --expect-receipt-sha256 $env:EXPECTED_RECEIPT_SHA --result verifier-result.json
+          if ($LASTEXITCODE -ne 0) { throw "Transferred bundle integrity verification failed" }
+      - name: Check strictly bounded trust dimensions
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          result = json.loads(Path('verifier-result.json').read_text(encoding='utf-8'))
+          assert result['status'] == 'valid'
+          assert result['verification']['integrity'] == 'verified'
+          assert result['verification']['issuer_authenticity'] == 'not_verified'
+          assert result['verification']['replay'] == 'not_performed'
+          assert result['verification']['time_authority'] == 'producer_supplied'
