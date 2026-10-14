@@ -73,3 +73,14 @@ Existing build/typecheck noted in PR body is self-reported; no upstream CI resul
 ## Independence and claims
 
 Native platform controls may already solve much of the problem; compare them as a baseline. A shadow PayGod witness is not a native enforcement guarantee. The verifier proves only stated checks. Demonstrated synthetic behavior does not become a production, regulatory or financial claim. See docs/CLAIMS_REGISTER.md.
+
+## 2026-10-14 — parallel integration rule (proposed)
+
+CMP-01 is an **upstream contribution** protocol, not a dependency gate on PayGod's observational experiments. Run two independent lanes:
+
+- **Native upstream lane:** reproduce an upstream problem, test and propose a minimal dependency-free fix. Only the upstream maintainer may merge and release it. External review waiting time is recorded, never converted into an internal product freeze.
+- **Optional local interoperability lane:** capture legally accessible original bytes or supplied fixtures; do read-only, provenance-labeled adaptation and independently test a PayGod shadow result. Never rely on unmerged upstream behavior as though available in production.
+
+A cross-lane dependency is recorded only if a concrete interface or permission makes it technically unavoidable. B2, X1, AP2 Pass B and CEMS each have independent claim gates. Exploratory Kernel candidates remain non-canonical until witness → ADR → protected tests → approval.
+
+Every case must record `scope`, `source_ref`, `falsifier`, `authority_boundary`, `permission`, `next_action`, `blocking_dependency` (if any), `engineering_hours`, `external_wait_days` and `evidence_ceiling`. Do not bypass privacy, secrets, payment authorization or upstream SECURITY instructions.
