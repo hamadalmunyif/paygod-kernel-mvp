@@ -1,67 +1,58 @@
-# PayGod Open Collaboration — Upstream-First Program
+# PayGod Open Collaboration — Parallel Evidence-Governed Program
 
-Status: PROPOSED / documentation only; 2026-10-12 snapshot. This program does not supersede docs/STOP_BUILD_RULE.md, docs/CLAIMS_REGISTER.md, X1 freeze, any recorded Pass B or historical evidence. Adoption requires maintainer review of the draft PR. No spending, remote releases, or kernel mutation is authorized here.
+**Status: PROPOSED on PR #108; operational authority only after approved merge.** Owner direction 2026-10-14: reopen independently scoped exploration while protecting canonical authority and frozen witnesses.
 
-## Mission
+Operating rule: **Upstream First · Evidence Native · PayGod Optional**.
 
-Contribute useful, independently testable improvements to other projects on their terms. Make PayGod integration optional and separate. We want reciprocal trust earned through reproducible engineering, not a requirement that an upstream project rearchitect itself for PayGod.
+## Four separate authorities
 
-Core operating rule: **Upstream First · Evidence Native · PayGod Optional**.
+1. Upstream maintainer accepts/releases their own source; our PR is never automatic adoption.
+2. External runtime/rail owns native execution, identity, and settlement.
+3. Canonical PayGod Kernel alone owns its registered decision and evidence identity.
+4. Independent verifier checks defined recipient-side evidence only, never inventing fact, time, or authorization.
 
-Separate four authorities:
-- Upstream maintainer: owns accepting, merging and releasing upstream code.
-- Upstream runtime/rail: owns its native state, action execution and authorization semantics.
-- PayGod Canonical Kernel: owns PayGod decisions, receipts, manifests and bundle identity only for its registered scope.
-- Independent verifier: checks defined transferred evidence, and may not invent the source event or decision.
+## Parallel work lanes, with independent GO/HOLD/STOP
 
-No signature alone proves organizational mandate, external fact truth or settlement; no passing CI alone proves demand or production control.
+| Lane | Home | What can advance now | Gate specific to its claims |
+| --- | --- | --- | --- |
+| Canonical integrity and defect fixes | Kernel | repair, reproducibility and bounded security work | witness, protected CI, owner review; semantic ADR |
+| B2-REAL / gas acceptance | gas case register + Observatory | solicit and evaluate genuinely eligible cases/recipients | frozen B2 qualification; not prerequisite for other lanes |
+| External Virtuals X1 | Observatory + pinned X1 materials | read-only capture, prospective shadow design | spend approval before paid job, no Kernel promotion by inference |
+| AP2 blind Pass B | isolated neutral handoff | independent review and falsifiers | blinded isolation; preserve Pass A and history |
+| OSS native contributions | temporary fork/upstream PR | reproduce and improve external native bugs | upstream maintainer controls merge/release |
+| Optional adapters / cross-protocol | Observatory | fixtures, read-only comparisons, negative tests | upstream authority stays external; no forged receipt |
+| CEMS/GHG industrial data | Observatory | read-only/deidentified data and numeric-admission research | source quality, permission, domain-specific acceptance |
+| Nondeveloper handoff | Observatory | portable evidence, independent recipient exercises | recipient's documented scoped verification result |
+| Buyer discovery | private research records | needs interviews, counterfactuals, pilot design | buyer or partner statements, not inferred demand |
+| Website/public claims | Cloud | describe accepted evidence accurately | claim register, deployment-specific witness |
 
-## Internal priorities and work inventory
+**A HOLD on one lane never blocks another unless a documented dependency is technically necessary.** A success in one lane never waives another lane's acceptance or authorization gate.
 
-| Priority | Workstream | Exit witness | Owner role | Non-claim |
-| --- | --- | --- | --- | --- |
-| P0 | Preserve canonical determinism, strict portable verifier and six CI checks | Current commit checks and mutation tests green | Kernel maintainer | Does not prove facts or external enforcement |
-| P0 | Triage internal open PRs #107 (legal attribution), #103 (GHG research); preserve chronology | Owner-approved resolution for #107; separate research decision for #103 | Repository owner / qualified legal reviewer where applicable | No automatic merge |
-| P1 | B2-REAL real cases and nondeveloper recipients | Source-true cases and independently attributable verifier receipts, measured against current gates | Domain evidence lead + external reviewer | A synthetic case never counts as real |
-| P1 | Virtuals X1 and FLOP/Butler external shadow experiments | Frozen external-native witness and independently reproducible positive/negative comparisons | Research lead + external protocol reviewer | No financial action, kernel promotion or Pass B rewrite |
-| P1 | Upstream contribution register, review package, partner relationships | Each external PR has a tested delta, owner, status URL, test commands and maintenance decision | Upstream liaison | Submitted != reviewed != merged != released |
-| P2 | Optional, isolated integration adapters / interoperability test vectors | Native upstream acceptance and shadow-vs-native discrepancy tests | Integration engineer | No production authority claim |
-| P3 | Commercial release/control productization | Actual counterparty workflow, authorization boundary, and buyer/recipient witness | Product lead | Research interest != purchase |
+## Minimal interaction contract
 
-Reference boundaries:
-- [Claims register](../CLAIMS_REGISTER.md)
-- [Stop-build rule](../STOP_BUILD_RULE.md)
-- [Repository single-authority closure](../REPOSITORY_BOUNDARY.md)
-- [Virtuals X1 research](../../research/virtuals-x1/README.md)
+Upstream event / saved JSON / measurement → preserve raw bytes and source → provenance-labeled optional adapter → pre-Kernel admission (WITHHELD/NOT RUN outside Kernel for missing mandatory facts) → unchanged canonical Kernel when representable → portable evidence → independent scoped verifier → compare against native status.
 
-## Workstreams and logical homes
+Adaptation is optional; do not require upstream to install PayGod, change protocol, accept a fork, transfer secrets, or trust a PayGod receipt. Prefer no checkout, narrow reads, and native fixtures when available.
 
-1. Canonical source-of-truth, protected build and verification: paygod-kernel-mvp.
-2. Website, presentation and non-authoritative API shell: paygod-cloud-starter, whose default branch is MASTER (not kernel MAIN). Confirm the active deploy repo/path before any website change.
-3. External platform reproduction: isolated test folders / disposable forks; upstream-native test runners.
-4. Research shadow adapters: opt-in, read-only or recorded-fixture first. Cannot mint canonical PayGod receipt/digest/decision outside the Kernel.
-5. Partner exchanges: upstream Issue/PR plus follow-up, never mandatory PayGod marketing in a bugfix.
+## Work ownership
 
-## Weekly working rhythm (operational checklist, not a scheduled automation)
+- **Kernel** = sole canonical implemented PayGod decision/receipt/manifest/bundle source.
+- **Private Observatory** = hypothesis and decision registry, experiments, independent review isolation, and shadow integrations; never public proof by mere existence.
+- **Cloud starter** = non-authoritative website and presentation. Its default branch is `master`.
+- **Upstream projects** = code and release authority for their own projects.
 
-- Monday: refresh the linked upstream and own PR/issue statuses directly from GitHub; pin commit SHA and exact reviewer actions.
-- Tuesday/Wednesday: reproduce one upstream issue, run clean baseline and mutation/negative tests, propose minimal patch.
-- Thursday: independent reviewer attempts to refute the patch and evaluates authorization, data loss, timeout, replay, idempotency, compatibility.
-- Friday: send one concise maintainer-facing update only when the PR has genuinely improved; close or pause redundant forks.
-- Monthly: rank targets by native usefulness, technical contact quality, reproducibility and actual maintainer response. Archive unattractive hypotheses; do not rewrite historical results.
+Do not create new repositories solely to reopen a lane. Use disposable branches/forks only for a proved native change.
+
+## Routing and review
+
+Each lane tracks: source URL + SHA/date, objective, falsifier, data permission, authority boundary, acceptance gate, owner, blocked reason if any, direct hours, upstream waiting days, current claim ceiling and next permitted action. Review lanes concurrently. Only semantic Kernel promotion requires a dated ADR and protected checks; defect/security repairs follow the documented protected path.
 
 ## Decision rules
 
-GO: reproduces a real upstream pain, minimal patch passes native regression, and risks are explicitly bounded.
-HOLD: missing maintainer buy-in for a protocol change, unproven server semantics, missing CI, or no independently observable source.
-STOP: makes unverifiable claims; bypasses payment, owner or production authority; fabricates a successful settlement/receipt; requires uncontrolled spending; or demands that another project adopt PayGod as a prerequisite.
+- **GO**: scoped authorized next experiment or upstream-native bug fix with verifiable outcome.
+- **HOLD**: missing permission, witness, reviewer independence, or rail-level authorization **for that lane only**.
+- **STOP**: unverifiable claims, forged receipts, undisclosed spending, bypass of upstream controls, confidentiality violations or inadequate bounded risk.
 
-See:
-- [Contribution Protocol](CONTRIBUTION_PROTOCOL.md)
-- [Target Repositories](TARGETS.md)
-- [Live-work snapshot](PR_REGISTRY.md)
-- [90-day Roadmap](ROADMAP_90_DAYS.md)
+Continue independently useful work while a foreign PR is awaiting response. Submitted, reviewed, merged, released, adopted and externally verified are distinct states.
 
-## Ownership and records
-
-This is a living **planning** program, not a retroactive decision authority. Every status assertion needs a retrieval date and first-party GitHub source. Explicit external acceptance requires an actual upstream maintainer action. Human partner feedback requires a quoted/sourced record. Never infer collaboration from an open PR alone.
+References: [Scoped Stop-Build Amendment](../STOP_BUILD_RULE.md), [Claims](../CLAIMS_REGISTER.md), [CMP-01](CONTRIBUTION_PROTOCOL.md), [Targets](TARGETS.md), [Registry](PR_REGISTRY.md), [Roadmap](ROADMAP_90_DAYS.md).
