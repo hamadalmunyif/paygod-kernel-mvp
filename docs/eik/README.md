@@ -1,6 +1,6 @@
 # Evidence Integration Kit (EIK) — developer and coding-agent entry
 
-**Status (2026-10-14): documentation-only entry point.** The published CLI, Pack contract and independent verifier are real, bounded components. EIK is an **experimental integration concept**, not yet a packaged SDK, hosted service, autonomous Pack authoring agent, MCP server, A2A endpoint, certified deployment gate, or public marketplace.
+**Status (2026-10-14): documented local entry plus a synthetic GitHub Actions reference on the associated PR.** The published CLI, Pack contract and independent verifier are real, bounded components; [the saved-report reference](../../examples/eik-github-actions/README.md) demonstrates an executable example with synthetic fixtures and CI witnesses after its review/merge. EIK is **not** a packaged SDK, live GitHub scanner connector, hosted service, autonomous Pack authoring agent, MCP server, A2A endpoint, certified deployment gate, or public marketplace.
 
 **Principle: Build privately. Verify independently. Contribute optionally.**
 
@@ -75,7 +75,13 @@ Contribute only if useful to others, with a small isolated diff under the existi
 
 Read [CONTRIBUTING.md](../../CONTRIBUTING.md) before submitting. A merged Pack is **not** production certification, a commercial listing, financial reward, or proof that the author's domain policy is substantively correct.
 
-## 6. Proposed next experiment — **not yet executed**
+## 6. Synthetic GitHub Actions reference and open external tests
+
+A narrow, runnable **synthetic saved-report** example is available at [examples/eik-github-actions](../../examples/eik-github-actions/README.md). It calls the actual CLI after two admission checks, then verifies a transferred canonical bundle and adversarial cases. This is not a live scanner integration or proof that an unfamiliar developer/independent external organization completed it.
+
+**The real-world E-004 hypothesis remains unproven** until a new user/agent and recipient test on permitted, real sources and a counterfactual against GitHub's native controls.
+
+## 7. Forward-compatible discoveries
 
 The private Observatory tracks EIK as `H-007 / E-004 / W-02`: compare local user/agent setup and source-admission rejection against native GitHub Actions / direct CLI, then repeat on a second distinct source. Count human interventions, false admission, engineering hours and independent recipient comprehension. Continue source-specific research in parallel; no upstream maintainer is required to install PayGod.
 
