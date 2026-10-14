@@ -1,0 +1,34 @@
+api_version: "paygod/v1"
+kind: Pack
+metadata:
+  name: "eik-synthetic-ci-scan"
+  version: "0.1.0"
+  description: "Reference policy for an already-completed synthetic CI security scan. Not a scanner or deployment gate."
+  maintainer: "PayGod reference contributors"
+  tags: ["eik", "reference", "synthetic", "ci"]
+spec:
+  inputs:
+    - name: "scan_report"
+      type: "observation"
+      source: "synthetic-ci-scan"
+      schema:
+        type: "object"
+        additionalProperties: false
+        required: ["secrets_found", "critical_count", "completed", "scanner_status", "source_sha256", "source_commit"]
+        properties:
+          secrets_found: { type: "integer", minimum: 0 }
+          critical_count: { type: "integer", minimum: 0 }
+          completed: { type: "boolean" }
+          scanner_status: { type: "string", enum: ["completed"] }
+          source_sha256: { type: "string", pattern: "^[a-f0-9]{64}$" }
+          source_commit: { type: "string", pattern: "^[a-f0-9]{40}$" }
+  policy:
+    rules:
+      - name: "deny-findings"
+        condition: "input.scan_report.secrets_found > 0 or input.scan_report.critical_count > 0"
+        decision: "deny"
+        reason: "Synthetic scan reports findings; no claim about actual repository secrets."
+      - name: "allow-reported-clean"
+        condition: "input.scan_report.secrets_found == 0 and input.scan_report.critical_count == 0 and input.scan_report.completed == true and input.scan_report.scanner_status == 'completed'"
+        decision: "allow"
+        reason: "Admitted synthetic scan reports zero findings; NOT production release approval."
