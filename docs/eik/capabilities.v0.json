@@ -2,7 +2,7 @@
   "document_kind": "paygod-eik-capability-snapshot",
   "document_version": "0.1.0",
   "as_of": "2026-10-14",
-  "status": "informational-doc-only",
+  "status": "informational-bounded-public-capabilities",
   "scope": "Current public repository capabilities and explicitly unshipped proposals. Not a discoverable MCP tool, signed capability assertion, production API or versioned Kernel contract.",
   "canonical_source": "https://github.com/hamadalmunyif/paygod-kernel-mvp",
   "read_first": [
@@ -56,9 +56,9 @@
     },
     {
       "id": "eik-synthetic-github-actions-reference",
-      "status": "implemented_synthetic_example_pending_pr_acceptance",
+      "status": "implemented_synthetic_ci_witnessed",
       "path": "examples/eik-github-actions/README.md",
-      "limits": "Saved synthetic scan only; shows explicit two-stage admission, canonical CLI, transferred integrity verification, missing/failed scanner negatives. Not live GitHub integration, authenticated source, deployment authority, or independent human adoption."
+      "limits": "Saved synthetic scan only; shows explicit two-stage admission, canonical CLI, transferred integrity verification, missing/failed scanner negatives. Not live GitHub integration, authenticated source, deployment authority, or independent human adoption. Seven exact-HEAD workflow results were successful on merged PR #112; external user/recipient acceptance and native-baseline improvement remain unmeasured."
     }
   ],
   "not_shipped": [
@@ -71,5 +71,6 @@
     "universal-runtime-input-admission"
   ],
   "contribution": "optional; no Pack publishing or upstream PR required for private local use",
-  "update_policy": "Must be reviewed and version-pinned against exact public source before use as a decision input. This metadata is not itself a source of authority."
+  "update_policy": "Must be reviewed and version-pinned against exact public source before use as a decision input. This metadata is not itself a source of authority.",
+  "source_status_document": "docs/eik/STATUS_2026-10-14.md"
 }
