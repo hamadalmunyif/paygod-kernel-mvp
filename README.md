@@ -86,6 +86,10 @@ Domain logic should enter through contracts, packs, or adapters before changing 
 
 See [Architecture Audit](docs/ARCHITECTURE_AUDIT.md).
 
+## Optional self-service Pack and coding-agent entry
+
+You can develop and test your own Pack privately without a PayGod account or upstream PR. Start with [EIK developer/agent onboarding](docs/eik/README.md), the [public AGENTS.md guidance](AGENTS.md), [Pack starter examples](docs/STARTER_PACKS.md), and [CONTRIBUTING.md](CONTRIBUTING.md) if you choose to submit a contribution. EIK is currently a documentation-led onboarding concept, **not** a released SDK, autonomous Pack builder, MCP server, marketplace, or live execution authority.
+
 ## Quickstart
 
 Canonical developer onboarding: [START_HERE.md](START_HERE.md).
