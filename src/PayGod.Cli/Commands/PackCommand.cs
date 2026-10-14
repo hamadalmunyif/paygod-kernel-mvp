@@ -1,5 +1,6 @@
 using System.CommandLine;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace PayGod.Cli.Commands;
 
@@ -29,6 +30,16 @@ public static class PackCommand
 
     private static void RunInit(string name, string? provider, bool force)
     {
+        // Pack names are single path components. --force must never be able to
+        // traverse out of packs/ or recursively delete an arbitrary directory.
+        if (string.IsNullOrEmpty(name) ||
+            !Regex.IsMatch(name, @"\A[a-z][a-z0-9-]{0,62}\z", RegexOptions.CultureInvariant))
+        {
+            Console.Error.WriteLine("Invalid Pack name. Use a lowercase slug: a-z, 0-9, hyphen; start with a letter (max 63 characters).");
+            Environment.Exit(2);
+            return;
+        }
+
         var packDir = string.IsNullOrWhiteSpace(provider)
             ? Path.Combine("packs", "core", name)
             : Path.Combine("packs", "providers", provider.Trim().ToLowerInvariant(), name);
@@ -45,6 +56,13 @@ public static class PackCommand
 
         if (Directory.Exists(packDir))
         {
+            if ((File.GetAttributes(packDir) & FileAttributes.ReparsePoint) != 0)
+            {
+                Console.Error.WriteLine("Refusing to overwrite a symlink/reparse-point Pack directory.");
+                Environment.Exit(2);
+                return;
+            }
+
             if (!force)
             {
                 Console.Error.WriteLine($"❌ Directory exists: {packDir}. Use --force to overwrite.");
@@ -72,6 +90,8 @@ spec:
       source: "custom"
       schema:
         type: "object"
+        required: ["block"]
+        additionalProperties: false
         properties:
           block: { type: "boolean" }
 
@@ -83,9 +103,9 @@ spec:
         reason: "Blocked by policy (block==true)."
 
       - name: "allow-when-not-blocked"
-        condition: "input.input.block != true"
+        condition: "input.input.block == false"
         decision: "allow"
-        reason: "Allowed by policy (block!=true)."
+        reason: "Allowed by policy for admitted boolean block=false."
 """;
 
         var casesYaml = """
@@ -123,10 +143,23 @@ cases:
 - **Core pack:** `packs/core/{{name}}` (cloud-agnostic)
 - **Provider pack:** `packs/providers/<cloud>/{{name}}` (provider-specific)
 
-## Tests
+## Structural admission and policy tests
+
+This generator produces a template, **not** a production admission pipeline.
+First validate an actual input's required fields/types using the optional
+structural-only EIK check:
+
 ```bash
+python3 tools/eik_admit.py --pack {{packDir}} --input <input.json>
 dotnet run --project src/PayGod.Cli -- test --pack {{packDir}}
 ```
+
+The admission command must not be interpreted as scanner completion,
+authenticity, sufficient provenance, legal mandate, or authorization to release.
+You must establish required external source status, freshness and permissions
+before invoking canonical `run`; missing mandatory facts are
+`WITHHELD / NOT RUN` in the **external workflow**, not Kernel verdicts.
+The generic Kernel `run` does not enforce this Pack's embedded input schema.
 """;
 
         File.WriteAllText(Path.Combine(packDir, "pack.yaml"), packYaml, new UTF8Encoding(false));
