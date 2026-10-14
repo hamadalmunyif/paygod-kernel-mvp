@@ -1,6 +1,6 @@
 # Evidence Integration Kit (EIK) — developer and coding-agent entry
 
-**Status (2026-10-14): documented local entry plus a synthetic GitHub Actions reference on the associated PR.** The published CLI, Pack contract and independent verifier are real, bounded components; [the saved-report reference](../../examples/eik-github-actions/README.md) demonstrates an executable example with synthetic fixtures and CI witnesses after its review/merge. EIK is **not** a packaged SDK, live GitHub scanner connector, hosted service, autonomous Pack authoring agent, MCP server, A2A endpoint, certified deployment gate, or public marketplace.
+**Status (2026-10-14): documented local entry plus a merged, executable synthetic GitHub Actions reference.** [PR #112](https://github.com/hamadalmunyif/paygod-kernel-mvp/pull/112) added a saved synthetic-report reference with canonical CLI and recipient-side CI witnesses; see the [dated technical status](STATUS_2026-10-14.md). The source and outcome are bounded to synthetic fixtures, not an external user acceptance or a live scanner. EIK is **not** a packaged SDK, live GitHub scanner connector, hosted service, autonomous Pack authoring agent, MCP server, A2A endpoint, certified deployment gate, or public marketplace.
 
 **Principle: Build privately. Verify independently. Contribute optionally.**
 
