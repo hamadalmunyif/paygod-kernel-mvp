@@ -81,6 +81,9 @@ jobs:
       - name: Verify concise fail-closed input rejection
         run: python3 tools/test_cli_input_rejection.py --cli ./out/paygod
 
+      - name: Verify EIK Pack init and pre-Kernel structural input negatives
+        run: python3 tools/test_eik_onboarding.py --cli ./out/paygod
+
   paygod-kernel-ci:
     name: Paygod Kernel CI
     runs-on: ubuntu-latest
