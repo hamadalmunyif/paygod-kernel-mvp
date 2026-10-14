@@ -1,75 +1,41 @@
-# 90-day evidence-led contribution and integration roadmap
+# Parallel 90-day roadmap — Evidence-governed, upstream-first
 
-Status: planning proposal beginning 2026-10-12. Review at day 7, 30, 60, 90; no automatic permission for expense, external publication, product claims or Kernel mutation.
+**Status: proposed 2026-10-14 amendment on PR #108.** Each lane advances independently subject to its own authority/evidence gate; this plan neither orders spending nor releases production.
 
-## Phase 0 — day 0–7: repository hygiene + one external merge-quality fix
+## Days 0–7: establish the decision boundary and unblock concurrent work
 
-1. Review internal open draft PR #107 (legal/public attribution): verify actual facts and qualified review; hold unapproved merge.
-2. Review internal draft #103 as research scope: decide tests and CI, not runtime promotion.
-3. Turn Virtuals ACP CLI PR #105 into native-test-supported contribution: whitespace-input rejection, no-op JSON, no-TTY delete refusal, hidden boolean tri-state, exact ID, duplicate deletion and actual backend partial PUT witness.
-4. Produce one red-before/green-after test and native build/typecheck reproduction. Never assert upstream CI green without upstream check.
-5. Update PR with clear authorization boundary, upstream issue #79, non-goals, no PayGod dependency; request one review.
-6. Freeze target register without forking more repositories.
+- Review PR #108 as an explicit prospective governance change; confirm frozen evidence files were not changed. Main remains under current rule until approved merge.
+- Preserve Kernel canonical CI and independent-verifier witnesses; triage #107 legal provenance and #103 GHG as distinct draft decisions.
+- Improve external Virtuals ACP CLI #105 with upstream-native red/green regressions: no-TTY, blank fields, omitted field preservation through PUT, JSON no-op, deletion and idempotency. Request maintainers' review only after tests.
+- Start **in parallel**, without waiting for #105 or B2 quotas: B2 qualified real-case sourcing, nondeveloper verifier handoff, isolated AP2 Pass B, Virtuals X1 read-only acquisition, CEMS measurement source/decimal profile experiment, and one buyer/recipient interview.
+- For each lane record source pin, scope, falsifier, permission, owner, metrics and known blockers. No fabricated outcomes.
 
-Output: PR #105 maintainer-ready with exact test commands; no new production work. Exit: evidence reviewed, human response requested, and pre-merge risks disclosed. If no review, track as WAITING_ON_UPSTREAM without interpreting silence.
+## Days 8–30: test reuse across two independent foreign surfaces
 
-## Phase 1 — day 8–30: one native cross-protocol mismatch witness
+- Build one optional read-only ACP or GitHub evidence capture/shadow path **outside Kernel**, measuring mapping failures and native status discrepancies.
+- Independently test a second different source (FLOP/Butler or CEMS) with saved fixtures. Avoid generalizing source-specific results.
+- Complete at least one neutral recipient-side verification attempt; classify UNKNOWN or inconclusive honestly.
+- Continue B2 case collection, X1 preparatory work and AP2 blindness separately.
+- Measure engineering hours, time-to-test and external waiting separately. No new external fork without a reproduced upstream-native issue.
 
-1. In FLOP TCLK, start at issue #172 and read CONTRIBUTING + AGENTS.md + SPEC.md before any code proposal. Native challenge: signed locked/claimed vs independent read-side settlement observation.
-2. In Butler Skills, map registry source commit, version, content hashes, forked duty and owner approval. Produce positive and negative synthetic duty event fixtures; accept 'no demonstrated gap' as a valid result.
-3. In ACP Node v2, pin SDK/event mapping to a native job transition. No paid jobs; avoid interpreting SDK role gating as deployed contract enforcement.
-4. Generate read-only comparison bundle in PayGod research sandbox; label native coordination, signer identity, rail status and unknown facts separately.
+## Days 31–60: expand interoperability where the first witnesses justify it
 
-Exit: one reproducible source-specific difference that is NOT already fully solved by native checks; one upstream issue comment with non-invasive tests where appropriate; no wire change and no spend.
+- Compare a second protocol family: AP2, UCP, x402, A2A or MCP using their documented native capabilities and synthetic/no-spend negative vectors.
+- Improve reuse of observation/admission contract outside Kernel; do not coerce fractional or unrepresentable source data to pass restricted canonicalization.
+- If evidence shows a material canonical contract gap, write a scoped ADR and independent falsifier. Only then implement a Kernel change via protected CI and explicit owner approval.
+- Keep native PR review/release independent from local adapter viability.
 
-## Phase 2 — day 31–60: broaden interoperable evidence, not fork count
+## Days 61–90: decide from measured evidence
 
-1. Select exactly one of AP2/UCP/x402 after first-tier feedback and a demonstrated integration mismatch.
-2. Compare official controls: AP2 mandate chain, UCP checkout commitment, x402 pay/facilitator states. Build tests against published SDK/samples without actual payment.
-3. Define a minimal optional portable comparison envelope in a research-only repository/path; omit legal authorization, truth, finality and timestamps when not proven.
-4. Ask maintainer a concrete test-vector or sample fix question. Offer standalone tests with no PayGod requirement.
+- Assess source-specific failures, integration reuse and recurring operational cost versus native alternatives.
+- Publish only claims supported by current Kernel and named independently reviewed recipient witnesses.
+- Pursue an authorized external pilot with bounded permissions and a clearly identified user or buyer when justified.
+- For each lane: GO (named next action), HOLD (specific missing dependency), STOP (falsified or prohibitive risk). Other lanes remain open.
 
-Exit: an upstream-native artifact that maintainers can run independently of PayGod, documented difference from baseline, optional bridge proof.
+## Permanent boundaries
 
-## Phase 3 — day 61–90: reciprocal credibility and architectural decision
+P0 remains simulated PASS WITH BOUNDARY; B2-REAL 0/10 and 0/5 are not silently inflated; Level 0/X1 and AP2 Pass B have distinct frozen methods; T0 controlled harness is not external authority. No wallet funding/payment, deployment, new public claim, or external-system mutation without separate permission. No alternate canonical receipt or decision path in adapters.
 
-1. Review all PRs: submitted/reviewed/merged/released/adopted and follow-up from maintainers. A good closed-unmerged result still informs design.
-2. Evaluate one partner pilot only with explicit real workflow, no prohibited economic action, bounded data rights and independent recipient.
-3. Decide if PayGod needs a new admission profile, native adapter or evidence schema. Observe -> classify -> recurrence/importance -> layer -> ADR -> implementation if separately approved.
-4. Write one verifiable demonstration explaining what native system proves and what optional PayGod adds. Do not announce commercial partnership without evidence.
-5. Re-rank targets from actual upstream feedback; decline low-impact forks.
+Success is **independently reproducible native benefit plus portable evidence that can be verified within its stated limits**, not number of forks or PRs.
 
-Exit: one trusted native contribution and one credible cross-protocol external witness, OR a documented refutation that eliminates unnecessary construction.
-
-## Roles and weekly deliverables
-
-| Role | Duty | Immutable evidence |
-| --- | --- | --- |
-| Program owner | Priority, legal/economic and publish authorization; explicit ADR choices | PR approvals, dated decision |
-| Upstream contributor | Native issue reproduction, minimal patch, test execution, maintainer interaction | Repro scripts, commits, PR comments |
-| Red-team reviewer | Negative tests, permissions, partial failure, prompt injection where relevant | Failure vectors, reproducible observation |
-| Protocol investigator | Baseline native behavior and trust boundary, external references | Pin/commit, source link, read-side witness |
-| PayGod Kernel steward | No alternate receipt/decision authority; monitor gate regression | CI check run, boundary mutation |
-| Independent recipient | Independently replay transferred material within allowed scope | Signed/verifiable recipient feedback, non-claims |
-| Commercial liaison | Discover whether a counterparty values an output | Date-stamped explicit answer, no imputed adoption |
-
-Roles may be performed by fewer people initially, but a self-review is NOT independent external validation.
-
-## Risk budget and kill criteria
-
-- No mainnet funds, no card purchases, no ACP economic purchases without a separately frozen authorization and max exposure.
-- No cross-repository CI secrets, no copying confidential Observatory artifacts into public PRs.
-- No third-party commercial claims just because tests pass.
-- Stop a target if native alternatives already solve the specific pain, maintainer explicitly rejects and no distinct local need exists, test cannot be reproduced, or 30-day effort cost grows without new evidence. Continue research freely elsewhere without forcing it into Kernel.
-- If a research observation contradicts PayGod's claim, document the discrepancy, revise the claim register through a dated follow-up after review, and preserve original evidence.
-
-## Candidate decision scorecard
-
-For each target retain 0–5 evidence-based values: native user pain 35%; minimal testable change 25%; relevance to proof/authority 20%; maintainer discussion clarity 10%; no-spend/safety 10%. Score does NOT override upstream contribution rules or owner approval. No fork solely due to high popularity/star count.
-
-## Rollout separations
-
-A successful external native PR creates a code contribution, not a PayGod partnership.
-A passing PayGod shadow bundle establishes only its declared witness and does not control foreign rails.
-A prospective paid customer requires a real buyer and a statement of willingness to buy under concrete terms.
-A deploy or website update requires its own repository and release witness. Never infer from a merged Kernel documentation PR.
+See [Scoped Stop-Build Amendment](../STOP_BUILD_RULE.md), [Open Collaboration](README.md), [Contribution Protocol](CONTRIBUTION_PROTOCOL.md), [Target map](TARGETS.md).
