@@ -58,7 +58,7 @@ The [Observatory transfer/acceptance register](docs/OBSERVATORY_TRANSFER_ACCEPTA
 - Live ACP Witness 001: fractional external descriptor **rejected as designed**, then a compatible shadow evidence-admission path succeeded **without modifying the Kernel** or creating a paid job.
 - Controlled T0: 98/98 harness tests, 13/13 bounded E1 Gate Zero rejections, 23 postflight verifier checks in a frozen local environment. These results are **not** a Kernel-owned live Warrant/E1/E2/S0 feature, external enforcer acceptance or T1 proof.
 - Numeric/industrial observation profiles: requirement for future data interoperability, not an implemented decimal capability.
-- No public-website or investor claim may exceed the canonical implemented/CI boundary. Research can contribute to docs and future tests without changing the stop-build rule.
+- No public-website or investor claim may exceed the canonical implemented/CI boundary. Research can contribute to docs, reproducible integrations and future tests under the 2026-10-14 prospective evidence-governed amendment; canonical changes still require the specific ADR/test/approval gates.
 
 ## Current validation gates
 
@@ -70,9 +70,9 @@ Counts as B2-REAL: false
 
 P0 established a pre-kernel boundary: evidence that cannot be represented and admitted faithfully is WITHHELD, and a required WITHHELD value causes NOT RUN before the canonical kernel path. ADR 0003 records this without adding tri-state semantics to the kernel.
 
-### Repository stop-build — ACTIVE
+### Evidence-governed parallel development — owner-approved 2026-10-14
 
-From main commit `6b65d0d97ce61111b9eb77762de03f4a518c0d21`, new feature development and security-capability expansion are frozen except for confirmed defect/security remediation, CI/reproducibility repair, evidence collection, and separately approved evidence-backed architecture changes.
+The historical repository stop-build began at `6b65d0d97ce61111b9eb77762de03f4a518c0d21`. Upon the approved merge of [PR #108](https://github.com/hamadalmunyif/paygod-kernel-mvp/pull/108), its prospective blanket-build restriction is replaced by [scoped evidence-governed development](docs/STOP_BUILD_RULE.md): separate authorized research, industrial, agent/protocol, nondeveloper-recipient, contributor and market-discovery lanes may advance without cross-gating. The original baseline remains historical. Kernel canonical semantics/trust-contract changes remain gated by a concrete witness, explicit ADR, protected CI and owner approval; experimental branches never imply production authority. B2-REAL and X1 retain their own frozen evidence and economic limits.
 
 ### v0.6 — Internal Rehearsal B2
 This is **not a pilot** and does not prove demand or willingness to pay.
