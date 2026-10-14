@@ -41,6 +41,14 @@ dotnet run --project src/PayGod.Cli -- test --pack packs/core/local-evidence-exa
 
 Replace the example rules with rules matching **your** policy. Design at least these test classes: accepted true/false input, missing required field, wrong type, source error masquerading as a clean report, contradictory source, and tampered evidence. The CLI policy fixture test can compare its declared decisions, but it is **not** a universal pre-Kernel admission validator.
 
+An **optional structural-only preflight** is available for Packs that declare an explicit object schema with nonempty `required` fields. Write a local JSON fixture such as `{"input":{"block":false}}` for the generated example, then run:
+
+```bash
+python3 tools/eik_admit.py --pack packs/core/local-evidence-example --input input.json
+```
+
+The tool returns `STRUCTURAL_ONLY_PASS` for correctly typed declared fields, or `WITHHELD_NOT_RUN` (exit code 2) for missing/malformed inputs. It never invokes Kernel or asserts scanner success, source truth, temporal validity or external execution authority. **A structural pass alone must not trigger production `run`.** Provider-specific source completion, authenticity, provenance and any explicit mandate need separate admission checks.
+
 > **Critical current limitation:** generic `run` does not automatically enforce every embedded Pack input schema. A Pack schema valid under `pack_validate.py` is not proof of source truth, runtime mandatory-field completeness, or a safe production decision. Perform admission **before** invoking `run`; for missing required evidence the external orchestrator must report `WITHHELD / NOT RUN` and not call Kernel. See [ADR 0003](../../adrs/0003-evidence-admission-before-decision-execution.md).
 
 Do not treat a generated Pack's illustrative `allow` result as deployment permission. The external system and its owner retain operational release authority.
