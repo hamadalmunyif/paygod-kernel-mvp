@@ -1,8 +1,10 @@
 # PayGod Open Collaboration — Parallel Evidence-Governed Program
 
-**Status: PROPOSED on PR #108; operational authority only after approved merge.** Owner direction 2026-10-14: reopen independently scoped exploration while protecting canonical authority and frozen witnesses.
+**Status: ACTIVE as of the accepted 2026-10-14 [PR #108](https://github.com/hamadalmunyif/paygod-kernel-mvp/pull/108); supersedes only the prospective blanket stop-build.** The earlier rule and frozen witnesses remain in Git history. Open independently scoped exploration while protecting canonical authority and release gates.
 
 Operating rule: **Upstream First · Evidence Native · PayGod Optional**.
+
+**Build privately · Verify independently · Contribute optionally.** Personal/agent-authored Packs can be developed and tested without creating a PayGod PR or account. The [EIK entry guide](../eik/README.md) is documentation and a local onboarding path, not a released adapter SDK, hosted assessment, authenticated source, or deploy authorization.
 
 ## Four separate authorities
 
