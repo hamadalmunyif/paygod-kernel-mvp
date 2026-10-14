@@ -1,0 +1,11 @@
+{
+  "fixture_kind": "paygod-eik-synthetic-scan-v0",
+  "scanner": "synthetic-ci-scan",
+  "run_state": "failed",
+  "scanner_result": "error",
+  "scanner_exit_code": 2,
+  "report_complete": false,
+  "source_commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "findings_count": 0,
+  "critical_count": 0
+}

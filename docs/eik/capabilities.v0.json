@@ -53,6 +53,12 @@
       "status": "accepted_adr_not_universal_enforcement",
       "path": "adrs/0003-evidence-admission-before-decision-execution.md",
       "limits": "WITHHELD and NOT RUN are external orchestration states."
+    },
+    {
+      "id": "eik-synthetic-github-actions-reference",
+      "status": "implemented_synthetic_example_pending_pr_acceptance",
+      "path": "examples/eik-github-actions/README.md",
+      "limits": "Saved synthetic scan only; shows explicit two-stage admission, canonical CLI, transferred integrity verification, missing/failed scanner negatives. Not live GitHub integration, authenticated source, deployment authority, or independent human adoption."
     }
   ],
   "not_shipped": [

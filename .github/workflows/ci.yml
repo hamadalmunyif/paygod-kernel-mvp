@@ -84,6 +84,9 @@ jobs:
       - name: Verify EIK Pack init and pre-Kernel structural input negatives
         run: python3 tools/test_eik_onboarding.py --cli ./out/paygod
 
+      - name: Verify optional EIK GitHub synthetic reference and independent-receiver negatives
+        run: python3 tools/test_eik_github_reference.py --cli ./out/paygod
+
   paygod-kernel-ci:
     name: Paygod Kernel CI
     runs-on: ubuntu-latest
