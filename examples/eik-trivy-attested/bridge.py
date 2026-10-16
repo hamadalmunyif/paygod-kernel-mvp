@@ -20,6 +20,7 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
 from eik_trivy_shadow import (MAX_REPORT_BYTES, no_duplicates, examine)  # noqa: E402
+from execution_statement import check as validate_scan_execution  # noqa: E402
 
 PACK = Path(__file__).resolve().parent / "pack"
 ADMISSION = ROOT / "tools" / "eik_admit.py"
@@ -69,6 +70,7 @@ def make_input(source, expected, rawsha, reported_exit, scanner_args):
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--report", required=True, type=Path)
+    p.add_argument("--execution-statement", required=True, type=Path)
     p.add_argument("--expected-artifact", required=True)
     p.add_argument("--scanner-exit-code", required=True, type=int)
     p.add_argument("--scanner-arg", action="append", default=[])
