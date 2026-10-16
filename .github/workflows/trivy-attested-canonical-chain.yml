@@ -249,6 +249,18 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Admitted source / canonical receipt binding failed" }
           python -c "import json; r=json.load(open('scoped-verification.json')); assert r['status']=='valid' and r['verification']['integrity']=='verified' and r['verification']['replay']=='not_performed' and r['verification']['issuer_authenticity']=='not_verified'"
           if ($LASTEXITCODE -ne 0) { throw "Scoped trust dimensions misrepresented" }
+      - name: Reject wrong pinned GH signing workflow and source commit
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $actual = "$($env:GITHUB_REPOSITORY)/.github/workflows/trivy-attested-canonical-chain.yml"
+          $wrong = "$($env:GITHUB_REPOSITORY)/.github/workflows/not-the-signer.yml"
+          gh attestation verify transfer/source/trivy.json --repo $env:GITHUB_REPOSITORY --signer-workflow $wrong --source-ref 'refs/heads/research/trivy-signed-execution-statement-20261016' --source-digest $env:GITHUB_SHA --format json *> $null
+          if ($LASTEXITCODE -eq 0) { throw 'Unexpected source signature accepted with WRONG signer workflow' }
+          gh attestation verify transfer/source/scan-execution.json --repo $env:GITHUB_REPOSITORY --signer-workflow $actual --source-ref 'refs/heads/research/trivy-signed-execution-statement-20261016' --source-digest ('0' * 40) --format json *> $null
+          if ($LASTEXITCODE -eq 0) { throw 'Execution signature accepted with WRONG signed source revision' }
+          Write-Output 'PASS: GH-native report and observed execution signer identity are source and revision scoped.'
+
       - name: Native source tamper AND PayGod bundle tamper must both fail
         shell: pwsh
         run: |
