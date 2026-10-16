@@ -122,6 +122,8 @@ def main():
     )
     if verification.returncode != 0:
         return emit("WITHHELD_NOT_RUN", "NATIVE_ATTESTATION_INVALID")
+    statement_bytes=a.execution_statement.read_bytes()
+
     try:
         att=json.loads(verification.stdout)
         if not isinstance(att,list) or not att:
