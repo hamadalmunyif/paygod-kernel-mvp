@@ -58,7 +58,7 @@ jobs:
           printf '%s\n' "$GITHUB_SHA" > native-source/workflow-commit.txt
           echo 'Native scanner produced JSON at observed branch SHA; this alone does not prove full scan coverage or issuer authenticity.'
 
-      - name: Read only shadow: never translate into a PayGod decision or receipt
+      - name: "Read only shadow: never translate into a PayGod decision or receipt"
         shell: bash
         run: |
           set -euo pipefail
