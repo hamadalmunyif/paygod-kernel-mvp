@@ -13,7 +13,8 @@ SHA40=re.compile(r"^[a-f0-9]{40}$")
 SUBJECT=re.compile(r"^.+@sha256:[a-f0-9]{64}$")
 SOURCE_REF="refs/heads/research/trivy-signed-execution-statement-20261016"
 COMMAND=["trivy","image","--scanners","vuln","--format","json",
-         "--exit-code","0","--output","native-source/trivy.json"]
+         "--exit-code","0","--config=","--ignorefile=","--secret-config=",
+         "--output","native-source/trivy.json"]
 
 def check(record:object, report:bytes, subject:str, repo:str, commit:str,
           expected_run_id:str, expected_run_attempt:str):
@@ -21,6 +22,7 @@ def check(record:object, report:bytes, subject:str, repo:str, commit:str,
         raise ValueError("EXECUTION_STATEMENT_NOT_OBJECT")
     fields={
         "statement_type","status","source_scope","scanner","scanner_version_stdout",
+        "config_isolation_mode","discarded_trivy_env_names",
         "scanner_binary_sha256","scanner_executable","argv","native_exit_code",
         "subject","report_sha256","report_size_bytes","workflow_repository",
         "workflow_ref","workflow_commit","workflow_run_id","workflow_run_attempt",
@@ -36,6 +38,7 @@ def check(record:object, report:bytes, subject:str, repo:str, commit:str,
         "source_scope":"first_party_github_actions_only",
         "scanner":"Trivy",
         "scanner_executable":"trivy",
+        "config_isolation_mode":"explicit_empty_config_ignore_and_trivy_env_scrub",
         "native_exit_code":0,
         "subject":subject,
         "workflow_repository":repo,
@@ -47,6 +50,11 @@ def check(record:object, report:bytes, subject:str, repo:str, commit:str,
     for key,expected in exact.items():
         if type(record[key]) is not type(expected) or record[key]!=expected:
             raise ValueError("STATEMENT_FIELD_MISMATCH:"+key)
+    env_names=record["discarded_trivy_env_names"]
+    if (not isinstance(env_names,list) or len(env_names)>100 or
+        env_names!=sorted(set(env_names)) or
+        any(not isinstance(k,str) or not re.fullmatch(r"TRIVY_[A-Z0-9_]+",k) for k in env_names)):
+        raise ValueError("DISCARDED_ENV_NAMES_UNRECOGNIZED")
     if record["argv"]!=COMMAND+[subject]:
         raise ValueError("UNEXPECTED_TRIVY_COMMAND")
     if not isinstance(record["scanner_version_stdout"],str) or not re.search(
