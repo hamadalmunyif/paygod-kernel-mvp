@@ -1,0 +1,215 @@
+name: Trivy Attested Source to Canonical PayGod Deny (RESEARCH ONLY)
+# This study is not a deployment/release gate; runs only on research branch.
+on:
+  push:
+    branches: [research/trivy-attested-canonical-deny-chain-20261016]
+    paths:
+      - '.github/workflows/trivy-attested-canonical-chain.yml'
+      - 'examples/eik-trivy-attested/**'
+      - 'tools/eik_trivy_shadow.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  signed-source-kernel-producer:
+    name: Native Trivy scan + GH attestation + admitted canonical Kernel deny
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    env:
+      PAYGOD_CLOCK: '2026-10-16T15:40:00Z' # producer supplied demonstration clock, NOT trusted time
+      PAYGOD_STRICT: '1'
+      GH_TOKEN: ${{ github.token }}
+    outputs:
+      receipt_sha256: ${{ steps.pin.outputs.receipt_sha256 }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: aquasecurity/setup-trivy@e07451d2e059ed86c2870430ea286b3a9e0bf241
+        with:
+          version: v0.75.0
+          cache: false
+      - name: Prepare pinned immutable public image; no tag drift
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p native-source
+          subject='alpine@sha256:ce64758a109eb420d874a118f87920e625e12d3634e03b4a5573fd9f6e5d3507'
+          docker pull "$subject"
+          printf '%s\n' "$subject" > native-source/subject.txt
+          trivy --version | tee native-source/trivy-version.txt
+      - name: Produce live Trivy JSON (exit zero != clean)
+        shell: bash
+        run: |
+          set -euo pipefail
+          subject="$(cat native-source/subject.txt)"
+          trivy image --scanners vuln --format json --exit-code 0 \
+            --output native-source/trivy.json "$subject" \
+            > native-source/trivy-stdout.txt 2> native-source/trivy-stderr.txt
+          printf '%s\n' 0 > native-source/trivy-exit.txt
+          sha256sum native-source/trivy.json | tee native-source/report-sha256.txt
+          printf '%s\n' "$GITHUB_SHA" > native-source/workflow-commit.txt
+      - name: Sign exact native Trivy report bytes using GitHub authority
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: native-source/trivy.json
+      - name: Publish canonical CLI binary (research source only)
+        run: |
+          python3 -m pip install -r tools/requirements.txt
+          dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -o out
+          ./out/PayGod.Cli test --pack examples/eik-trivy-attested/pack
+      - name: Native GH verification AND admission BEFORE canonical Kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 examples/eik-trivy-attested/bridge.py \
+            --report native-source/trivy.json \
+            --expected-artifact "$(cat native-source/subject.txt)" \
+            --scanner-exit-code 0 \
+            --scanner-arg=image \
+            --scanner-arg=--scanners=vuln \
+            --scanner-arg=--format=json \
+            --repository "$GITHUB_REPOSITORY" \
+            --cli ./out/PayGod.Cli \
+            --out eik-output \
+            | tee bridge-execution.json
+          python3 - <<'PY'
+          import json, pathlib, hashlib
+          d=json.loads(pathlib.Path("bridge-execution.json").read_text())
+          assert d["status"] == "KERNEL_EXECUTED_NONPERMIT"
+          assert d["kernel_invoked"] is True
+          receipt=pathlib.Path("eik-output/evidence/receipt.json")
+          assert d["receipt_sha256"] == hashlib.sha256(receipt.read_bytes()).hexdigest()
+          assert json.loads(receipt.read_text())["verdict"]["value"] == "deny"
+          assert set(p.name for p in receipt.parent.iterdir()) == {
+              "receipt.json", "manifest.json", "ledger.jsonl", "findings.json", "plan.json"}
+          print("PASS: canonical Kernel issued deny; no adapter-produced receipt.")
+          PY
+      - name: Negative signed-source mutation MUST be withheld BEFORE Kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp native-source/trivy.json native-source/modified-report.json
+          printf ' \n' >> native-source/modified-report.json
+          set +e
+          python3 examples/eik-trivy-attested/bridge.py \
+            --report native-source/modified-report.json \
+            --expected-artifact "$(cat native-source/subject.txt)" \
+            --scanner-exit-code 0 --scanner-arg=image \
+            --scanner-arg=--scanners=vuln --scanner-arg=--format=json \
+            --repository "$GITHUB_REPOSITORY" --cli ./out/PayGod.Cli \
+            --out tampered-bridge-output > rejected.json
+          rc="$?"
+          set -e
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          assert json.loads(Path("rejected.json").read_text())["status"] == "WITHHELD_NOT_RUN"
+          assert json.loads(Path("rejected.json").read_text())["code"] == "NATIVE_ATTESTATION_INVALID"
+          assert json.loads(Path("rejected.json").read_text())["kernel_invoked"] is False
+          assert not Path("tampered-bridge-output").exists()
+          print("PASS: changed source bytes cannot enter Kernel without GH-native attestation.")
+          PY
+          test "$rc" -eq 2
+      - name: Produce bounded receipt digest handoff (producer-supplied, NOT independent pin)
+        id: pin
+        shell: bash
+        run: |
+          set -euo pipefail
+          digest="$(sha256sum eik-output/evidence/receipt.json | cut -d ' ' -f1)"
+          echo "receipt_sha256=$digest" >> "$GITHUB_OUTPUT"
+          mkdir -p verifier-dist
+          cp tools/verify_portable_evidence.py verifier-dist/verify_portable_evidence.py
+          cp tools/issuer_auth.py verifier-dist/issuer_auth.py
+          cp tools/eik_trivy_shadow.py verifier-dist/eik_trivy_shadow.py
+          cp examples/eik-trivy-attested/receiver_binding.py verifier-dist/receiver_binding.py
+      - name: Transfer source separately from canonical Kernel bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: research-trivy-attested-kernel-evidence
+          path: eik-output/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Transfer code for receiver without checkout
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: research-trivy-portable-verifier
+          path: verifier-dist/
+          retention-days: 7
+          if-no-files-found: error
+
+  no-checkout-native-comparison:
+    name: Fresh Windows recipient GH and PayGod scoped verification
+    needs: signed-source-kernel-producer
+    runs-on: windows-2022
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_RECEIPT_SHA: ${{ needs.signed-source-kernel-producer.outputs.receipt_sha256 }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: research-trivy-attested-kernel-evidence
+          path: transfer
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: research-trivy-portable-verifier
+          path: verifier
+      - name: No checkout: GH-native provenance and separate PayGod integrity checks
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          foreach ($p in @('.git', 'src', 'packs', 'tools')) {
+            if (Test-Path $p) { throw "Producer source unexpectedly accessible: $p" }
+          }
+          gh attestation verify transfer/source/trivy.json --repo $env:GITHUB_REPOSITORY --format json | Set-Content -Encoding utf8 gh-verified.json
+          if ($LASTEXITCODE -ne 0) { throw "GH native report provenance verification failed" }
+          python verifier/verify_portable_evidence.py transfer/evidence --expect-receipt-sha256 $env:EXPECTED_RECEIPT_SHA --result scoped-verification.json
+          if ($LASTEXITCODE -ne 0) { throw "Canonical PayGod receipt integrity failed" }
+          python verifier/receiver_binding.py --report transfer/source/trivy.json --input transfer/source/input.json --receipt transfer/evidence/receipt.json
+          if ($LASTEXITCODE -ne 0) { throw "Admitted source / canonical receipt binding failed" }
+          python -c "import json; r=json.load(open('scoped-verification.json')); assert r['status']=='valid' and r['verification']['integrity']=='verified' and r['verification']['replay']=='not_performed' and r['verification']['issuer_authenticity']=='not_verified'"
+          if ($LASTEXITCODE -ne 0) { throw "Scoped trust dimensions misrepresented" }
+      - name: Native source tamper AND PayGod bundle tamper must both fail
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          Copy-Item transfer/source/trivy.json trivy-mutated.json
+          Add-Content -Encoding utf8 trivy-mutated.json ' '
+          gh attestation verify trivy-mutated.json --repo $env:GITHUB_REPOSITORY --format json *> $null
+          if ($LASTEXITCODE -eq 0) { throw "Tampered Trivy report passed native GH verification" }
+          Copy-Item transfer/evidence evidence-mutated -Recurse
+          Add-Content -Encoding utf8 evidence-mutated/findings.json ' '
+          python verifier/verify_portable_evidence.py evidence-mutated --expect-receipt-sha256 $env:EXPECTED_RECEIPT_SHA *> $null
+          if ($LASTEXITCODE -eq 0) { throw "Tampered PayGod bundle passed portable verifier" }
+          Copy-Item transfer/source/input.json input-mutated.json
+          Add-Content -Encoding utf8 input-mutated.json ' '
+          python verifier/receiver_binding.py --report transfer/source/trivy.json --input input-mutated.json --receipt transfer/evidence/receipt.json *> $null
+          # Whitespace is insignificant for canonical input, so this is NOT expected to fail;
+          # replace a real source binding field below to test a semantic mutation.
+          $src = Get-Content transfer/source/input.json -Raw | ConvertFrom-Json
+          $src.scan_report.source_sha256 = ('0' * 64)
+          $src | ConvertTo-Json -Depth 20 | Set-Content -Encoding utf8 input-mutated.json
+          python verifier/receiver_binding.py --report transfer/source/trivy.json --input input-mutated.json --receipt transfer/evidence/receipt.json *> $null
+          if ($LASTEXITCODE -eq 0) { throw "Tampered source-to-receipt binding passed" }
+          Write-Output 'PASS: independent OS confirms GH-signed source, PayGod portable receipt integrity and source hash binding; all semantic mutations rejected.'
+          Write-Output 'LIMIT: same-account runner, producer-supplied receipt pin, no external human and no authenticated real-world scanner coverage claim.'
+          exit 0
