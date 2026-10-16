@@ -28,11 +28,11 @@ def verify(report_file, input_file, receipt_file, statement_file, repo, commit):
     report=read_json(report_file)
     statement=read_json(statement_file)
     validate_scan_execution(statement,raw,report['ArtifactName'],repo,commit)
+    admitted=read_json(input_file)
     statement_sha=hashlib.sha256(Path(statement_file).read_bytes()).hexdigest()
     admitted_statement_sha=admitted.get("scan_report",{}).get("scan_execution_sha256")
     if statement_sha != admitted_statement_sha:
         raise ValueError("EXECUTION_STATEMENT_SHA_NOT_BOUND_TO_INPUT")
-    admitted=read_json(input_file)
     receipt=read_json(receipt_file)
     scan=admitted.get("scan_report",{})
     if not isinstance(scan,dict) or scan.get("source_sha256")!=sha:
