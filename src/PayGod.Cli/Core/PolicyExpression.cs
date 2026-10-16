@@ -264,12 +264,13 @@ public static class PolicyExpression
             {
                 var lhs = lk == System.Text.Json.JsonValueKind.True;
                 var rhs = rk == System.Text.Json.JsonValueKind.True;
-                var result = op switch
-                {
-                    TokenType.Eq => lhs == rhs,
-                    TokenType.Ne => lhs != rhs,
-                    _ => false
-                };
+                // Ordering booleans is undefined for typed-v1. Returning false
+                // here would let a surrounding 'not' turn malformed policy
+                // syntax into an ALLOW, violating fail-closed evaluation.
+                if (op is not TokenType.Eq and not TokenType.Ne)
+                    throw new InvalidOperationException(
+                        "Policy Boolean comparison supports equality and inequality only.");
+                var result = op == TokenType.Eq ? lhs == rhs : lhs != rhs;
                 return new(JsonValue.Create(result));
             }
 
