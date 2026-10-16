@@ -112,6 +112,53 @@ public class PolicyExpressionTypeSafetyTests
                 "{\"iam_event\":{}}"));
     }
 
+    [Theory]
+    [InlineData("{\"input\":{}}")]
+    [InlineData("{\"input\":{\"block\":null}}")]
+    [InlineData("{\"input\":{\"block\":\"false\"}}")]
+    [InlineData("{\"input\":{\"block\":0}}")]
+    [InlineData("{\"input\":{\"block\":[]}}")]
+    [InlineData("{\"input\":{\"block\":{}}}")]
+    public void Negation_MissingOrNonBoolean_CannotBecomeAllow(string json)
+    {
+        Assert.Throws<InvalidOperationException>(
+            () => Evaluate("not input.input.block", json));
+    }
+
+    [Theory]
+    [InlineData("{\"input\":{\"block\":false}}", true)]
+    [InlineData("{\"input\":{\"block\":true}}", false)]
+    public void Negation_PresentBoolean_IsEvaluated(string json, bool expected)
+    {
+        Assert.Equal(expected, Evaluate("not input.input.block", json));
+    }
+
+    [Theory]
+    [InlineData("{\"input\":{}}")]
+    [InlineData("{\"input\":{\"block\":\"true\"}}")]
+    [InlineData("{\"input\":{\"block\":1}}")]
+    public void StandalonePath_MissingOrNonBoolean_IsErrorInTypedProfile(string json)
+    {
+        Assert.Throws<InvalidOperationException>(
+            () => Evaluate("input.input.block", json));
+    }
+
+    [Fact]
+    public void LegacyProfile_NegatedMissingPathBehaviorIsPinnedForHistoricalReplayOnly()
+    {
+        // This is not approval to admit missing source data.
+        var root = JsonNode.Parse("{\"input\":{}}")!;
+        Assert.True(PolicyExpression.Evaluate("not input.input.block", root));
+    }
+
+    [Fact]
+    public void TypedProfile_MissingBooleanInAnyPredicate_IsError()
+    {
+        const string policy = "input.items.any(v => v.required)";
+        const string raw = "{\"items\":[{\"required\":\"true\"}]}";
+        Assert.Throws<InvalidOperationException>(() => Evaluate(policy, raw));
+    }
+
     [Fact]
     public void OptedInPack_RejectsWrongTypedBooleanBeforeAllow()
     {
