@@ -1,0 +1,44 @@
+api_version: "paygod/v1"
+kind: Pack
+metadata:
+  name: "trivy-observed-severity-nonpermit-prototype"
+  version: "2.0.0"
+  description: "Research-only observed Trivy severity deny/flag rules; intentionally cannot produce allow or authorize release."
+  maintainer: "PayGod research"
+  tags: ["research", "security", "read-only", "nonpermit"]
+spec:
+  inputs:
+    - name: "scan_report"
+      type: "observation"
+      source: "trivy-shadow-normalized-research"
+      schema:
+        type: "object"
+        additionalProperties: false
+        required: ["artifact_name", "vulnerabilities"]
+        properties:
+          artifact_name:
+            type: "string"
+            pattern: "^.+@sha256:[a-f0-9]{64}$"
+          vulnerabilities:
+            type: "array"
+            items:
+              type: "object"
+              additionalProperties: false
+              required: ["cve_id", "severity", "installed_version", "trivy_status"]
+              properties:
+                cve_id: { type: "string", minLength: 1 }
+                severity:
+                  type: "string"
+                  enum: ["CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"]
+                installed_version: { type: "string", minLength: 1 }
+                trivy_status: { type: "string" }
+  policy:
+    rules:
+      - name: "block-observed-high-critical"
+        condition: "input.scan_report.vulnerabilities.any(v => v.severity == 'CRITICAL' or v.severity == 'HIGH')"
+        decision: "deny"
+        reason: "Observed HIGH or CRITICAL findings in research source; scanner-native equivalent blocking exists."
+      - name: "flag-observed-medium"
+        condition: "input.scan_report.vulnerabilities.any(v => v.severity == 'MEDIUM')"
+        decision: "flag"
+        reason: "Observed MEDIUM findings; no release authorization."
