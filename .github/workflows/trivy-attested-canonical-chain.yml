@@ -144,6 +144,38 @@ jobs:
           print("PASS: changed source bytes cannot enter Kernel without GH-native attestation.")
           PY
           test "$rc" -eq 2
+      - name: Reject changed signed scan execution record before Kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp native-source/scan-execution.json changed-execution.json
+          printf ' ' >> changed-execution.json
+          set +e
+          python3 examples/eik-trivy-attested/bridge.py \
+            --report native-source/trivy.json \
+            --execution-statement changed-execution.json \
+            --expected-artifact "$(cat native-source/subject.txt)" \
+            --scanner-exit-code 0 \
+            --scanner-arg=image \
+            --scanner-arg=--scanners=vuln \
+            --scanner-arg=--format=json \
+            --repository "$GITHUB_REPOSITORY" \
+            --cli ./out/PayGod.Cli \
+            --out altered-execution-bridge-output > changed-execution-result.json
+          rc="$?"
+          set -e
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("changed-execution-result.json").read_text())
+          assert d["status"]=="WITHHELD_NOT_RUN", d
+          assert d["kernel_invoked"] is False, d
+          assert d["code"]=="EXECUTION_ATTESTATION_INVALID", d
+          assert not Path("altered-execution-bridge-output").exists()
+          print("PASS: execution-record byte mutation rejected before Kernel.")
+          PY
+          test "$rc" -eq 2
+
       - name: Produce bounded receipt digest handoff (producer-supplied, NOT independent pin)
         id: pin
         shell: bash
