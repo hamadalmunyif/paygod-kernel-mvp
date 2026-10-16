@@ -58,6 +58,24 @@ public static class RunCommand
             return;
         }
 
+        // Preserve legacy profile replay while refusing malformed evidence
+        // before writing ANY canonical artifacts for explicit typed-v1 Packs.
+        // This is only evaluator-type admission; source completeness and truth
+        // require external evidence admission under ADR 0003.
+        PolicyResult? typedResult = null;
+        if (pack.spec.policy.evaluation_profile != "legacy-v1")
+        {
+            try
+            {
+                typedResult = PolicyEngine.Evaluate(pack, inputJson);
+            }
+            catch (InvalidOperationException ex)
+            {
+                FailCode("POLICY_INPUT_REJECTED", ex.Message);
+                return;
+            }
+        }
+
         var packDigest = Sha256Hex(File.ReadAllBytes(packPath));
         var packObj = new { name = pack.metadata.name, version = pack.metadata.version, path = packDir, digest_sha256 = packDigest };
 
@@ -69,7 +87,7 @@ public static class RunCommand
         var planPath = Path.Join(outDir.FullName, "plan.json");
         WriteJson(planPath, plan);
 
-        var result = PolicyEngine.Evaluate(pack, inputJson);
+        var result = typedResult ?? PolicyEngine.Evaluate(pack, inputJson);
         var findings = new List<object>();
         if (result.Decision == "flag")
             findings.Add(new { kind = "flag", severity = "medium", code = "PACK_FLAG", message = result.Reason, rule_name = result.RuleName, evidence_refs = Array.Empty<string>() });
