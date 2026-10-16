@@ -10,21 +10,26 @@ namespace PayGod.Cli.Core;
 /// </summary>
 public static class PolicyExpression
 {
-    public static bool Evaluate(string expression, JsonNode input)
+    public static bool Evaluate(string expression, JsonNode input, bool strictTypes = false)
     {
         var parser = new Parser(expression);
         var ast = parser.ParseExpression();
         parser.Expect(TokenType.EOF);
-        var ctx = new EvalContext(input);
+        var ctx = new EvalContext(input, strictTypes);
         return ast.Eval(ctx).AsBool();
     }
 
     private sealed class EvalContext
     {
         public JsonNode Input { get; }
+        public bool StrictTypes { get; }
         private readonly Dictionary<string, JsonNode?> _vars = new(StringComparer.Ordinal);
 
-        public EvalContext(JsonNode input) => Input = input;
+        public EvalContext(JsonNode input, bool strictTypes)
+        {
+            Input = input;
+            StrictTypes = strictTypes;
+        }
 
         public JsonNode? ResolveVar(string name)
         {
@@ -151,6 +156,55 @@ public static class PolicyExpression
             // Invalid operands raise an evaluation error (including under 'not'),
             // rather than emitting a false result that a negation could turn
             // into an unsafe allow. Admission still gates external source facts.
+            if (!ctx.StrictTypes)
+            {
+            var ln = l.AsNumber();
+            var rn = r.AsNumber();
+            if (ln.HasValue && rn.HasValue)
+            {
+                var res = op switch
+                {
+                    TokenType.Eq => Math.Abs(ln.Value - rn.Value) < 1e-9,
+                    TokenType.Ne => Math.Abs(ln.Value - rn.Value) >= 1e-9,
+                    TokenType.Gt => ln.Value > rn.Value,
+                    TokenType.Ge => ln.Value >= rn.Value,
+                    TokenType.Lt => ln.Value < rn.Value,
+                    TokenType.Le => ln.Value <= rn.Value,
+                    _ => false
+                };
+                return new(JsonValue.Create(res));
+            }
+
+            var ls = l.AsString();
+            var rs = r.AsString();
+            if (ls is not null && rs is not null)
+            {
+                var cmp = string.CompareOrdinal(ls, rs);
+                var res = op switch
+                {
+                    TokenType.Eq => cmp == 0,
+                    TokenType.Ne => cmp != 0,
+                    TokenType.Gt => cmp > 0,
+                    TokenType.Ge => cmp >= 0,
+                    TokenType.Lt => cmp < 0,
+                    TokenType.Le => cmp <= 0,
+                    _ => false
+                };
+                return new(JsonValue.Create(res));
+            }
+
+            var lb = l.AsBool();
+            var rb = r.AsBool();
+            var bres = op switch
+            {
+                TokenType.Eq => lb == rb,
+                TokenType.Ne => lb != rb,
+                _ => false
+            };
+            return new(JsonValue.Create(bres));
+            }
+            
+            // Explicit new profile only; never alter historic pack replay defaults.
             var lk = l.Node?.GetValueKind();
             var rk = r.Node?.GetValueKind();
             if (lk is null || rk is null)
@@ -222,7 +276,11 @@ public static class PolicyExpression
         {
             var arrVal = arrayPath.Eval(ctx).Node;
             if (arrVal is not JsonArray arr)
-                throw new InvalidOperationException("Policy any() requires a present JSON array.");
+            {
+                if (ctx.StrictTypes)
+                    throw new InvalidOperationException("Policy any() requires a present JSON array.");
+                return new(JsonValue.Create(false));
+            }
 
             foreach (var item in arr)
             {
