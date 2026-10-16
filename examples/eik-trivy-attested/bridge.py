@@ -103,7 +103,7 @@ def main():
     # GH CLI <=2.101.0 had an inexact --signer-workflow identity match
     # (GHSA-wjmr-j3rp-mh2g); refuse those clients. Pin workflow/ref/source.
     cli_version=run("gh","--version")
-    match=re.search(r"gh version (\\d+)\\.(\\d+)\\.(\\d+)",cli_version.stdout)
+    match=re.search(r"gh version (\d+)\.(\d+)\.(\d+)",cli_version.stdout)
     if cli_version.returncode!=0 or not match or tuple(map(int,match.groups()))<(2,102,0):
         return emit("WITHHELD_NOT_RUN", "GH_ATTESTATION_CLI_PATCH_REQUIRED")
     current_commit=os.environ.get("GITHUB_SHA","")
