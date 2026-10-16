@@ -154,7 +154,7 @@ def main():
             )
             result = examine(data, a.expected_artifact, a.scanner_exit_code,
                              a.scanner_arg, digest)
-    except (OSError, UnicodeError, json.JSONDecodeError, ValueError):
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError, RecursionError):
         result = output("WITHHELD_NOT_RUN", ["INVALID_OR_UNAVAILABLE_REPORT"], digest)
 
     print(json.dumps(result, sort_keys=True, separators=(",", ":"), ensure_ascii=True))
