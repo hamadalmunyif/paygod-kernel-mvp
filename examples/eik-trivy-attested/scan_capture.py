@@ -18,7 +18,8 @@ import sys
 
 SHA_SUBJECT=re.compile(r"^.+@sha256:[a-f0-9]{64}$")
 SHA40=re.compile(r"^[a-f0-9]{40}$")
-ARGS=["image","--scanners","vuln","--format","json","--exit-code","0"]
+ARGS=["image","--scanners","vuln","--format","json","--exit-code","0",
+      "--config=","--ignorefile=","--secret-config="]
 
 def sha(data:bytes)->str:
     return hashlib.sha256(data).hexdigest()
@@ -41,7 +42,13 @@ def main():
         raise ValueError("Trivy executable unavailable")
     binary_path=Path(binary).resolve()
     binary_hash=sha(binary_path.read_bytes())
-    version=subprocess.run([str(binary_path),"--version"],capture_output=True,text=True,timeout=20,check=True)
+    # Configuration can be inherited from TRIVY_* environment variables;
+    # strip them for the scanner subprocess. Empty --config/ignorefile flags
+    # suppress repository config and ignore filters.
+    ignored_env_names=sorted(k for k in os.environ if k.startswith("TRIVY_"))
+    clean_env={k:v for k,v in os.environ.items() if not k.startswith("TRIVY_")}
+    version=subprocess.run([str(binary_path),"--version"],capture_output=True,
+                           text=True,timeout=20,check=True,env=clean_env)
     if not re.search(r"\bVersion:\s*0\.75\.0\b",version.stdout):
         raise ValueError("Actual Trivy version does not match expected 0.75.0")
 
@@ -51,7 +58,7 @@ def main():
     # Only these executable arguments are permitted in this research witness.
     # No --severity, --ignore-status, ignorefile or skip flags in the invocation.
     argv=[str(binary_path),*ARGS,"--output",str(report),args.subject]
-    actual=subprocess.run(argv,capture_output=True,timeout=180,check=False)
+    actual=subprocess.run(argv,capture_output=True,timeout=180,check=False,env=clean_env)
     (out/"trivy-stdout.txt").write_bytes(actual.stdout)
     (out/"trivy-stderr.txt").write_bytes(actual.stderr)
     if actual.returncode!=0 or not report.exists():
@@ -70,6 +77,8 @@ def main():
         "scanner_version_stdout":version.stdout.strip(),
         "scanner_binary_sha256":binary_hash,
         "scanner_executable":"trivy",
+        "config_isolation_mode":"explicit_empty_config_ignore_and_trivy_env_scrub",
+        "discarded_trivy_env_names":ignored_env_names,
         "argv":["trivy",*ARGS,"--output","native-source/trivy.json",args.subject],
         "native_exit_code":actual.returncode,
         "subject":args.subject,
