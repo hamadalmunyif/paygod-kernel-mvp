@@ -68,12 +68,18 @@ All cases must be classified as `ADMITTED_TO_PROPOSED_POLICY`, `WITHHELD_NOT_RUN
 - Any new source-integrated Pack must be versioned, with paired negative fixtures and a native-only comparator. Preserve the original Pack v1 receipts and original replay interpreter; do not rename the current `Status` as `fixed_verified`.
 - If typed-v1 DSL semantics from draft [#115](https://github.com/hamadalmunyif/paygod-kernel-mvp/pull/115) are approved, explicitly opt into them in the *new* Pack; never make assumptions about #115 being merged. A source/admission fix is needed independently from typed comparison hardening.
 
+## Native public-image witness achieved, without independent producer validation
+
+On 2026-10-16 our branch executed genuine `Trivy v0.75.0` against public Alpine image SHA `ce64758a...6e5d3507` at [successful run #38923270994](https://github.com/hamadalmunyif/paygod-kernel-mvp/actions/runs/38923270994), and repeated the same target with a separate native HIGH/CRITICAL exit gate at [successful run #38923531022](https://github.com/hamadalmunyif/paygod-kernel-mvp/actions/runs/38923531022). See the exact [source and native-only comparison record](REAL_NATIVE_PUBLIC_IMAGE_WITNESS_2026-10-16.md).
+
+This moves one **narrow** item to `P2A OBSERVED_NAMED_PUBLIC_NATIVE_SCAN`: 21 vulnerability findings, 2 HIGH, all advisory `Status=fixed`, and Trivy-native exit **1** on HIGH/CRITICAL. The shadow diagnostic agreed on 2 HIGH but issued **no PayGod verdict**. A GitHub Actions report and local hash are not proof of independent external producer authenticity, user/partner permission, complete anti-filter attestation, fixed binary state, or independent receiver. `P2B AUTHENTICATED_EXTERNAL_SOURCE` remains **NOT OBTAINED**. `P3 NATIVE_ONLY_BLOCK_COMPARISON` is **OBSERVED**, but a broader native signed-attestation-vs-PayGod evidence comparison remains **NOT RUN**.
+
 ## Go/no-go for Issue #116
 
 **P0 RED:** evidence of the false allow is already obtained, bounded and source-pinned.  
 **P1 SHADOW:** no-authority parser and adversarial CI green in PR #118, synthetic only.  
-**P2 REAL SOURCE:** **NOT OBTAINED**; no authenticated scan + subject + completion fixture yet.  
-**P3 NATIVE COMPARISON:** **NOT RUN**; Trivy-only plus genuine CI attestation baseline pending.  
+**P2 REAL SOURCE:** public native scan in our CI **OBSERVED** with raw report/subject/command at exact SHA; independently authenticated external producer/completeness witness **NOT OBTAINED**.  
+**P3 NATIVE COMPARISON:** native Trivy severity-only blocking **OBSERVED** and sufficient for this gate; genuine cross-organization signed attestation and independent-receiver baseline **NOT RUN**.  
 **P4 VERSIONED PACK / ADR:** **NOT ACCEPTED / NOT MERGED**.  
 **P5 INDEPENDENT RECIPIENT:** **NOT OBTAINED**.
 
