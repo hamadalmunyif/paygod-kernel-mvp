@@ -4,7 +4,9 @@
 Origin: [Issue #116](https://github.com/hamadalmunyif/paygod-kernel-mvp/issues/116). Comparison witness: [RED PR #117](https://github.com/hamadalmunyif/paygod-kernel-mvp/pull/117).  
 Owner basis: `main@d347213848f03a6d25554631d0183a682879b11b`.
 
-The exact pending promotion gates, real-source challenge matrix, native-only comparison and independent recipient conditions are documented in [REAL_SOURCE_ACCEPTANCE.md](REAL_SOURCE_ACCEPTANCE.md). This research should not be represented as closed Issue #116 until those gates are witnessed.
+The exact pending promotion gates, real-source challenge matrix, native-only comparison and independent recipient conditions are documented in [REAL_SOURCE_ACCEPTANCE.md](REAL_SOURCE_ACCEPTANCE.md).
+
+A dated **genuine public-image Trivy scan and Trivy-native blocking comparison** are recorded in [REAL_NATIVE_PUBLIC_IMAGE_WITNESS_2026-10-16.md](REAL_NATIVE_PUBLIC_IMAGE_WITNESS_2026-10-16.md). These prove a bounded native-source observation, **not** a canonical PayGod decision, external source attestation or commercial value. This research should not be represented as closed Issue #116 until those gates are witnessed.
 
 ## Why this exists
 
