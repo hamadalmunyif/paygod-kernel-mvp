@@ -152,10 +152,12 @@ jobs:
           digest="$(sha256sum eik-output/evidence/receipt.json | cut -d ' ' -f1)"
           echo "receipt_sha256=$digest" >> "$GITHUB_OUTPUT"
           mkdir -p verifier-dist
+          cp native-source/scan-execution.json eik-output/source/scan-execution.json
           cp tools/verify_portable_evidence.py verifier-dist/verify_portable_evidence.py
           cp tools/issuer_auth.py verifier-dist/issuer_auth.py
           cp tools/eik_trivy_shadow.py verifier-dist/eik_trivy_shadow.py
           cp examples/eik-trivy-attested/receiver_binding.py verifier-dist/receiver_binding.py
+          cp examples/eik-trivy-attested/execution_statement.py verifier-dist/execution_statement.py
       - name: Transfer source separately from canonical Kernel bundle
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
