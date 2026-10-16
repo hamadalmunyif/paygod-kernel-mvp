@@ -1,0 +1,46 @@
+api_version: "paygod/v1"
+kind: Pack
+metadata:
+  name: "trivy-signed-report-deny-evidence-research"
+  version: "2.0.0"
+  description: "Read-only signed Trivy report research: deny observed severe findings, no permit path."
+  maintainer: "PayGod research"
+  tags: ["research", "eik", "trivy", "attested-report", "nonpermit"]
+spec:
+  inputs:
+    - name: "scan_report"
+      type: "observation"
+      source: "trivy-native-github-attested-research"
+      schema:
+        type: "object"
+        additionalProperties: false
+        required: ["artifact_name", "source_sha256", "vulnerabilities"]
+        properties:
+          artifact_name:
+            type: "string"
+            pattern: "^.+@sha256:[a-f0-9]{64}$"
+          source_sha256:
+            type: "string"
+            pattern: "^[a-f0-9]{64}$"
+          vulnerabilities:
+            type: "array"
+            minItems: 1
+            items:
+              type: "object"
+              additionalProperties: false
+              required: ["cve_id", "severity", "installed_version", "trivy_status"]
+              properties:
+                cve_id: { type: "string", minLength: 1 }
+                severity: { type: "string", enum: ["CRITICAL", "HIGH", "MEDIUM", "LOW"] }
+                installed_version: { type: "string", minLength: 1 }
+                trivy_status: { type: "string", minLength: 1 }
+  policy:
+    rules:
+      - name: "deny-observed-high-critical"
+        condition: "input.scan_report.vulnerabilities.any(v => v.severity == 'CRITICAL' or v.severity == 'HIGH')"
+        decision: "deny"
+        reason: "Signed-source research contains observed high or critical findings; no deployment authorization."
+      - name: "flag-observed-medium"
+        condition: "input.scan_report.vulnerabilities.any(v => v.severity == 'MEDIUM')"
+        decision: "flag"
+        reason: "Signed-source research contains medium findings; no deployment authorization."
