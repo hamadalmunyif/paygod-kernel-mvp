@@ -1,0 +1,29 @@
+api_version: "paygod/v1"
+kind: Pack
+metadata:
+  name: "typed-comparison-security-regression"
+  version: "2.0.0"
+  description: "Synthetic regression for the explicit typed-v1 evaluation profile; not evidence source admission."
+  maintainer: "PayGod kernel tests"
+spec:
+  inputs:
+    - name: "input"
+      type: "observation"
+      source: "synthetic-regression"
+      schema:
+        type: "object"
+        required: ["block"]
+        additionalProperties: false
+        properties:
+          block: { type: "boolean" }
+  policy:
+    evaluation_profile: "typed-v1"
+    rules:
+      - name: "allow-typed-unblocked"
+        condition: "input.input.block == false"
+        decision: "allow"
+        reason: "Synthetic typed false passed the isolated regression."
+      - name: "deny-typed-blocked"
+        condition: "input.input.block == true"
+        decision: "deny"
+        reason: "Synthetic typed true blocks the isolated regression."
