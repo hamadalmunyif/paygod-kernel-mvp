@@ -81,6 +81,9 @@ jobs:
       - name: Verify concise fail-closed input rejection
         run: python3 tools/test_cli_input_rejection.py --cli ./out/paygod
 
+      - name: Verify typed-v1 Pack CLI admission errors leave no canonical receipt
+        run: python3 tools/test_typed_policy_run.py --cli ./out/paygod
+
       - name: Verify EIK Pack init and pre-Kernel structural input negatives
         run: python3 tools/test_eik_onboarding.py --cli ./out/paygod
 
