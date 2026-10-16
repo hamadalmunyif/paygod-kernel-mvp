@@ -144,10 +144,10 @@ public class PolicyExpressionTypeSafetyTests
     }
 
     [Theory]
-    [InlineData(">", "{\\"input\\":{\\"block\\":false}}")]
-    [InlineData(">=", "{\\"input\\":{\\"block\\":true}}")]
-    [InlineData("<", "{\\"input\\":{\\"block\\":true}}")]
-    [InlineData("<=", "{\\"input\\":{\\"block\\":false}}")]
+    [InlineData(">", "{\"input\":{\"block\":false}}")]
+    [InlineData(">=", "{\"input\":{\"block\":true}}")]
+    [InlineData("<", "{\"input\":{\"block\":true}}")]
+    [InlineData("<=", "{\"input\":{\"block\":false}}")]
     public void TypedBooleanOrdering_UnderNegation_ThrowsInsteadOfAllow(string op, string json)
     {
         // Without a throw, unsupported ordering fell through to false;
@@ -157,8 +157,8 @@ public class PolicyExpressionTypeSafetyTests
     }
 
     [Theory]
-    [InlineData("{\\"input\\":{\\"block\\":false}}", true)]
-    [InlineData("{\\"input\\":{\\"block\\":true}}", false)]
+    [InlineData("{\"input\":{\"block\":false}}", true)]
+    [InlineData("{\"input\":{\"block\":true}}", false)]
     public void TypedBooleanEquality_StillWorksWithExplicitTypes(string json, bool expected)
     {
         Assert.Equal(expected, Evaluate("input.input.block == false", json));
