@@ -41,13 +41,13 @@ def rejects(case, value):
     else:
         sample[case]=value
     try:
-        check(sample,REPORT,SUBJECT,REPO,COMMIT)
+        check(sample,REPORT,SUBJECT,REPO,COMMIT,"123456","1")
     except ValueError:
         return
     raise AssertionError("Invalid execution statement incorrectly accepted: "+case)
 
 def main():
-    assert check(specimen(), REPORT, SUBJECT,REPO,COMMIT)["status"]=="OBSERVED_EXECUTION_STATEMENT_BOUND"
+    assert check(specimen(), REPORT, SUBJECT,REPO,COMMIT,"123456","1")["status"]=="OBSERVED_EXECUTION_STATEMENT_BOUND"
     negatives=[
         ("native_exit_code",1),
         ("native_exit_code",False),
@@ -60,6 +60,8 @@ def main():
         ("workflow_commit","c"*40),
         ("workflow_repository","another/owner"),
         ("workflow_ref","refs/heads/main"),
+        ("workflow_run_id","333333"),
+        ("workflow_run_attempt","2"),
         ("workflow_run_attempt","not-number"),
         ("source_truth_independently_verified",True),
         ("scan_completeness_independently_attested",True),
@@ -69,12 +71,19 @@ def main():
     for key,val in negatives:
         rejects(key,val)
     try:
-        check(specimen(),REPORT+b" ",SUBJECT,REPO,COMMIT)
+        check(specimen(),REPORT+b" ",SUBJECT,REPO,COMMIT,"123456","1")
     except ValueError:
         pass
     else:
         raise AssertionError("Modified raw bytes escaped execution binding")
-    print(f"PASS: signed-execution statement structural contract ({len(negatives)+1} negatives). Native GH authentication tested in workflow separately.")
+    for expected_id,expected_attempt in [("123457","1"),("123456","2"),("bogus","1"),("123456","0x10")]:
+        try:
+            check(specimen(), REPORT, SUBJECT, REPO, COMMIT, expected_id, expected_attempt)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Mismatched expected run scope accepted")
+    print(f"PASS: signed-execution statement contract ({len(negatives)+1+4} negatives) incl. exact expected run/attempt. GH signature tested separately.")
 
 if __name__=="__main__":
     main()
