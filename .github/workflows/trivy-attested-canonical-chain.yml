@@ -53,6 +53,8 @@ jobs:
           trivy --version | tee native-source/trivy-version.txt
       - name: Execute native Trivy and capture command and binary provenance
         shell: bash
+        env:
+          TRIVY_SEVERITY: LOW # intentional negative: capture removes inherited filter
         run: |
           set -euo pipefail
           python3 examples/eik-trivy-attested/scan_capture.py \
