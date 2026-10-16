@@ -212,7 +212,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "GH native scanner execution statement provenance failed" }
           python verifier/verify_portable_evidence.py transfer/evidence --expect-receipt-sha256 $env:EXPECTED_RECEIPT_SHA --result scoped-verification.json
           if ($LASTEXITCODE -ne 0) { throw "Canonical PayGod receipt integrity failed" }
-          python verifier/receiver_binding.py --report transfer/source/trivy.json --input transfer/source/input.json --receipt transfer/evidence/receipt.json
+          python verifier/receiver_binding.py --report transfer/source/trivy.json --input transfer/source/input.json --receipt transfer/evidence/receipt.json --statement transfer/source/scan-execution.json --repository $env:GITHUB_REPOSITORY --source-commit $env:GITHUB_SHA
           if ($LASTEXITCODE -ne 0) { throw "Admitted source / canonical receipt binding failed" }
           python -c "import json; r=json.load(open('scoped-verification.json')); assert r['status']=='valid' and r['verification']['integrity']=='verified' and r['verification']['replay']=='not_performed' and r['verification']['issuer_authenticity']=='not_verified'"
           if ($LASTEXITCODE -ne 0) { throw "Scoped trust dimensions misrepresented" }
@@ -230,13 +230,13 @@ jobs:
           if ($LASTEXITCODE -eq 0) { throw "Tampered PayGod bundle passed portable verifier" }
           Copy-Item transfer/source/input.json input-mutated.json
           Add-Content -Encoding utf8 input-mutated.json ' '
-          python verifier/receiver_binding.py --report transfer/source/trivy.json --input input-mutated.json --receipt transfer/evidence/receipt.json *> $null
+          python verifier/receiver_binding.py --report transfer/source/trivy.json --input input-mutated.json --receipt transfer/evidence/receipt.json --statement transfer/source/scan-execution.json --repository $env:GITHUB_REPOSITORY --source-commit $env:GITHUB_SHA *> $null
           # Whitespace is insignificant for canonical input, so this is NOT expected to fail;
           # replace a real source binding field below to test a semantic mutation.
           $src = Get-Content transfer/source/input.json -Raw | ConvertFrom-Json
           $src.scan_report.source_sha256 = ('0' * 64)
           $src | ConvertTo-Json -Depth 20 | Set-Content -Encoding utf8 input-mutated.json
-          python verifier/receiver_binding.py --report transfer/source/trivy.json --input input-mutated.json --receipt transfer/evidence/receipt.json *> $null
+          python verifier/receiver_binding.py --report transfer/source/trivy.json --input input-mutated.json --receipt transfer/evidence/receipt.json --statement transfer/source/scan-execution.json --repository $env:GITHUB_REPOSITORY --source-commit $env:GITHUB_SHA *> $null
           if ($LASTEXITCODE -eq 0) { throw "Tampered source-to-receipt binding passed" }
           Write-Output 'PASS: independent OS confirms GH-signed source, PayGod portable receipt integrity and source hash binding; all semantic mutations rejected.'
           Write-Output 'LIMIT: same-account runner, producer-supplied receipt pin, no external human and no authenticated real-world scanner coverage claim.'
