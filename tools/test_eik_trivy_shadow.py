@@ -114,10 +114,12 @@ def main():
     call(wrong_schema, "WITHHELD_NOT_RUN", "UNKNOWN_TRIVY_SCHEMA")
     call(b'\xff\xfe', "WITHHELD_NOT_RUN", "INVALID_OR_UNAVAILABLE_REPORT")
     call(b'{', "WITHHELD_NOT_RUN", "INVALID_OR_UNAVAILABLE_REPORT")
+    call((b"[" * 1200) + b"0" + (b"]" * 1200), "WITHHELD_NOT_RUN",
+         "INVALID_OR_UNAVAILABLE_REPORT")
     empty = copy.deepcopy(GOOD)
     empty["Results"] = []
     call(empty, "WITHHELD_NOT_RUN", "SCAN_RESULTS_ABSENT")
-    print("PASS: duplicate keys, non-finite JSON, schema type, invalid UTF-8 and empty results withheld")
+    print("PASS: duplicate/nonfinite/deep JSON, schema type, bad UTF-8 and empty results withheld")
     print("PASS: all shadow diagnostics are non-authoritative and emit no PayGod artifacts")
 
 if __name__ == "__main__":
