@@ -1,0 +1,34 @@
+version: "2.0.0"
+cases:
+  - name: "Research severe fixed-available Trivy report yields canonical deny"
+    input:
+      scan_report:
+        artifact_name: "example.invalid/app@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        source_sha256: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        vulnerabilities:
+          - cve_id: "CVE-2099-0001"
+            severity: "HIGH"
+            installed_version: "3.3.7-r1"
+            trivy_status: "fixed"
+    expected:
+      decision: "deny"
+  - name: "Research medium is flagged"
+    input:
+      scan_report:
+        artifact_name: "example.invalid/app@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        source_sha256: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        vulnerabilities:
+          - cve_id: "CVE-2099-0002"
+            severity: "MEDIUM"
+            installed_version: "3.3.7-r1"
+            trivy_status: "fixed"
+    expected:
+      decision: "flag"
+  - name: "Empty observations are unknown, never allow"
+    input:
+      scan_report:
+        artifact_name: "example.invalid/app@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        source_sha256: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        vulnerabilities: []
+    expected:
+      decision: "unknown"
