@@ -72,6 +72,23 @@ jobs:
           python3 -m pip install -r tools/requirements.txt
           dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -o out
           ./out/PayGod.Cli test --pack examples/eik-trivy-attested/pack
+      - name: Verify signed native Trivy command and execution record BEFORE Kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh attestation verify native-source/scan-execution.json \
+            --repo "$GITHUB_REPOSITORY" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/trivy-attested-canonical-chain.yml" \
+            --source-ref "$GITHUB_REF" \
+            --source-digest "$GITHUB_SHA" \
+            --format json > native-source/gh-execution-attestation.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          record=json.loads(Path("native-source/gh-execution-attestation.json").read_text())
+          assert isinstance(record,list) and record, "No native signed execution record"
+          print("PASS: GH-native signature on exact scanner-execution statement")
+          PY
       - name: Native GH verification AND admission BEFORE canonical Kernel
         shell: bash
         run: |
