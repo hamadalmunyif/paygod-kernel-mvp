@@ -192,3 +192,6 @@ jobs:
           if ($LASTEXITCODE -eq 0) { throw "tampered report incorrectly passed native signature check" }
           Write-Output "PASS: fresh no-checkout Windows runner verifies genuine Trivy report using native GitHub attestation and rejects tampering."
           Write-Output "LIMIT: same-owner workflow/repository; NOT independent human recipient or source-truth proof."
+          # An intentionally failing tamper probe leaves LASTEXITCODE=1; explicitly
+          # report the assertion step as success once the rejection is confirmed.
+          exit 0
