@@ -15,16 +15,19 @@ HERE=Path(__file__).resolve().parent
 sys.path.insert(0,str(HERE))
 from verify_portable_evidence import canonical_json  # separately transferred code
 from eik_trivy_shadow import examine, no_duplicates
+from execution_statement import check as validate_scan_execution
 
 def read_json(path):
     return json.loads(Path(path).read_bytes().decode("utf-8"),
                       object_pairs_hook=no_duplicates,
                       parse_constant=lambda _: (_ for _ in ()).throw(ValueError("Non-finite JSON")))
 
-def verify(report_file, input_file, receipt_file):
+def verify(report_file, input_file, receipt_file, statement_file, repo, commit):
     raw=Path(report_file).read_bytes()
     sha=hashlib.sha256(raw).hexdigest()
     report=read_json(report_file)
+    statement=read_json(statement_file)
+    validate_scan_execution(statement,raw,report['ArtifactName'],repo,commit)
     admitted=read_json(input_file)
     receipt=read_json(receipt_file)
     scan=admitted.get("scan_report",{})
@@ -60,9 +63,12 @@ def main():
     p.add_argument("--report",required=True)
     p.add_argument("--input",required=True)
     p.add_argument("--receipt",required=True)
+    p.add_argument("--statement",required=True)
+    p.add_argument("--repository",required=True)
+    p.add_argument("--source-commit",required=True)
     a=p.parse_args()
     try:
-        out=verify(a.report,a.input,a.receipt)
+        out=verify(a.report,a.input,a.receipt,a.statement,a.repository,a.source_commit)
     except (OSError, UnicodeError, ValueError, KeyError, TypeError, RecursionError) as e:
         print("BINDING_FAILED: "+str(e),file=sys.stderr)
         return 2
