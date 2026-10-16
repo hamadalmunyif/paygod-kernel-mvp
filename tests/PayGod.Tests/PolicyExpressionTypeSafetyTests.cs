@@ -143,6 +143,27 @@ public class PolicyExpressionTypeSafetyTests
             () => Evaluate("input.input.block", json));
     }
 
+    [Theory]
+    [InlineData(">", "{\\"input\\":{\\"block\\":false}}")]
+    [InlineData(">=", "{\\"input\\":{\\"block\\":true}}")]
+    [InlineData("<", "{\\"input\\":{\\"block\\":true}}")]
+    [InlineData("<=", "{\\"input\\":{\\"block\\":false}}")]
+    public void TypedBooleanOrdering_UnderNegation_ThrowsInsteadOfAllow(string op, string json)
+    {
+        // Without a throw, unsupported ordering fell through to false;
+        // 'not (false)' could incorrectly satisfy an allow rule.
+        Assert.Throws<InvalidOperationException>(() =>
+            Evaluate($"not (input.input.block {op} false)", json));
+    }
+
+    [Theory]
+    [InlineData("{\\"input\\":{\\"block\\":false}}", true)]
+    [InlineData("{\\"input\\":{\\"block\\":true}}", false)]
+    public void TypedBooleanEquality_StillWorksWithExplicitTypes(string json, bool expected)
+    {
+        Assert.Equal(expected, Evaluate("input.input.block == false", json));
+    }
+
     [Fact]
     public void LegacyProfile_NegatedMissingPathBehaviorIsPinnedForHistoricalReplayOnly()
     {
