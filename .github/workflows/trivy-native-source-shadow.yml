@@ -83,6 +83,43 @@ jobs:
           print("Bounded shadow status:", diag["status"], "Reasons:", diag["reason_codes"])
           PY
 
+      - name: Native-only blocking counterfactual on the same pinned subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          subject="$(cat native-source/subject.txt)"
+          # This is a separate vendor-native gate, not an added filter on
+          # the separately preserved raw all-severity source report.
+          set +e
+          trivy image --scanners vuln --severity HIGH,CRITICAL \
+            --exit-code 1 --format json \
+            --output native-source/native-high-critical-gate.json "$subject" \
+            2>&1 | tee native-source/native-gate.log
+          native_rc="${PIPESTATUS[0]}"
+          set -e
+          printf '%s\n' "$native_rc" > native-source/native-gate-exit.txt
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          native = json.loads(Path("native-source/native-high-critical-gate.json").read_text())
+          high = sum(
+              v.get("Severity") in {"HIGH", "CRITICAL"}
+              for result in native.get("Results", [])
+              for v in result.get("Vulnerabilities", []) or []
+          )
+          shadow = json.loads(Path("native-source/paygod-shadow-diagnostic.json").read_text())
+          assert high > 0, "Expected high/critical in native comparator"
+          assert shadow["status"] == "SHADOW_BLOCK_CANDIDATE"
+          assert shadow["details"]["high_or_critical"] == high
+          print("Native-only HIGH/CRITICAL finding count:", high)
+          print("Native exit code recorded separately; shadow has no decision authority.")
+          PY
+          if [[ "$native_rc" -ne 1 ]]; then
+            echo "::error::Native Trivy did not return expected severity gate exit (observed: $native_rc)"
+            exit 1
+          fi
+          echo "Native Trivy blocks pinned public image without PayGod (exit code 1)."
+
       - name: Publish ONLY public-image report and non-authoritative diagnostics
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
