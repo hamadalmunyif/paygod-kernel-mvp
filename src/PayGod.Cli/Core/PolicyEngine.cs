@@ -27,6 +27,8 @@ public class PackSpec
 
 public class PackPolicy
 {
+    // Explicitly opt into strict typed semantics; existing packs retain legacy behavior.
+    public string evaluation_profile { get; set; } = "legacy-v1";
     public List<PolicyRule> rules { get; set; } = new();
 }
 
@@ -62,9 +64,13 @@ public static class PolicyEngine
     {
         if (input == null) return new PolicyResult { Decision = "error", Reason = "Input is null" };
 
+        var profile = pack.spec.policy.evaluation_profile;
+        if (profile is not ("legacy-v1" or "typed-v1"))
+            throw new InvalidOperationException($"Unsupported policy evaluation profile: {profile}");
+
         foreach (var rule in pack.spec.policy.rules)
         {
-            if (EvaluateCondition(rule.condition, input))
+            if (EvaluateCondition(rule.condition, input, profile))
             {
                 return new PolicyResult 
                 { 
@@ -78,9 +84,9 @@ public static class PolicyEngine
         return new PolicyResult { Decision = "unknown", Reason = "No policy rules matched." };
     }
 
-    private static bool EvaluateCondition(string condition, JsonNode input)
+    private static bool EvaluateCondition(string condition, JsonNode input, string profile)
     {
-        return PolicyExpression.Evaluate(condition, input);
+        return PolicyExpression.Evaluate(condition, input, strictTypes: profile == "typed-v1");
     }
 }
 
