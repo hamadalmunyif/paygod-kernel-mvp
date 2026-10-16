@@ -173,7 +173,7 @@ jobs:
         with:
           name: research-trivy-portable-verifier
           path: verifier
-      - name: No checkout: GH-native provenance and separate PayGod integrity checks
+      - name: "No checkout: GH-native provenance and separate PayGod integrity checks"
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
