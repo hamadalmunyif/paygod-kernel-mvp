@@ -123,6 +123,19 @@ def main():
     if verification.returncode != 0:
         return emit("WITHHELD_NOT_RUN", "NATIVE_ATTESTATION_INVALID")
     statement_bytes=a.execution_statement.read_bytes()
+    statement_command=[
+        str(a.execution_statement.resolve()) if part==str(a.report.resolve()) else part
+        for part in verification.args
+    ]
+    statement_signature=run(*statement_command)
+    if statement_signature.returncode != 0:
+        return emit("WITHHELD_NOT_RUN", "EXECUTION_ATTESTATION_INVALID")
+    try:
+        signed=json.loads(statement_signature.stdout)
+        if not isinstance(signed,list) or not signed:
+            raise ValueError("missing statement attestation")
+    except ValueError:
+        return emit("WITHHELD_NOT_RUN", "EXECUTION_ATTESTATION_UNREADABLE")
     try:
         record=json.loads(statement_bytes.decode("utf-8"),object_pairs_hook=no_duplicates)
         validate_scan_execution(record,raw,a.expected_artifact,a.repository,current_commit)
