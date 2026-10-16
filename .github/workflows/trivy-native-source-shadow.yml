@@ -12,6 +12,9 @@ on:
 
 permissions:
   contents: read
+  id-token: write        # Only this research workflow may request OIDC provenance.
+  attestations: write    # Store a signed GitHub statement for the public test JSON.
+  artifact-metadata: write
 
 jobs:
   native-trivy-shadow:
@@ -119,6 +122,31 @@ jobs:
             exit 1
           fi
           echo "Native Trivy blocks pinned public image without PayGod (exit code 1)."
+
+      - name: Attest provenance of exact public Trivy report bytes (GitHub native)
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: native-source/trivy.json
+
+      - name: Independently verify GitHub-native report provenance statement
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh --version
+          gh attestation verify native-source/trivy.json \
+            --repo "$GITHUB_REPOSITORY" \
+            --format json \
+            > native-source/attestation-verification.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("native-source/attestation-verification.json").read_text())
+          assert isinstance(report, list) and report, "No valid native GitHub report attestation"
+          print("Verified attestation for exact raw Trivy report bytes via native GitHub CLI")
+          print("Does not independently authenticate scan coverage, validity of advisories or source data truth.")
+          PY
 
       - name: Publish ONLY public-image report and non-authoritative diagnostics
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
