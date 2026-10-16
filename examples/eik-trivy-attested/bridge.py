@@ -123,6 +123,11 @@ def main():
     if verification.returncode != 0:
         return emit("WITHHELD_NOT_RUN", "NATIVE_ATTESTATION_INVALID")
     statement_bytes=a.execution_statement.read_bytes()
+    try:
+        record=json.loads(statement_bytes.decode("utf-8"),object_pairs_hook=no_duplicates)
+        validate_scan_execution(record,raw,a.expected_artifact,a.repository,current_commit)
+    except (UnicodeError, ValueError, TypeError, RecursionError):
+        return emit("WITHHELD_NOT_RUN", "SCAN_EXECUTION_RECORD_MISMATCH")
 
     try:
         att=json.loads(verification.stdout)
