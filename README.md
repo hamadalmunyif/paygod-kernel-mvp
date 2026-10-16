@@ -20,7 +20,7 @@ It produces schema-governed decision evidence that can be transferred and indepe
 
 **Build privately · Verify independently · Contribute optionally.**
 
-Pack definitions and fixture tests are useful extension points, not independent assurance that a real scanner ran or a customer authorized deployment. EIK's merged GitHub Actions reference uses **saved synthetic observations** and the existing canonical CLI/standalone verifier; it is not a hosted SDK, live scanner integration, external third-party acceptance, or operational authority. See [Issue #111](https://github.com/hamadalmunyif/paygod-kernel-mvp/issues/111) before evaluating unadmitted inputs through the generic `run` command.
+Pack definitions and fixture tests are useful extension points, not independent assurance that a real scanner ran or a customer authorized deployment. EIK's merged GitHub Actions reference uses **saved synthetic observations** and the existing canonical CLI/standalone verifier; it is not a hosted SDK, live scanner integration, external third-party acceptance, or operational authority. See [Issue #111](https://github.com/hamadalmunyif/paygod-kernel-mvp/issues/111) before evaluating unadmitted inputs through the generic `run` command. **Additional known safety gap:** [Issue #116](https://github.com/hamadalmunyif/paygod-kernel-mvp/issues/116) documents that the v1 `critical-cve-blocker` misreads Trivy `Status=fixed` (fix available) as though installed remediation were complete; **do not use that Pack as an authenticated Trivy production release gate** pending a reviewed versioned correction.
 
 ## What is proven
 
