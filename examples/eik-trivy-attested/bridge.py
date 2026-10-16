@@ -122,7 +122,10 @@ def main():
     )
     if verification.returncode != 0:
         return emit("WITHHELD_NOT_RUN", "NATIVE_ATTESTATION_INVALID")
-    statement_bytes=a.execution_statement.read_bytes()
+    try:
+        statement_bytes=a.execution_statement.read_bytes()
+    except OSError:
+        return emit("WITHHELD_NOT_RUN", "EXECUTION_STATEMENT_UNAVAILABLE")
     statement_command=[
         str(a.execution_statement.resolve()) if part==str(a.report.resolve()) else part
         for part in verification.args
