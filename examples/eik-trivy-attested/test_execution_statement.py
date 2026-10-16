@@ -18,6 +18,8 @@ def specimen():
         "scanner_version_stdout":"Version: 0.75.0",
         "scanner_binary_sha256":"c"*64,
         "scanner_executable":"trivy",
+        "config_isolation_mode":"explicit_empty_config_ignore_and_trivy_env_scrub",
+        "discarded_trivy_env_names":["TRIVY_SEVERITY"],
         "argv":COMMAND+[SUBJECT],
         "native_exit_code":0,
         "subject":SUBJECT,
@@ -49,6 +51,9 @@ def rejects(case, value):
 def main():
     assert check(specimen(), REPORT, SUBJECT,REPO,COMMIT,"123456","1")["status"]=="OBSERVED_EXECUTION_STATEMENT_BOUND"
     negatives=[
+        ("config_isolation_mode","inherited_configuration"),
+        ("discarded_trivy_env_names",["TRIVY_SEVERITY","TRIVY_SEVERITY"]),
+        ("discarded_trivy_env_names",["TRIVY_severity"]),
         ("native_exit_code",1),
         ("native_exit_code",False),
         ("scanner_version_stdout","Version: 0.74.0"),
