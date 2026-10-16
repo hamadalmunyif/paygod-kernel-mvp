@@ -148,13 +148,13 @@ public static class PolicyExpression
 
             // Typed comparisons: a missing/null operand is not negative evidence.
             // Disallow implicit string/number/boolean coercion in policy comparisons.
-            // Distinct kind types do not compare equal or unequal under this strict
-            // proposal; admission remains responsible for refusing mandatory gaps
-            // before any canonical Kernel execution.
+            // Invalid operands raise an evaluation error (including under 'not'),
+            // rather than emitting a false result that a negation could turn
+            // into an unsafe allow. Admission still gates external source facts.
             var lk = l.Node?.GetValueKind();
             var rk = r.Node?.GetValueKind();
             if (lk is null || rk is null)
-                return new(JsonValue.Create(false));
+                throw new InvalidOperationException("Policy comparison requires present, non-null operands.");
 
             if (lk == System.Text.Json.JsonValueKind.Number &&
                 rk == System.Text.Json.JsonValueKind.Number)
@@ -162,7 +162,7 @@ public static class PolicyExpression
                 var ln = l.AsNumber();
                 var rn = r.AsNumber();
                 if (!ln.HasValue || !rn.HasValue)
-                    return new(JsonValue.Create(false));
+                    throw new InvalidOperationException("Policy numeric comparison requires valid numeric operands.");
 
                 var result = op switch
                 {
@@ -209,9 +209,10 @@ public static class PolicyExpression
                 return new(JsonValue.Create(result));
             }
 
-            // Unsupported arrays/objects and cross-kind comparisons are not
-            // evidence of either equality or inequality.
-            return new(JsonValue.Create(false));
+            // A false result under 'not' could become an unsafe allow.
+            // Refuse malformed/cross-kind comparisons instead of producing a
+            // boolean that the policy could invert.
+            throw new InvalidOperationException("Policy comparison operands have incompatible or unsupported types.");
         }
     }
 
@@ -220,7 +221,8 @@ public static class PolicyExpression
         public override Value Eval(EvalContext ctx)
         {
             var arrVal = arrayPath.Eval(ctx).Node;
-            if (arrVal is not JsonArray arr) return new(JsonValue.Create(false));
+            if (arrVal is not JsonArray arr)
+                throw new InvalidOperationException("Policy any() requires a present JSON array.");
 
             foreach (var item in arr)
             {
