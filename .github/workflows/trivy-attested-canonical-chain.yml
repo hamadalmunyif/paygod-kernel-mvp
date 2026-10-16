@@ -271,6 +271,11 @@ jobs:
           $src | ConvertTo-Json -Depth 20 | Set-Content -Encoding utf8 input-mutated.json
           python verifier/receiver_binding.py --report transfer/source/trivy.json --input input-mutated.json --receipt transfer/evidence/receipt.json --statement transfer/source/scan-execution.json --repository $env:GITHUB_REPOSITORY --source-commit $env:GITHUB_SHA *> $null
           if ($LASTEXITCODE -eq 0) { throw "Tampered source-to-receipt binding passed" }
+          $src = Get-Content transfer/source/input.json -Raw | ConvertFrom-Json
+          $src.scan_report.scan_execution_sha256 = ('0' * 64)
+          $src | ConvertTo-Json -Depth 20 | Set-Content -Encoding utf8 input-mutated.json
+          python verifier/receiver_binding.py --report transfer/source/trivy.json --input input-mutated.json --receipt transfer/evidence/receipt.json --statement transfer/source/scan-execution.json --repository $env:GITHUB_REPOSITORY --source-commit $env:GITHUB_SHA *> $null
+          if ($LASTEXITCODE -eq 0) { throw "Tampered signed execution statement digest was not rejected" }
           Write-Output 'PASS: independent OS confirms GH-signed source, PayGod portable receipt integrity and source hash binding; all semantic mutations rejected.'
           Write-Output 'LIMIT: same-account runner, producer-supplied receipt pin, no external human and no authenticated real-world scanner coverage claim.'
           exit 0
