@@ -74,11 +74,17 @@ On 2026-10-16 our branch executed genuine `Trivy v0.75.0` against public Alpine 
 
 This moves one **narrow** item to `P2A OBSERVED_NAMED_PUBLIC_NATIVE_SCAN`: 21 vulnerability findings, 2 HIGH, all advisory `Status=fixed`, and Trivy-native exit **1** on HIGH/CRITICAL. The shadow diagnostic agreed on 2 HIGH but issued **no PayGod verdict**. A GitHub Actions report and local hash are not proof of independent external producer authenticity, user/partner permission, complete anti-filter attestation, fixed binary state, or independent receiver. `P2B AUTHENTICATED_EXTERNAL_SOURCE` remains **NOT OBTAINED**. `P3 NATIVE_ONLY_BLOCK_COMPARISON` is **OBSERVED**, but a broader native signed-attestation-vs-PayGod evidence comparison remains **NOT RUN**.
 
+## P2A signed GitHub report provenance — native tool capability confirmed
+
+[Third native source run #38924288024](https://github.com/hamadalmunyif/paygod-kernel-mvp/actions/runs/38924288024) produced [GitHub Artifact Attestation #56711445](https://github.com/hamadalmunyif/paygod-kernel-mvp/attestations/56711445) for raw Trivy report SHA `e5ed929984636ad1387a0de39646748e496082d622be9c84ad8aae6b0986455d`, signed through Sigstore/Rekor and successfully verified by `gh attestation verify` in the same workflow. Exact evidence, issuer and source limitations: [real source witness](REAL_NATIVE_PUBLIC_IMAGE_WITNESS_2026-10-16.md).
+
+This independently verifies the **native GitHub signature** using GitHub CLI but remains a scan by **our own** CI, not an outside human/tenant or consented partner. It is **not proof of a fully unfiltered scan**, and the current EIK parser does not verify this attestation, so its output retains `source_attested=false`. GitHub's native attestation is now an explicit **existing competing control**: PayGod must prove a differential need before attempting to reproduce such provenance machinery.
+
 ## Go/no-go for Issue #116
 
 **P0 RED:** evidence of the false allow is already obtained, bounded and source-pinned.  
 **P1 SHADOW:** no-authority parser and adversarial CI green in PR #118, synthetic only.  
-**P2 REAL SOURCE:** public native scan in our CI **OBSERVED** with raw report/subject/command at exact SHA; independently authenticated external producer/completeness witness **NOT OBTAINED**.  
+**P2 REAL SOURCE:** public native scan in our CI **OBSERVED**, report provenance **NATIVELY ATTESTED AND SIGNATURE VERIFIED** by GitHub/Sigstore at dated exact run; independent outside producer/receiver and scan-completeness proof **NOT OBTAINED**.  
 **P3 NATIVE COMPARISON:** native Trivy severity-only blocking **OBSERVED** and sufficient for this gate; genuine cross-organization signed attestation and independent-receiver baseline **NOT RUN**.  
 **P4 VERSIONED PACK / ADR:** **NOT ACCEPTED / NOT MERGED**.  
 **P5 INDEPENDENT RECIPIENT:** **NOT OBTAINED**.
