@@ -5,59 +5,116 @@ using Xunit;
 namespace PayGod.Tests;
 
 /// <summary>
-/// RED TESTS on exact pinned baseline for Issue #111.
-/// These are assertions of desired fail-closed typed-equality behavior,
-/// not an assertion that the existing Kernel already satisfies it.
-/// Only the literal typed JSON boolean false may satisfy == false.
-/// Do not merge while red or silently change historical DSL semantics:
-/// compare accepted pack compatibility and seek ADR / owner review.
+/// Typed-comparison security regression for Issue #111.
+/// The earlier RED witness remains preserved at commit d2228a6.
+/// A missing/invalid fact must raise an evaluation error, never become an
+/// "allow" because a policy negated a false comparison.
 /// </summary>
 public class PolicyExpressionTypeSafetyTests
 {
     [Theory]
     [InlineData("{\"input\":{\"block\":false}}", true)]
     [InlineData("{\"input\":{\"block\":true}}", false)]
-    [InlineData("{\"input\":{}}", false)]
-    [InlineData("{\"input\":{\"block\":null}}", false)]
-    [InlineData("{\"input\":{\"block\":\"false\"}}", false)]
-    [InlineData("{\"input\":{\"block\":0}}", false)]
-    [InlineData("{\"input\":{\"block\":{}}}", false)]
-    [InlineData("{}", false)]
-    public void EqualityAgainstBooleanFalse_RequiresPresentTypedBoolean(
-        string json,
-        bool expected)
+    public void EqualityAgainstFalse_UsesActualBoolean(string json, bool expected)
     {
-        var root = JsonNode.Parse(json)!;
-        Assert.Equal(expected, PolicyExpression.Evaluate(
-            "input.input.block == false", root));
+        Assert.Equal(expected, Evaluate("input.input.block == false", json));
     }
 
     [Theory]
     [InlineData("{\"input\":{\"block\":true}}", true)]
     [InlineData("{\"input\":{\"block\":false}}", false)]
-    [InlineData("{\"input\":{}}", false)]
-    [InlineData("{\"input\":{\"block\":\"true\"}}", false)]
-    [InlineData("{\"input\":{\"block\":1}}", false)]
-    public void EqualityAgainstBooleanTrue_RequiresPresentTypedBoolean(
-        string json,
-        bool expected)
+    public void EqualityAgainstTrue_UsesActualBoolean(string json, bool expected)
     {
-        var root = JsonNode.Parse(json)!;
-        Assert.Equal(expected, PolicyExpression.Evaluate(
-            "input.input.block == true", root));
+        Assert.Equal(expected, Evaluate("input.input.block == true", json));
     }
 
     [Theory]
-    [InlineData("{\"input\":{\"value\":0}}", true)]
-    [InlineData("{\"input\":{\"value\":\"0\"}}", false)]
-    [InlineData("{\"input\":{\"value\":false}}", false)]
-    [InlineData("{\"input\":{}}", false)]
-    public void NumericEquality_RejectsStringAndBooleanCoercion(
-        string json,
-        bool expected)
+    [InlineData("{\"input\":{\"block\":0}}", true)]
+    [InlineData("{\"input\":{\"block\":1}}", false)]
+    public void EqualityAgainstNumber_UsesActualNumber(string json, bool expected)
     {
-        var root = JsonNode.Parse(json)!;
-        Assert.Equal(expected, PolicyExpression.Evaluate(
-            "input.input.value == 0", root));
+        Assert.Equal(expected, Evaluate("input.input.block == 0", json));
+    }
+
+    [Theory]
+    [InlineData("{\"input\":{}}")]
+    [InlineData("{\"input\":{\"block\":null}}")]
+    [InlineData("{\"input\":{\"block\":\"false\"}}")]
+    [InlineData("{\"input\":{\"block\":0}}")]
+    [InlineData("{\"input\":{\"block\":{}}}")]
+    [InlineData("{}")]
+    public void EqualityAgainstFalse_WithMissingOrWrongTypedInput_IsError(string json)
+    {
+        Assert.Throws<InvalidOperationException>(
+            () => Evaluate("input.input.block == false", json));
+    }
+
+    [Theory]
+    [InlineData("{\"input\":{}}")]
+    [InlineData("{\"input\":{\"block\":\"true\"}}")]
+    [InlineData("{\"input\":{\"block\":1}}")]
+    [InlineData("{\"input\":{\"block\":null}}")]
+    public void EqualityAgainstTrue_WithMissingOrWrongTypedInput_IsError(string json)
+    {
+        Assert.Throws<InvalidOperationException>(
+            () => Evaluate("input.input.block == true", json));
+    }
+
+    [Theory]
+    [InlineData("{\"input\":{}}")]
+    [InlineData("{\"input\":{\"block\":\"0\"}}")]
+    [InlineData("{\"input\":{\"block\":false}}")]
+    [InlineData("{\"input\":{\"block\":null}}")]
+    public void EqualityAgainstNumber_WithMissingOrWrongTypedInput_IsError(string json)
+    {
+        Assert.Throws<InvalidOperationException>(
+            () => Evaluate("input.input.block == 0", json));
+    }
+
+    [Theory]
+    [InlineData("{\"scan_report\":{\"vulnerabilities\":[{\"cvss_score_x10\":98}]}}")]
+    [InlineData("{\"scan_report\":{\"vulnerabilities\":[{\"cvss_score_x10\":98,\"status\":null}]}}")]
+    [InlineData("{\"scan_report\":{\"vulnerabilities\":[{\"cvss_score_x10\":98,\"status\":false}]}}")]
+    [InlineData("{\"scan_report\":{\"vulnerabilities\":[{\"cvss_score_x10\":\"98\",\"status\":\"active\"}]}}")]
+    [InlineData("{\"scan_report\":{}}")]
+    public void NegatedCveAny_DoesNotAllowMalformedEvidence(string json)
+    {
+        const string allowCondition =
+            "not input.scan_report.vulnerabilities.any(v => v.cvss_score_x10 >= 70 and v.status != 'fixed')";
+        Assert.Throws<InvalidOperationException>(() => Evaluate(allowCondition, json));
+    }
+
+    [Fact]
+    public void NegatedCveAny_CompleteEmptyArray_MatchesButIsNotSourceAdmission()
+    {
+        // This only shows DSL evaluation; the *external* scan-completion
+        // proof and true schema admission are still separately required.
+        Assert.True(Evaluate(
+            "not input.scan_report.vulnerabilities.any(v => v.cvss_score_x10 >= 70 and v.status != 'fixed')",
+            "{\"scan_report\":{\"vulnerabilities\":[]}}"));
+    }
+
+    [Theory]
+    [InlineData("{\"scan_report\":{\"vulnerabilities\":[{\"cvss_score_x10\":98,\"status\":\"active\"}]}}", false)]
+    [InlineData("{\"scan_report\":{\"vulnerabilities\":[{\"cvss_score_x10\":32,\"status\":\"active\"}]}}", true)]
+    public void NegatedCveAny_ValidTypedCasesRemainCompatible(string json, bool expected)
+    {
+        Assert.Equal(expected, Evaluate(
+            "not input.scan_report.vulnerabilities.any(v => v.cvss_score_x10 >= 70 and v.status != 'fixed')",
+            json));
+    }
+
+    [Fact]
+    public void ComparisonNotEqual_MissingInput_IsErrorEvenInAllowRule()
+    {
+        Assert.Throws<InvalidOperationException>(
+            () => Evaluate("input.iam_event.policy_attached != 'AdministratorAccess'",
+                "{\"iam_event\":{}}"));
+    }
+
+    private static bool Evaluate(string condition, string input)
+    {
+        var root = JsonNode.Parse(input)!;
+        return PolicyExpression.Evaluate(condition, root);
     }
 }
