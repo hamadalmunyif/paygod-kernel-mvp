@@ -15,7 +15,8 @@ SOURCE_REF="refs/heads/research/trivy-signed-execution-statement-20261016"
 COMMAND=["trivy","image","--scanners","vuln","--format","json",
          "--exit-code","0","--output","native-source/trivy.json"]
 
-def check(record:object, report:bytes, subject:str, repo:str, commit:str):
+def check(record:object, report:bytes, subject:str, repo:str, commit:str,
+          expected_run_id:str, expected_run_attempt:str):
     if not isinstance(record,dict):
         raise ValueError("EXECUTION_STATEMENT_NOT_OBJECT")
     fields={
@@ -62,6 +63,16 @@ def check(record:object, report:bytes, subject:str, repo:str, commit:str):
         raise ValueError("RUN_ID_NOT_BOUND")
     if not isinstance(record["workflow_run_attempt"],str) or not record["workflow_run_attempt"].isdigit():
         raise ValueError("RUN_ATTEMPT_NOT_BOUND")
+    # An attested file from another run of the SAME commit/ref must not
+    # satisfy this particular test. For a third party these expected values
+    # need an independently pinned statement, not producer-supplied strings.
+    if (not isinstance(expected_run_id,str) or not expected_run_id.isdigit() or
+        not isinstance(expected_run_attempt,str) or not expected_run_attempt.isdigit()):
+        raise ValueError("EXPECTED_RUN_SCOPE_INVALID")
+    if record["workflow_run_id"]!=expected_run_id:
+        raise ValueError("EXECUTION_RUN_ID_MISMATCH")
+    if record["workflow_run_attempt"]!=expected_run_attempt:
+        raise ValueError("EXECUTION_RUN_ATTEMPT_MISMATCH")
     return {
         "status":"OBSERVED_EXECUTION_STATEMENT_BOUND",
         "statement_sha256":None, # caller fills digest only if needed; no signing here
