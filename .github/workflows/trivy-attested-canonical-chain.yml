@@ -72,6 +72,7 @@ jobs:
           python3 -m pip install -r tools/requirements.txt
           dotnet publish src/PayGod.Cli/PayGod.Cli.csproj -c Release -o out
           ./out/PayGod.Cli test --pack examples/eik-trivy-attested/pack
+          python3 examples/eik-trivy-attested/test_execution_statement.py
       - name: Verify signed native Trivy command and execution record BEFORE Kernel
         shell: bash
         run: |
