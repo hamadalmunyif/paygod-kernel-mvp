@@ -116,7 +116,7 @@ def main():
         "gh","attestation","verify",str(a.report.resolve()),
         "--repo",a.repository,
         "--signer-workflow",signer,
-        "--source-ref","refs/heads/research/trivy-attested-canonical-deny-chain-20261016",
+        "--source-ref","refs/heads/research/trivy-signed-execution-statement-20261016",
         "--source-digest",current_commit,
         "--format","json",
     )
