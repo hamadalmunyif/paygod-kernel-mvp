@@ -155,3 +155,40 @@ jobs:
           path: native-source/
           retention-days: 7
           if-no-files-found: error
+ 
+  no-checkout-native-recipient:
+    name: "No-checkout Windows: native GitHub attestation verify and tamper rejection"
+    needs: native-trivy-shadow
+    runs-on: windows-2022
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - name: Download report without repository checkout or producer filesystem
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: native-trivy-public-image-shadow
+          path: native-source
+
+      - name: Verify exact report independently with GitHub native tool
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $report = "native-source/trivy.json"
+          gh --version
+          gh attestation verify $report --repo $env:GITHUB_REPOSITORY --format json | Set-Content -Encoding utf8 native-source/receiver-verification.json
+          if ($LASTEXITCODE -ne 0) { throw "native signature verification failed in fresh Windows runner" }
+          $checks = Get-Content native-source/receiver-verification.json -Raw | ConvertFrom-Json
+          if (-not $checks) { throw "missing verified attestation" }
+          $diagnostic = Get-Content native-source/paygod-shadow-diagnostic.json -Raw | ConvertFrom-Json
+          if ($diagnostic.kernel_called -ne $false -or $diagnostic.receipt_issued -ne $false -or $null -ne $diagnostic.paygod_decision) {
+            throw "shadow artifact unexpectedly claims a Kernel decision"
+          }
+          Copy-Item $report "native-source/trivy-tampered.json"
+          Add-Content -Encoding utf8 "native-source/trivy-tampered.json" "tamper"
+          gh attestation verify "native-source/trivy-tampered.json" --repo $env:GITHUB_REPOSITORY --format json *> $null
+          if ($LASTEXITCODE -eq 0) { throw "tampered report incorrectly passed native signature check" }
+          Write-Output "PASS: fresh no-checkout Windows runner verifies genuine Trivy report using native GitHub attestation and rejects tampering."
+          Write-Output "LIMIT: same-owner workflow/repository; NOT independent human recipient or source-truth proof."
