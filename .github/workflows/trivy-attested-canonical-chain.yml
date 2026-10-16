@@ -51,21 +51,22 @@ jobs:
           docker pull "$subject"
           printf '%s\n' "$subject" > native-source/subject.txt
           trivy --version | tee native-source/trivy-version.txt
-      - name: Produce live Trivy JSON (exit zero != clean)
+      - name: Execute native Trivy and capture command and binary provenance
         shell: bash
         run: |
           set -euo pipefail
-          subject="$(cat native-source/subject.txt)"
-          trivy image --scanners vuln --format json --exit-code 0 \
-            --output native-source/trivy.json "$subject" \
-            > native-source/trivy-stdout.txt 2> native-source/trivy-stderr.txt
-          printf '%s\n' 0 > native-source/trivy-exit.txt
+          python3 examples/eik-trivy-attested/scan_capture.py \
+            --subject "$(cat native-source/subject.txt)" \
+            --output-dir native-source
           sha256sum native-source/trivy.json | tee native-source/report-sha256.txt
-          printf '%s\n' "$GITHUB_SHA" > native-source/workflow-commit.txt
       - name: Sign exact native Trivy report bytes using GitHub authority
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: native-source/trivy.json
+      - name: Sign observed Trivy scan execution statement separately
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: native-source/scan-execution.json
       - name: Publish canonical CLI binary (research source only)
         run: |
           python3 -m pip install -r tools/requirements.txt
