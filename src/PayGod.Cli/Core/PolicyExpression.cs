@@ -16,7 +16,7 @@ public static class PolicyExpression
         var ast = parser.ParseExpression();
         parser.Expect(TokenType.EOF);
         var ctx = new EvalContext(input, strictTypes);
-        return ast.Eval(ctx).AsBool();
+        return ast.Eval(ctx).AsBool(ctx.StrictTypes);
     }
 
     private sealed class EvalContext
@@ -42,8 +42,18 @@ public static class PolicyExpression
 
     private readonly record struct Value(JsonNode? Node)
     {
-        public bool AsBool()
+        public bool AsBool(bool strictTypes = false)
         {
+            // Only real JSON Boolean may stand as a truth value in typed-v1.
+            // Missing/null/string/number/array/object are not evidence of false.
+            if (strictTypes)
+            {
+                var kind = Node?.GetValueKind();
+                if (kind is System.Text.Json.JsonValueKind.True or System.Text.Json.JsonValueKind.False)
+                    return kind == System.Text.Json.JsonValueKind.True;
+                throw new InvalidOperationException(
+                    "Policy Boolean expression requires a present JSON boolean.");
+            }
             if (Node is null) return false;
             if (Node is JsonValue v)
             {
@@ -122,23 +132,23 @@ public static class PolicyExpression
 
     private sealed class NotExpr(Expr inner) : Expr
     {
-        public override Value Eval(EvalContext ctx) => new(JsonValue.Create(!inner.Eval(ctx).AsBool()));
+        public override Value Eval(EvalContext ctx) => new(JsonValue.Create(!inner.Eval(ctx).AsBool(ctx.StrictTypes)));
     }
 
     private sealed class BinaryBoolExpr(TokenType op, Expr left, Expr right) : Expr
     {
         public override Value Eval(EvalContext ctx)
         {
-            var l = left.Eval(ctx).AsBool();
+            var l = left.Eval(ctx).AsBool(ctx.StrictTypes);
             if (op == TokenType.And)
             {
                 if (!l) return new(JsonValue.Create(false));
-                return new(JsonValue.Create(right.Eval(ctx).AsBool()));
+                return new(JsonValue.Create(right.Eval(ctx).AsBool(ctx.StrictTypes)));
             }
             if (op == TokenType.Or)
             {
                 if (l) return new(JsonValue.Create(true));
-                return new(JsonValue.Create(right.Eval(ctx).AsBool()));
+                return new(JsonValue.Create(right.Eval(ctx).AsBool(ctx.StrictTypes)));
             }
             return new(JsonValue.Create(false));
         }
@@ -285,7 +295,7 @@ public static class PolicyExpression
             foreach (var item in arr)
             {
                 ctx.SetVar(varName, item);
-                if (predicate.Eval(ctx).AsBool()) return new(JsonValue.Create(true));
+                if (predicate.Eval(ctx).AsBool(ctx.StrictTypes)) return new(JsonValue.Create(true));
             }
             return new(JsonValue.Create(false));
         }
