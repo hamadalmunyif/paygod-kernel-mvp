@@ -28,6 +28,10 @@ def verify(report_file, input_file, receipt_file, statement_file, repo, commit):
     report=read_json(report_file)
     statement=read_json(statement_file)
     validate_scan_execution(statement,raw,report['ArtifactName'],repo,commit)
+    statement_sha=hashlib.sha256(Path(statement_file).read_bytes()).hexdigest()
+    admitted_statement_sha=admitted.get("scan_report",{}).get("scan_execution_sha256")
+    if statement_sha != admitted_statement_sha:
+        raise ValueError("EXECUTION_STATEMENT_SHA_NOT_BOUND_TO_INPUT")
     admitted=read_json(input_file)
     receipt=read_json(receipt_file)
     scan=admitted.get("scan_report",{})
@@ -45,7 +49,7 @@ def verify(report_file, input_file, receipt_file, statement_file, repo, commit):
             "cve_id":f["vulnerability_id"],"severity":f["severity"],
             "installed_version":f["installed_version"],"trivy_status":f["trivy_status"]
         })
-    if sorted(scan.keys())!=["artifact_name","source_sha256","vulnerabilities"]:
+    if sorted(scan.keys())!=["artifact_name","scan_execution_sha256","source_sha256","vulnerabilities"]:
         raise ValueError("UNEXPECTED_ADMITTED_FIELD")
     if scan["vulnerabilities"]!=normalized:
         raise ValueError("ADMITTED_FINDINGS_DIVERGE_FROM_RAW_TRIVY")
