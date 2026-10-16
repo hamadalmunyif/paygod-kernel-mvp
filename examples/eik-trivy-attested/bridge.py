@@ -139,6 +139,7 @@ def main():
     try:
         record=json.loads(statement_bytes.decode("utf-8"),object_pairs_hook=no_duplicates)
         validate_scan_execution(record,raw,a.expected_artifact,a.repository,current_commit)
+        normalized["scan_report"]["scan_execution_sha256"]=hashlib.sha256(statement_bytes).hexdigest()
     except (UnicodeError, ValueError, TypeError, RecursionError):
         return emit("WITHHELD_NOT_RUN", "SCAN_EXECUTION_RECORD_MISMATCH")
 
