@@ -50,6 +50,13 @@
         "policy": {
           "additionalProperties": false,
           "properties": {
+            "evaluation_profile": {
+              "enum": [
+                "legacy-v1",
+                "typed-v1"
+              ],
+              "type": "string"
+            },
             "rules": {
               "items": {
                 "additionalProperties": false,
