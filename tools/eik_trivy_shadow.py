@@ -59,7 +59,7 @@ def examine(data, expected_artifact, exit_code, command_args, source_digest):
         for arg in command_args
     ):
         return output("WITHHELD_NOT_RUN", ["UNSUPPORTED_SCAN_FILTER"], source_digest)
-    if not isinstance(data, dict) or data.get("SchemaVersion") != 2:
+    if not isinstance(data, dict) or type(data.get("SchemaVersion")) is not int or data["SchemaVersion"] != 2:
         return output("WITHHELD_NOT_RUN", ["UNKNOWN_TRIVY_SCHEMA"], source_digest)
     if not isinstance(data.get("ArtifactName"), str) or data["ArtifactName"] != expected_artifact:
         return output("WITHHELD_NOT_RUN", ["SUBJECT_MISMATCH"], source_digest)
@@ -145,10 +145,16 @@ def main():
         else:
             raw = report.read_bytes()
             digest = hashlib.sha256(raw).hexdigest()
-            data = json.loads(raw.decode("utf-8"), object_pairs_hook=no_duplicates)
+            data = json.loads(
+                raw.decode("utf-8"),
+                object_pairs_hook=no_duplicates,
+                parse_constant=lambda _: (_ for _ in ()).throw(
+                    ValueError("non-finite number is not JSON")
+                ),
+            )
             result = examine(data, a.expected_artifact, a.scanner_exit_code,
                              a.scanner_arg, digest)
-    except (OSError, UnicodeError, json.JSONDecodeError, DuplicateKeyError):
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError):
         result = output("WITHHELD_NOT_RUN", ["INVALID_OR_UNAVAILABLE_REPORT"], digest)
 
     print(json.dumps(result, sort_keys=True, separators=(",", ":"), ensure_ascii=True))
