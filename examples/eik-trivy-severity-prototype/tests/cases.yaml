@@ -1,0 +1,100 @@
+version: "2.0.0"
+cases:
+  - name: "Deny high even when raw Trivy status fixed"
+    input:
+      scan_report:
+        artifact_name: "registry.example/test@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        vulnerabilities:
+          - cve_id: "CVE-2099-0001"
+            severity: "HIGH"
+            installed_version: "3.3.7-r1"
+            trivy_status: "fixed"
+    expected:
+      decision: "deny"
+  - name: "Deny critical even when raw Trivy status fixed"
+    input:
+      scan_report:
+        artifact_name: "registry.example/test@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        vulnerabilities:
+          - cve_id: "CVE-2099-0002"
+            severity: "CRITICAL"
+            installed_version: "1-r1"
+            trivy_status: "fixed"
+    expected:
+      decision: "deny"
+  - name: "Deny high when source status is affected"
+    input:
+      scan_report:
+        artifact_name: "registry.example/test@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        vulnerabilities:
+          - cve_id: "CVE-2099-0001"
+            severity: "HIGH"
+            installed_version: "3.3.7-r1"
+            trivy_status: "affected"
+    expected:
+      decision: "deny"
+  - name: "Deny high among lower severity findings"
+    input:
+      scan_report:
+        artifact_name: "registry.example/test@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        vulnerabilities:
+          - cve_id: "CVE-2099-0002"
+            severity: "LOW"
+            installed_version: "1.0"
+            trivy_status: "fixed"
+          - cve_id: "CVE-2099-0001"
+            severity: "HIGH"
+            installed_version: "3.3.7-r1"
+            trivy_status: "fixed"
+    expected:
+      decision: "deny"
+  - name: "Medium findings are flagged, never allowed"
+    input:
+      scan_report:
+        artifact_name: "registry.example/test@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        vulnerabilities:
+          - cve_id: "CVE-2099-0003"
+            severity: "MEDIUM"
+            installed_version: "1.0"
+            trivy_status: "fixed"
+    expected:
+      decision: "flag"
+  - name: "Low only is unknown, never allowed"
+    input:
+      scan_report:
+        artifact_name: "registry.example/test@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        vulnerabilities:
+          - cve_id: "CVE-2099-0004"
+            severity: "LOW"
+            installed_version: "1.0"
+            trivy_status: "fixed"
+    expected:
+      decision: "unknown"
+  - name: "Empty vulnerability list is unknown, never clean permission"
+    input:
+      scan_report:
+        artifact_name: "registry.example/test@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        vulnerabilities: []
+    expected:
+      decision: "unknown"
+  - name: "Missing vulnerability list cannot be release permission"
+    input:
+      scan_report:
+        artifact_name: "registry.example/test@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    expected:
+      decision: "unknown"
+  - name: "Missing source is unknown, never allowed"
+    input: {}
+    expected:
+      decision: "unknown"
+  - name: "Unrecognized severity is unknown, never allowed"
+    input:
+      scan_report:
+        artifact_name: "registry.example/test@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        vulnerabilities:
+          - cve_id: "CVE-2099-0005"
+            severity: "FIXED"
+            installed_version: "1.0"
+            trivy_status: "fixed"
+    expected:
+      decision: "unknown"
