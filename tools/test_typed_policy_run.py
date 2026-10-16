@@ -41,6 +41,8 @@ def main():
             manifest = output / "manifest.json"
             ledger = output / "ledger.jsonl"
             if decision is None:
+                assert not output.exists(), (
+                    name, "failed typed evaluation must not create output directory")
                 assert not any(x.exists() for x in (receipt, manifest, ledger)), (
                     name, "malformed typed input must not mint canonical evidence")
             else:
@@ -48,6 +50,23 @@ def main():
                 recorded = json.loads(receipt.read_text(encoding="utf-8"))
                 assert recorded["verdict"]["value"] == decision, (name, recorded["verdict"])
             print(f"PASS: typed-v1 {name}, exit={p.returncode}, receipt={'yes' if decision else 'no'}")
+        # Refuse reuse of a directory holding an old canonical receipt.
+        # An error must never silently overwrite or pretend to replace it.
+        prior = tmp / "preexisting-output"
+        prior.mkdir()
+        old_receipt = prior / "receipt.json"
+        old_receipt.write_text('{"historic":"do-not-modify"}', encoding="utf-8")
+        source = tmp / "reused-source.json"
+        source.write_text('{"input":{"block":false}}', encoding="utf-8")
+        reused = subprocess.run(
+            [cli, "run", "--pack", str(PACK), "--input", str(source),
+             "--out", str(prior)], capture_output=True, text=True)
+        assert reused.returncode == 2, (reused.stdout, reused.stderr)
+        assert "OUTPUT_DIRECTORY_NOT_FRESH" in reused.stderr, reused.stderr
+        assert old_receipt.read_text(encoding="utf-8") == '{"historic":"do-not-modify"}'
+        assert not (prior / "manifest.json").exists()
+        assert not (prior / "ledger.jsonl").exists()
+        print("PASS: typed-v1 refuses stale output directory; historic receipt untouched")
     print("PASS: typed-v1 CLI no-artifact regression; legacy fixtures are verified separately")
 
 if __name__ == "__main__":
