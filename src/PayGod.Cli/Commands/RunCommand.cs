@@ -29,9 +29,20 @@ public static class RunCommand
         var packPath = Path.Join(packDir, "pack.yaml");
         if (!File.Exists(packPath)) Fail($"Missing pack.yaml: {packPath}");
         if (!input.Exists) Fail($"Missing input file: {input.FullName}");
-        outDir.Create();
 
         var pack = PolicyEngine.LoadPack(packPath);
+        var scopedTypedRun = pack.spec.policy.evaluation_profile != "legacy-v1";
+        // A typed-profile invocation must own a fresh output location: using
+        // an existing directory could expose an old receipt after an early
+        // error, and make a consumer mistake stale files for current output.
+        // Do not delete or rewrite prior evidence on a failed invocation.
+        if (scopedTypedRun && Directory.Exists(outDir.FullName))
+        {
+            FailCode("OUTPUT_DIRECTORY_NOT_FRESH",
+                "Typed-profile execution requires a new output directory.");
+            return;
+        }
+        if (!scopedTypedRun) outDir.Create();
 
         JsonNode inputJson;
         try
@@ -75,6 +86,10 @@ public static class RunCommand
                 return;
             }
         }
+
+        // Create a new output location only after typed evaluation succeeded.
+        // This does not authorize concurrent writers; use a unique path per run.
+        if (scopedTypedRun) outDir.Create();
 
         var packDigest = Sha256Hex(File.ReadAllBytes(packPath));
         var packObj = new { name = pack.metadata.name, version = pack.metadata.version, path = packDir, digest_sha256 = packDigest };
