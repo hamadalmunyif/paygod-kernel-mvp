@@ -4,6 +4,8 @@
 Origin: [Issue #116](https://github.com/hamadalmunyif/paygod-kernel-mvp/issues/116). Comparison witness: [RED PR #117](https://github.com/hamadalmunyif/paygod-kernel-mvp/pull/117).  
 Owner basis: `main@d347213848f03a6d25554631d0183a682879b11b`.
 
+The exact pending promotion gates, real-source challenge matrix, native-only comparison and independent recipient conditions are documented in [REAL_SOURCE_ACCEPTANCE.md](REAL_SOURCE_ACCEPTANCE.md). This research should not be represented as closed Issue #116 until those gates are witnessed.
+
 ## Why this exists
 
 The existing `critical-cve-blocker` v1 policy checks `v.status != 'fixed'`. According to Trivy maintainer's explanation [discussion #11021](https://github.com/aquasecurity/trivy/discussions/11021), `Status=fixed` means **a fix is available from the advisory**, not that the installed package is fixed. This specific false-`allow` was reproduced via an intentionally RED **synthetic** Pack case in PR #117 (`Expected deny, Got allow`).
