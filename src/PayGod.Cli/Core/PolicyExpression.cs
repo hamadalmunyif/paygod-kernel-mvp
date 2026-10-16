@@ -146,11 +146,25 @@ public static class PolicyExpression
             var l = left.Eval(ctx);
             var r = right.Eval(ctx);
 
-            var ln = l.AsNumber();
-            var rn = r.AsNumber();
-            if (ln.HasValue && rn.HasValue)
+            // Typed comparisons: a missing/null operand is not negative evidence.
+            // Disallow implicit string/number/boolean coercion in policy comparisons.
+            // Distinct kind types do not compare equal or unequal under this strict
+            // proposal; admission remains responsible for refusing mandatory gaps
+            // before any canonical Kernel execution.
+            var lk = l.Node?.GetValueKind();
+            var rk = r.Node?.GetValueKind();
+            if (lk is null || rk is null)
+                return new(JsonValue.Create(false));
+
+            if (lk == System.Text.Json.JsonValueKind.Number &&
+                rk == System.Text.Json.JsonValueKind.Number)
             {
-                var res = op switch
+                var ln = l.AsNumber();
+                var rn = r.AsNumber();
+                if (!ln.HasValue || !rn.HasValue)
+                    return new(JsonValue.Create(false));
+
+                var result = op switch
                 {
                     TokenType.Eq => Math.Abs(ln.Value - rn.Value) < 1e-9,
                     TokenType.Ne => Math.Abs(ln.Value - rn.Value) >= 1e-9,
@@ -160,15 +174,14 @@ public static class PolicyExpression
                     TokenType.Le => ln.Value <= rn.Value,
                     _ => false
                 };
-                return new(JsonValue.Create(res));
+                return new(JsonValue.Create(result));
             }
 
-            var ls = l.AsString();
-            var rs = r.AsString();
-            if (ls is not null && rs is not null)
+            if (lk == System.Text.Json.JsonValueKind.String &&
+                rk == System.Text.Json.JsonValueKind.String)
             {
-                var cmp = string.CompareOrdinal(ls, rs);
-                var res = op switch
+                var cmp = string.CompareOrdinal(l.AsString(), r.AsString());
+                var result = op switch
                 {
                     TokenType.Eq => cmp == 0,
                     TokenType.Ne => cmp != 0,
@@ -178,18 +191,27 @@ public static class PolicyExpression
                     TokenType.Le => cmp <= 0,
                     _ => false
                 };
-                return new(JsonValue.Create(res));
+                return new(JsonValue.Create(result));
             }
 
-            var lb = l.AsBool();
-            var rb = r.AsBool();
-            var bres = op switch
+            var lhsBool = lk is System.Text.Json.JsonValueKind.True or System.Text.Json.JsonValueKind.False;
+            var rhsBool = rk is System.Text.Json.JsonValueKind.True or System.Text.Json.JsonValueKind.False;
+            if (lhsBool && rhsBool)
             {
-                TokenType.Eq => lb == rb,
-                TokenType.Ne => lb != rb,
-                _ => false
-            };
-            return new(JsonValue.Create(bres));
+                var lhs = lk == System.Text.Json.JsonValueKind.True;
+                var rhs = rk == System.Text.Json.JsonValueKind.True;
+                var result = op switch
+                {
+                    TokenType.Eq => lhs == rhs,
+                    TokenType.Ne => lhs != rhs,
+                    _ => false
+                };
+                return new(JsonValue.Create(result));
+            }
+
+            // Unsupported arrays/objects and cross-kind comparisons are not
+            // evidence of either equality or inequality.
+            return new(JsonValue.Create(false));
         }
     }
 
