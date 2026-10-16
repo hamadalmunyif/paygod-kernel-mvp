@@ -100,8 +100,24 @@ def main():
 
     # This *actually calls* GitHub native trust verification, not a caller-supplied
     # --source-attested boolean. It signs/verifies REPORT BYTES (not scanner command).
-    verification=run("gh","attestation","verify",str(a.report.resolve()),
-                     "--repo",a.repository,"--format","json")
+    # GH CLI <=2.101.0 had an inexact --signer-workflow identity match
+    # (GHSA-wjmr-j3rp-mh2g); refuse those clients. Pin workflow/ref/source.
+    cli_version=run("gh","--version")
+    match=re.search(r"gh version (\\d+)\\.(\\d+)\\.(\\d+)",cli_version.stdout)
+    if cli_version.returncode!=0 or not match or tuple(map(int,match.groups()))<(2,102,0):
+        return emit("WITHHELD_NOT_RUN", "GH_ATTESTATION_CLI_PATCH_REQUIRED")
+    current_commit=os.environ.get("GITHUB_SHA","")
+    if not re.fullmatch(r"[a-f0-9]{40}", current_commit):
+        return emit("WITHHELD_NOT_RUN", "SIGNER_SOURCE_COMMIT_NOT_PINNED")
+    signer=f"{a.repository}/.github/workflows/trivy-attested-canonical-chain.yml"
+    verification=run(
+        "gh","attestation","verify",str(a.report.resolve()),
+        "--repo",a.repository,
+        "--signer-workflow",signer,
+        "--source-ref","refs/heads/research/trivy-attested-canonical-deny-chain-20261016",
+        "--source-digest",current_commit,
+        "--format","json",
+    )
     if verification.returncode != 0:
         return emit("WITHHELD_NOT_RUN", "NATIVE_ATTESTATION_INVALID")
     try:
