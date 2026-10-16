@@ -95,6 +95,7 @@ jobs:
           set -euo pipefail
           python3 examples/eik-trivy-attested/bridge.py \
             --report native-source/trivy.json \
+            --execution-statement native-source/scan-execution.json \
             --expected-artifact "$(cat native-source/subject.txt)" \
             --scanner-exit-code 0 \
             --scanner-arg=image \
