@@ -22,12 +22,14 @@ def read_json(path):
                       object_pairs_hook=no_duplicates,
                       parse_constant=lambda _: (_ for _ in ()).throw(ValueError("Non-finite JSON")))
 
-def verify(report_file, input_file, receipt_file, statement_file, repo, commit):
+def verify(report_file, input_file, receipt_file, statement_file, repo, commit,
+           expected_run_id, expected_run_attempt):
     raw=Path(report_file).read_bytes()
     sha=hashlib.sha256(raw).hexdigest()
     report=read_json(report_file)
     statement=read_json(statement_file)
-    validate_scan_execution(statement,raw,report['ArtifactName'],repo,commit)
+    validate_scan_execution(statement,raw,report['ArtifactName'],repo,commit,
+                            expected_run_id,expected_run_attempt)
     admitted=read_json(input_file)
     statement_sha=hashlib.sha256(Path(statement_file).read_bytes()).hexdigest()
     admitted_statement_sha=admitted.get("scan_report",{}).get("scan_execution_sha256")
@@ -70,9 +72,12 @@ def main():
     p.add_argument("--statement",required=True)
     p.add_argument("--repository",required=True)
     p.add_argument("--source-commit",required=True)
+    p.add_argument("--expected-run-id",required=True)
+    p.add_argument("--expected-run-attempt",required=True)
     a=p.parse_args()
     try:
-        out=verify(a.report,a.input,a.receipt,a.statement,a.repository,a.source_commit)
+        out=verify(a.report,a.input,a.receipt,a.statement,a.repository,a.source_commit,
+                   a.expected_run_id,a.expected_run_attempt)
     except (OSError, UnicodeError, ValueError, KeyError, TypeError, RecursionError) as e:
         print("BINDING_FAILED: "+str(e),file=sys.stderr)
         return 2
