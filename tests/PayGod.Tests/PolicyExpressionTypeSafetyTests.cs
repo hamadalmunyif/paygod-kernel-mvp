@@ -112,9 +112,64 @@ public class PolicyExpressionTypeSafetyTests
                 "{\"iam_event\":{}}"));
     }
 
+    [Fact]
+    public void OptedInPack_RejectsWrongTypedBooleanBeforeAllow()
+    {
+        var pack = MakePack("typed-v1");
+        var root = JsonNode.Parse("{\"input\":{\"block\":\"false\"}}")!;
+        Assert.Throws<InvalidOperationException>(() => PolicyEngine.Evaluate(pack, root));
+    }
+
+    [Fact]
+    public void OptedInPack_UsesTypedBooleanForAllow()
+    {
+        var pack = MakePack("typed-v1");
+        var root = JsonNode.Parse("{\"input\":{\"block\":false}}")!;
+        Assert.Equal("allow", PolicyEngine.Evaluate(pack, root).Decision);
+    }
+
+    [Fact]
+    public void UnspecifiedProfile_PreservesLegacyBehaviorForHistoricalWitnesses()
+    {
+        var pack = MakePack("legacy-v1");
+        var root = JsonNode.Parse("{\"input\":{\"block\":\"false\"}}")!;
+        // Record existing behavior *only* to prevent historical replay drift.
+        // Legacy coercion is not permission to admit external untyped input.
+        Assert.Equal("allow", PolicyEngine.Evaluate(pack, root).Decision);
+    }
+
+    [Fact]
+    public void UnsupportedProfile_IsRejected()
+    {
+        var pack = MakePack("unsupported");
+        var root = JsonNode.Parse("{\"input\":{\"block\":false}}")!;
+        Assert.Throws<InvalidOperationException>(() => PolicyEngine.Evaluate(pack, root));
+    }
+
+    private static PackDefinition MakePack(string profile) => new()
+    {
+        spec = new PackSpec
+        {
+            policy = new PackPolicy
+            {
+                evaluation_profile = profile,
+                rules = new List<PolicyRule>
+                {
+                    new()
+                    {
+                        name = "allow-unblocked",
+                        condition = "input.input.block == false",
+                        decision = "allow",
+                        reason = "Only properly typed boolean false in typed profile."
+                    }
+                }
+            }
+        }
+    };
+
     private static bool Evaluate(string condition, string input)
     {
         var root = JsonNode.Parse(input)!;
-        return PolicyExpression.Evaluate(condition, root);
+        return PolicyExpression.Evaluate(condition, root, strictTypes: true);
     }
 }
