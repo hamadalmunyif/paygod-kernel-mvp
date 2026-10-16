@@ -5,6 +5,7 @@ cases:
       scan_report:
         artifact_name: "example.invalid/app@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         source_sha256: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        scan_execution_sha256: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
         vulnerabilities:
           - cve_id: "CVE-2099-0001"
             severity: "HIGH"
@@ -17,6 +18,7 @@ cases:
       scan_report:
         artifact_name: "example.invalid/app@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         source_sha256: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        scan_execution_sha256: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
         vulnerabilities:
           - cve_id: "CVE-2099-0002"
             severity: "MEDIUM"
@@ -29,6 +31,7 @@ cases:
       scan_report:
         artifact_name: "example.invalid/app@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         source_sha256: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        scan_execution_sha256: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
         vulnerabilities: []
     expected:
       decision: "unknown"

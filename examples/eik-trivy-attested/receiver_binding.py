@@ -15,17 +15,26 @@ HERE=Path(__file__).resolve().parent
 sys.path.insert(0,str(HERE))
 from verify_portable_evidence import canonical_json  # separately transferred code
 from eik_trivy_shadow import examine, no_duplicates
+from execution_statement import check as validate_scan_execution
 
 def read_json(path):
     return json.loads(Path(path).read_bytes().decode("utf-8"),
                       object_pairs_hook=no_duplicates,
                       parse_constant=lambda _: (_ for _ in ()).throw(ValueError("Non-finite JSON")))
 
-def verify(report_file, input_file, receipt_file):
+def verify(report_file, input_file, receipt_file, statement_file, repo, commit,
+           expected_run_id, expected_run_attempt):
     raw=Path(report_file).read_bytes()
     sha=hashlib.sha256(raw).hexdigest()
     report=read_json(report_file)
+    statement=read_json(statement_file)
+    validate_scan_execution(statement,raw,report['ArtifactName'],repo,commit,
+                            expected_run_id,expected_run_attempt)
     admitted=read_json(input_file)
+    statement_sha=hashlib.sha256(Path(statement_file).read_bytes()).hexdigest()
+    admitted_statement_sha=admitted.get("scan_report",{}).get("scan_execution_sha256")
+    if statement_sha != admitted_statement_sha:
+        raise ValueError("EXECUTION_STATEMENT_SHA_NOT_BOUND_TO_INPUT")
     receipt=read_json(receipt_file)
     scan=admitted.get("scan_report",{})
     if not isinstance(scan,dict) or scan.get("source_sha256")!=sha:
@@ -42,7 +51,7 @@ def verify(report_file, input_file, receipt_file):
             "cve_id":f["vulnerability_id"],"severity":f["severity"],
             "installed_version":f["installed_version"],"trivy_status":f["trivy_status"]
         })
-    if sorted(scan.keys())!=["artifact_name","source_sha256","vulnerabilities"]:
+    if sorted(scan.keys())!=["artifact_name","scan_execution_sha256","source_sha256","vulnerabilities"]:
         raise ValueError("UNEXPECTED_ADMITTED_FIELD")
     if scan["vulnerabilities"]!=normalized:
         raise ValueError("ADMITTED_FINDINGS_DIVERGE_FROM_RAW_TRIVY")
@@ -60,9 +69,15 @@ def main():
     p.add_argument("--report",required=True)
     p.add_argument("--input",required=True)
     p.add_argument("--receipt",required=True)
+    p.add_argument("--statement",required=True)
+    p.add_argument("--repository",required=True)
+    p.add_argument("--source-commit",required=True)
+    p.add_argument("--expected-run-id",required=True)
+    p.add_argument("--expected-run-attempt",required=True)
     a=p.parse_args()
     try:
-        out=verify(a.report,a.input,a.receipt)
+        out=verify(a.report,a.input,a.receipt,a.statement,a.repository,a.source_commit,
+                   a.expected_run_id,a.expected_run_attempt)
     except (OSError, UnicodeError, ValueError, KeyError, TypeError, RecursionError) as e:
         print("BINDING_FAILED: "+str(e),file=sys.stderr)
         return 2

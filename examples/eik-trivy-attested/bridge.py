@@ -20,6 +20,7 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
 from eik_trivy_shadow import (MAX_REPORT_BYTES, no_duplicates, examine)  # noqa: E402
+from execution_statement import check as validate_scan_execution  # noqa: E402
 
 PACK = Path(__file__).resolve().parent / "pack"
 ADMISSION = ROOT / "tools" / "eik_admit.py"
@@ -69,6 +70,7 @@ def make_input(source, expected, rawsha, reported_exit, scanner_args):
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--report", required=True, type=Path)
+    p.add_argument("--execution-statement", required=True, type=Path)
     p.add_argument("--expected-artifact", required=True)
     p.add_argument("--scanner-exit-code", required=True, type=int)
     p.add_argument("--scanner-arg", action="append", default=[])
@@ -114,12 +116,39 @@ def main():
         "gh","attestation","verify",str(a.report.resolve()),
         "--repo",a.repository,
         "--signer-workflow",signer,
-        "--source-ref","refs/heads/research/trivy-attested-canonical-deny-chain-20261016",
+        "--source-ref","refs/heads/research/trivy-signed-execution-statement-20261016",
         "--source-digest",current_commit,
         "--format","json",
     )
     if verification.returncode != 0:
         return emit("WITHHELD_NOT_RUN", "NATIVE_ATTESTATION_INVALID")
+    try:
+        statement_bytes=a.execution_statement.read_bytes()
+    except OSError:
+        return emit("WITHHELD_NOT_RUN", "EXECUTION_STATEMENT_UNAVAILABLE")
+    statement_command=[
+        str(a.execution_statement.resolve()) if part==str(a.report.resolve()) else part
+        for part in verification.args
+    ]
+    statement_signature=run(*statement_command)
+    if statement_signature.returncode != 0:
+        return emit("WITHHELD_NOT_RUN", "EXECUTION_ATTESTATION_INVALID")
+    try:
+        signed=json.loads(statement_signature.stdout)
+        if not isinstance(signed,list) or not signed:
+            raise ValueError("missing statement attestation")
+    except ValueError:
+        return emit("WITHHELD_NOT_RUN", "EXECUTION_ATTESTATION_UNREADABLE")
+    try:
+        record=json.loads(statement_bytes.decode("utf-8"),object_pairs_hook=no_duplicates)
+        validate_scan_execution(
+            record,raw,a.expected_artifact,a.repository,current_commit,
+            os.environ.get("GITHUB_RUN_ID",""),os.environ.get("GITHUB_RUN_ATTEMPT",""),
+        )
+        normalized["scan_report"]["scan_execution_sha256"]=hashlib.sha256(statement_bytes).hexdigest()
+    except (UnicodeError, ValueError, TypeError, RecursionError):
+        return emit("WITHHELD_NOT_RUN", "SCAN_EXECUTION_RECORD_MISMATCH")
+
     try:
         att=json.loads(verification.stdout)
         if not isinstance(att,list) or not att:

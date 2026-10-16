@@ -14,12 +14,15 @@ spec:
       schema:
         type: "object"
         additionalProperties: false
-        required: ["artifact_name", "source_sha256", "vulnerabilities"]
+        required: ["artifact_name", "source_sha256", "scan_execution_sha256", "vulnerabilities"]
         properties:
           artifact_name:
             type: "string"
             pattern: "^.+@sha256:[a-f0-9]{64}$"
           source_sha256:
+            type: "string"
+            pattern: "^[a-f0-9]{64}$"
+          scan_execution_sha256:
             type: "string"
             pattern: "^[a-f0-9]{64}$"
           vulnerabilities:
