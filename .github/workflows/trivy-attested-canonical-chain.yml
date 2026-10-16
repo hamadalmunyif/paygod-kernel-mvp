@@ -2,7 +2,7 @@ name: Trivy Attested Source to Canonical PayGod Deny (RESEARCH ONLY)
 # This study is not a deployment/release gate; runs only on research branch.
 on:
   push:
-    branches: [research/trivy-attested-canonical-deny-chain-20261016]
+    branches: [research/trivy-signed-execution-statement-20261016]
     paths:
       - '.github/workflows/trivy-attested-canonical-chain.yml'
       - 'examples/eik-trivy-attested/**'
@@ -204,7 +204,7 @@ jobs:
           if ($ver -notmatch 'gh version (\d+)\.(\d+)\.(\d+)') { throw 'Cannot determine gh CLI version for signer pin' }
           if ([version]"$($Matches[1]).$($Matches[2]).$($Matches[3])" -lt [version]'2.102.0') { throw 'gh attestation signer-workflow verification requires patched CLI >=2.102.0' }
           $signer = "$($env:GITHUB_REPOSITORY)/.github/workflows/trivy-attested-canonical-chain.yml"
-          gh attestation verify transfer/source/trivy.json --repo $env:GITHUB_REPOSITORY --signer-workflow $signer --source-ref 'refs/heads/research/trivy-attested-canonical-deny-chain-20261016' --source-digest $env:GITHUB_SHA --format json | Set-Content -Encoding utf8 gh-verified.json
+          gh attestation verify transfer/source/trivy.json --repo $env:GITHUB_REPOSITORY --signer-workflow $signer --source-ref 'refs/heads/research/trivy-signed-execution-statement-20261016' --source-digest $env:GITHUB_SHA --format json | Set-Content -Encoding utf8 gh-verified.json
           if ($LASTEXITCODE -ne 0) { throw "GH native report provenance verification failed" }
           python verifier/verify_portable_evidence.py transfer/evidence --expect-receipt-sha256 $env:EXPECTED_RECEIPT_SHA --result scoped-verification.json
           if ($LASTEXITCODE -ne 0) { throw "Canonical PayGod receipt integrity failed" }
@@ -218,7 +218,7 @@ jobs:
           $ErrorActionPreference='Stop'
           Copy-Item transfer/source/trivy.json trivy-mutated.json
           Add-Content -Encoding utf8 trivy-mutated.json ' '
-          gh attestation verify trivy-mutated.json --repo $env:GITHUB_REPOSITORY --signer-workflow "$($env:GITHUB_REPOSITORY)/.github/workflows/trivy-attested-canonical-chain.yml" --source-ref "refs/heads/research/trivy-attested-canonical-deny-chain-20261016" --source-digest $env:GITHUB_SHA --format json *> $null
+          gh attestation verify trivy-mutated.json --repo $env:GITHUB_REPOSITORY --signer-workflow "$($env:GITHUB_REPOSITORY)/.github/workflows/trivy-attested-canonical-chain.yml" --source-ref "refs/heads/research/trivy-signed-execution-statement-20261016" --source-digest $env:GITHUB_SHA --format json *> $null
           if ($LASTEXITCODE -eq 0) { throw "Tampered Trivy report passed native GH verification" }
           Copy-Item transfer/evidence evidence-mutated -Recurse
           Add-Content -Encoding utf8 evidence-mutated/findings.json ' '
