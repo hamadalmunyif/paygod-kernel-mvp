@@ -17,6 +17,15 @@ Before running, record without identifying/sensitive details:
 - The full native artifact, instructions and input must be retrievable at the agreed date; short-lived GitHub artifacts may expire. Where unavailable, mark `INCONCLUSIVE / ARTIFACT_EXPIRED`, not success.
 - Log the exact immutable image digest, scanner/execution statement, two native GH attestations, Kernel Pack/version/commit, verifier binary/script digest and two workflow run IDs.
 
+## Same-commit / different-run substitution challenge (new)
+
+The first-party verifier now additionally compares the signed execution statement's `workflow_run_id` and `workflow_run_attempt` with **explicit expected** values. This matters because two valid GitHub attestations can refer to different runs of the same workflow commit. The receiver must reject mixing these as evidence for a single observed source execution.
+
+- **Internal CI:** expected run ID and attempt derive from the same GitHub Actions workflow's runtime environment. This proves a bounded consistency property **within our own organization**, not independent external authority.
+- **External reviewer:** independently establish and pin the expected run ID/attempt and exact workflow SHA from a trustworthy record, before opening the producer's delivered bundle. Do not substitute the producer's own claim or infer institutional endorsement from GitHub's run ID.
+- In the negative test, use a valid-format but wrong run ID and then wrong attempt, holding report bytes/receipt unchanged. Both must fail the statement-to-receiver match. This supplements, and does not replace, the GH-native `--signer-workflow`, `--source-ref`, and `--source-digest` checks.
+- Record any additional verification steps and time in **both** native and PayGod arms. Do not credit PayGod for a native GitHub check already available in Arm A.
+
 ## Neutral A/B comparison, same evidence source
 
 | Arm | Inputs given to reviewer | Expected bounded capability |
