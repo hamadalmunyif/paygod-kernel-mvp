@@ -78,6 +78,11 @@ jobs:
           ./out/paygod test --pack packs/core/iso27001-policy-review
           ./out/paygod test --pack packs/providers/aws/admin-drift-detection
 
+      - name: Verify Trivy v2 research non-permit severity Pack fixtures
+        run: |
+          ./out/paygod test --pack examples/eik-trivy-severity-prototype
+          python3 tools/test_trivy_severity_nonpermit.py
+
       - name: Verify concise fail-closed input rejection
         run: python3 tools/test_cli_input_rejection.py --cli ./out/paygod
 
