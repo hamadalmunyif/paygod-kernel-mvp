@@ -164,6 +164,40 @@ public class PolicyExpressionTypeSafetyTests
         Assert.Equal(expected, Evaluate("input.input.block == false", json));
     }
 
+    [Theory]
+    [InlineData("input.input.block == false && input.input.required")]
+    [InlineData("input.input.block == false || true")]
+    [InlineData("input.input.block == false #ignored-condition")]
+    public void TypedPolicy_UnexpectedLexerCharacter_CannotTruncateAllowRule(string expression)
+    {
+        const string source = "{\"input\":{\"block\":false,\"required\":false}}";
+        Assert.Throws<InvalidOperationException>(() => Evaluate(expression, source));
+    }
+
+    [Theory]
+    [InlineData("input.input.count == 1e999")]
+    [InlineData("input.input.count == 1-1")]
+    public void TypedPolicy_InvalidNumericLiteral_CannotBecomeZero(string expression)
+    {
+        const string source = "{\"input\":{\"count\":0}}";
+        Assert.Throws<InvalidOperationException>(() => Evaluate(expression, source));
+    }
+
+    [Fact]
+    public void TypedPolicy_UnterminatedStringLiteral_IsError()
+    {
+        Assert.Throws<InvalidOperationException>(() =>
+            Evaluate("input.input.word == 'open", "{\"input\":{\"word\":\"open\"}}"));
+    }
+
+    [Fact]
+    public void LegacyLexerBehavior_IsNotSilentlyRewritten()
+    {
+        var input = JsonNode.Parse("{\"input\":{\"block\":false}}")!;
+        // Historical replay of legacy-v1 remains deliberately unchanged.
+        Assert.True(PolicyExpression.Evaluate("input.input.block == false && trailing", input));
+    }
+
     [Fact]
     public void LegacyProfile_NegatedMissingPathBehaviorIsPinnedForHistoricalReplayOnly()
     {
