@@ -164,6 +164,52 @@ def main():
             assert recorded["verdict"]["value"] == decision, (name, recorded["verdict"])
             print(f"PASS: nested typed-v1 shadow {name} => {decision}")
 
+        # A typo in the opt-in field must not quietly default to legacy-v1,
+        # coerce string "false", and mint a false-allow canonical receipt.
+        original_profile = 'evaluation_profile: "typed-v1"'
+        assert base_pack.count(original_profile) == 1
+        for name, key in [
+            ("unicode-dotless-i", "evaluation_profıle"),
+            ("lookalike-uppercase-i", "evaluation_profiIe"),
+            ("profile-suffix", "evaluation_profile_extra"),
+        ]:
+            pack_dir = tmp / f"pack-misspelled-{name}"
+            pack_dir.mkdir()
+            (pack_dir / "pack.yaml").write_text(
+                base_pack.replace(original_profile, f'{key}: "typed-v1"'),
+                encoding="utf-8")
+            source = tmp / f"misspelled-{name}.json"
+            source.write_text('{"input":{"block":"false"}}', encoding="utf-8")
+            output = tmp / f"out-misspelled-{name}"
+            p = subprocess.run([cli, "run", "--pack", str(pack_dir),
+                                "--input", str(source), "--out", str(output)],
+                               capture_output=True, text=True)
+            assert p.returncode == 2, (name, p.returncode, p.stdout, p.stderr)
+            assert "PACK_POLICY_INVALID" in p.stderr, (name, p.stderr)
+            assert not output.exists(), (name, "misspelled typed profile minted output")
+            print(f"PASS: {name} profile typo rejected before legacy fallback")
+
+        # Whole-Pack preflight must reject invalid reserved lambda names, even
+        # if an earlier allow rule already matches the input.
+        reserved_dir = tmp / "pack-hidden-reserved-input"
+        reserved_dir.mkdir()
+        (reserved_dir / "pack.yaml").write_text(
+            base_pack + "\n" +
+            '      - name: hidden-reserved\n'
+            '        condition: "input.groups.any(input => true)"\n'
+            '        decision: deny\n'
+            '        reason: Reserved root in a hidden rule\n',
+            encoding="utf-8")
+        reserved_output = tmp / "out-hidden-reserved"
+        p = subprocess.run([cli, "run", "--pack", str(reserved_dir),
+                            "--input", str(tmp / "known-false.json"),
+                            "--out", str(reserved_output)],
+                           capture_output=True, text=True)
+        assert p.returncode == 2, (p.returncode, p.stdout, p.stderr)
+        assert "POLICY_INPUT_REJECTED" in p.stderr, p.stderr
+        assert not reserved_output.exists(), "reserved hidden lambda minted allow"
+        print("PASS: unreachable reserved input lambda rejected before allow")
+
         # Refuse reuse of a directory holding an old canonical receipt.
         # An error must never silently overwrite or pretend to replace it.
         prior = tmp / "preexisting-output"
