@@ -87,6 +87,9 @@ def main():
             ("unknown-pipe", "input.input.block == false || true"),
             ("unknown-comment", "input.input.block == false # ignored"),
             ("invalid-number", "input.input.count == 1e999"),
+            ("fractional-number", "input.input.count == 0.0000000001"),
+            ("exponent-number", "input.input.count == 1e0"),
+            ("unsafe-number", "input.input.count == 9007199254740992"),
             ("malformed-number", "input.input.count == 1-1"),
             ("unterminated-string", "input.input.word == 'open"),
         ]
