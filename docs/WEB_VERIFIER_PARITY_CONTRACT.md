@@ -21,7 +21,7 @@ A lower layer cannot redefine a higher layer. A green website build cannot chang
 
 ## Canonical source snapshot
 
-Observed on Kernel `main@203bee9ac5668975bf5248c57f922c214567d415`:
+Observed on Kernel `main@81e8020065434d0af3557444c28bd3e128d06899`:
 
 | Artifact | Role | Git blob |
 | --- | --- | --- |
@@ -34,14 +34,14 @@ Observed on Kernel `main@203bee9ac5668975bf5248c57f922c214567d415`:
 
 ## Website evidence snapshot
 
-Observed website production source `paygod-cloud-starter@fcf272f0291b602dfbb9b75b4faf15fa01ca340b`:
+Observed pinned website source snapshot `paygod-cloud-starter@af7061963367288c6fb3830e5723e5f5bc63230e` on `website/paygod-production`:
 
 - `website/src/verifier.mjs` implements browser `paygod-c14n-v1`, transport verification and optional recipient-supplied issuer trust.
 - `website/tests/fixtures/kernel-c14n-reference-20261014.json` has Git blob `3880d3a45b417ae95cae9a7b8cebb1c8c47722d8`, exactly matching the Kernel canonical corpus blob above.
 - `website/tests/kernel_c14n_reference.mjs` verifies canonical bytes and SHA-256 against that frozen corpus and separately rejects decimal, exponent and unsafe integer lexical forms.
 - Browser and standalone Python verifier tests separately exercise bundle/manifest/ledger/receipt checks and issuer-auth negative cases.
 
-This snapshot establishes **bounded implementation parity**, not full Kernel equivalence.
+This pinned source snapshot establishes the website implementation context used by the parity evidence below. It does **not** by itself prove live production state; deployment metadata and live smoke remain separate release evidence.
 
 ## Currently proven cross-runtime parity
 
@@ -76,9 +76,9 @@ The following dimensions now have frozen shared corpora consumed across the test
 | Evidence admission / source truth | ADR 0003 / source-specific | **OUT OF WEBSITE PARITY** |
 | Issuer mandate / release authority | separate trust/authorization problem | **OUT OF WEBSITE PARITY** |
 
-The first Kernel transport-corpus run preserved a real divergence: JS passed while Python returned `cryptography_backend_unavailable` for the trusted-issuer case. The corpus was not rewritten. The existing pinned issuer-auth backend was installed in the CI path. Codex then identified a cross-platform newline risk in Python fixture materialization; the test was changed from text-mode writes to exact UTF-8 byte writes without changing corpus bytes or expected outcomes. Kernel JS and Python both pass the unchanged blob at PR #125 head `4d1df77dd498585d1fce2b2523662d9366bf24cc`.
+The first Kernel transport-corpus run preserved a real divergence: JS passed while Python returned `cryptography_backend_unavailable` for the trusted-issuer case. The corpus was not rewritten. The existing pinned issuer-auth backend was installed in the CI path. Codex then identified two cross-platform byte-preservation risks: Python text-mode materialization and Git checkout newline conversion. Both were corrected without changing corpus bytes or expected outcomes: Python now writes exact UTF-8 bytes, and `.gitattributes` pins the frozen corpora to `eol=lf` with an explicit CI `git check-attr eol` gate. PR #125 passed 8/8 workflow families at exact head `0585ee622ffe7683ce36beac322beebc95025a0b`, Codex completed with no findings, and the corpus/fixes were merged to Kernel `main@81e8020065434d0af3557444c28bd3e128d06899`.
 
-Website PR #22 copied the exact same transport corpus blob and passed both browser-JS and vendored-Python transport corpus gates at Website Verifier run `39064262758`.
+Website PR #22 copies the exact same transport corpus blob. Its current exact head `bf43c9627c8868a59e15cedca11357841e23abe5` passes LF-checkout enforcement, canonical parity, ledger parity, browser-JS transport parity, vendored-Python transport parity, privacy-contract checks, and existing verifier regressions. It remains pre-merge evidence until the website merge train completes and the merged production SHA is correlated to deployment/live smoke.
 
 ## Required claim language
 
