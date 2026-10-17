@@ -122,6 +122,38 @@ def main():
         assert not output.exists(), "unreachable invalid typed policy minted evidence"
         print("PASS: typed-v1 entire-rule syntax preflight fails before matching allow")
 
+        # CI-level canonical receipt check for a shadowed nested any() variable.
+        # Previously the inner item's required=true could replace the outer
+        # required=false and incorrectly produce an allow.
+        nested_dir = tmp / "pack-nested-shadow"
+        nested_dir.mkdir()
+        nested_pack = base_pack.replace(
+            original_rule,
+            'condition: "input.groups.any(v => v.items.any(v => v.ok) and v.required)"'
+        ).replace(
+            'condition: "input.input.block == true"',
+            'condition: "true"'
+        )
+        (nested_dir / "pack.yaml").write_text(nested_pack, encoding="utf-8")
+        for name, required, decision in [
+            ("nested-outer-not-required", False, "deny"),
+            ("nested-outer-required", True, "allow"),
+        ]:
+            source = tmp / f"{name}.json"
+            source.write_text(json.dumps({
+                "input": {"block": False},
+                "groups": [{"required": required,
+                            "items": [{"ok": True, "required": True}]}]
+            }, separators=(",", ":")), encoding="utf-8")
+            output = tmp / f"out-{name}"
+            p = subprocess.run([cli, "run", "--pack", str(nested_dir),
+                                "--input", str(source), "--out", str(output)],
+                               capture_output=True, text=True)
+            assert p.returncode == 0, (name, p.returncode, p.stdout, p.stderr)
+            recorded = json.loads((output / "receipt.json").read_text(encoding="utf-8"))
+            assert recorded["verdict"]["value"] == decision, (name, recorded["verdict"])
+            print(f"PASS: nested typed-v1 shadow {name} => {decision}")
+
         # Refuse reuse of a directory holding an old canonical receipt.
         # An error must never silently overwrite or pretend to replace it.
         prior = tmp / "preexisting-output"
