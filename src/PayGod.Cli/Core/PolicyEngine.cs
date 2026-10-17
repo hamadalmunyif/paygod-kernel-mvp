@@ -68,6 +68,15 @@ public static class PolicyEngine
         if (profile is not ("legacy-v1" or "typed-v1"))
             throw new InvalidOperationException($"Unsupported policy evaluation profile: {profile}");
 
+        // Preflight the WHOLE new-version policy grammar, even rules made
+        // unreachable by an earlier match. A malformed tail is never safe
+        // solely because the first matching rule would return allow.
+        if (profile == "typed-v1")
+        {
+            foreach (var rule in pack.spec.policy.rules)
+                PolicyExpression.ValidateSyntax(rule.condition);
+        }
+
         foreach (var rule in pack.spec.policy.rules)
         {
             if (EvaluateCondition(rule.condition, input, profile))
