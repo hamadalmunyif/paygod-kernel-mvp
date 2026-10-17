@@ -46,6 +46,22 @@ jobs:
       - name: Verify Spec Compliance (Python reference)
         run: python3 tools/verify_spec.py
 
+      - name: Verify frozen corpus checkout is pinned to LF
+        shell: bash
+        run: |
+          for p in \
+            spec/test-vectors/canonical-json.json \
+            spec/test-vectors/ledger-chaining.json \
+            spec/test-vectors/transport-parity-v1.json
+          do
+            attr="$(git check-attr eol -- "$p")"
+            echo "$attr"
+            case "$attr" in
+              *"eol: lf") ;;
+              *) echo "ERROR: $p is not pinned to eol=lf" >&2; exit 1 ;;
+            esac
+          done
+
       - name: Run .NET canonicalization and unit regression tests
         run: dotnet test tests/PayGod.Tests/PayGod.Tests.csproj --configuration Release
 
