@@ -117,6 +117,12 @@ public static class PolicyExpression
         public override Value Eval(EvalContext ctx) => new(JsonValue.Create(value));
     }
 
+    // typed-v1 authored numbers are c14n-v1 safe integers, never doubles.
+    private sealed class SafeIntegerLiteral(long value) : Expr
+    {
+        public override Value Eval(EvalContext ctx) => new(JsonValue.Create(value));
+    }
+
     private sealed class StringLiteral(string value) : Expr
     {
         public override Value Eval(EvalContext ctx) => new(JsonValue.Create(value));
@@ -237,19 +243,19 @@ public static class PolicyExpression
             if (lk == System.Text.Json.JsonValueKind.Number &&
                 rk == System.Text.Json.JsonValueKind.Number)
             {
-                var ln = l.AsNumber();
-                var rn = r.AsNumber();
-                if (!ln.HasValue || !rn.HasValue)
-                    throw new InvalidOperationException("Policy numeric comparison requires valid numeric operands.");
-
+                // Evaluator equality must not depend on binary floating point.
+                // paygod-c14n-v1 source and explicit typed policy literals are
+                // bounded integers; compare the exact 64-bit values.
+                var ln = RequireTypedSafeInteger(l);
+                var rn = RequireTypedSafeInteger(r);
                 var result = op switch
                 {
-                    TokenType.Eq => ln.Value == rn.Value,
-                    TokenType.Ne => ln.Value != rn.Value,
-                    TokenType.Gt => ln.Value > rn.Value,
-                    TokenType.Ge => ln.Value >= rn.Value,
-                    TokenType.Lt => ln.Value < rn.Value,
-                    TokenType.Le => ln.Value <= rn.Value,
+                    TokenType.Eq => ln == rn,
+                    TokenType.Ne => ln != rn,
+                    TokenType.Gt => ln > rn,
+                    TokenType.Ge => ln >= rn,
+                    TokenType.Lt => ln < rn,
+                    TokenType.Le => ln <= rn,
                     _ => false
                 };
                 return new(JsonValue.Create(result));
@@ -293,6 +299,21 @@ public static class PolicyExpression
             // boolean that the policy could invert.
             throw new InvalidOperationException("Policy comparison operands have incompatible or unsupported types.");
         }
+    }
+
+    private static long RequireTypedSafeInteger(Value value)
+    {
+        // ToJsonString retains the lexical JSON number for parsed source
+        // nodes and emits an integer for SafeIntegerLiteral values.
+        // Reject decimal/exponent source forms instead of coercing to double.
+        if (value.Node is not JsonValue number ||
+            !long.TryParse(number.ToJsonString(), NumberStyles.AllowLeadingSign,
+                CultureInfo.InvariantCulture, out var integral) ||
+            integral < -Canonicalizer.SafeIntegerMax ||
+            integral > Canonicalizer.SafeIntegerMax)
+            throw new InvalidOperationException(
+                "typed-v1 numeric comparisons require canonical safe integers.");
+        return integral;
     }
 
     private sealed class AnyExpr(PathRef arrayPath, string varName, Expr predicate) : Expr
@@ -524,9 +545,18 @@ public static class PolicyExpression
                 case TokenType.False: Consume(TokenType.False); return new BoolLiteral(false);
                 case TokenType.Number:
                     var numText = _cur.Text; Consume(TokenType.Number);
-                    var parsed = double.TryParse(numText, NumberStyles.Float, CultureInfo.InvariantCulture, out var d);
-                    if (strictSyntax && (!parsed || !double.IsFinite(d)))
-                        throw new InvalidOperationException("Invalid or non-finite policy numeric literal.");
+                    if (strictSyntax)
+                    {
+                        if (!long.TryParse(numText, NumberStyles.AllowLeadingSign,
+                                CultureInfo.InvariantCulture, out var integer) ||
+                            integer < -Canonicalizer.SafeIntegerMax ||
+                            integer > Canonicalizer.SafeIntegerMax)
+                            throw new InvalidOperationException(
+                                "typed-v1 policy numeric literals must be safe integers.");
+                        return new SafeIntegerLiteral(integer);
+                    }
+                    _ = double.TryParse(numText, NumberStyles.Float,
+                        CultureInfo.InvariantCulture, out var d);
                     return new NumberLiteral(d);
                 case TokenType.String:
                     var sText = _cur.Text; Consume(TokenType.String);
