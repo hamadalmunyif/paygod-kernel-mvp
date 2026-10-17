@@ -87,8 +87,66 @@ public static class PolicyEngine
                 throw new InvalidOperationException(
                     "Unknown spec.policy field: only rules and evaluation_profile are permitted.");
         }
-        if (!policyMap.Children.ContainsKey(new YamlScalarNode("rules")))
+
+        var rulesKey = new YamlScalarNode("rules");
+        if (!policyMap.Children.TryGetValue(rulesKey, out var rulesNode))
             throw new InvalidOperationException("Pack spec.policy.rules is required.");
+
+        var profile = "legacy-v1";
+        if (policyMap.Children.TryGetValue(
+                new YamlScalarNode("evaluation_profile"), out var profileNode))
+        {
+            if (profileNode is not YamlScalarNode profileScalar ||
+                string.IsNullOrWhiteSpace(profileScalar.Value))
+                throw new InvalidOperationException(
+                    "Pack spec.policy.evaluation_profile must be a non-empty scalar.");
+            profile = profileScalar.Value!;
+        }
+
+        // Preserve historical legacy-v1 deserialization behavior. The stricter
+        // rule-mapping admission below is version-gated to typed-v1 only.
+        if (profile != "typed-v1") return;
+
+        if (rulesNode is not YamlSequenceNode rules)
+            throw new InvalidOperationException(
+                "typed-v1 spec.policy.rules must be a sequence.");
+
+        var permittedRuleFields = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "name", "condition", "decision", "reason"
+        };
+
+        for (var index = 0; index < rules.Children.Count; index++)
+        {
+            if (rules.Children[index] is not YamlMappingNode ruleMap)
+                throw new InvalidOperationException(
+                    $"typed-v1 policy rule[{index}] must be a mapping.");
+
+            foreach (var key in ruleMap.Children.Keys)
+            {
+                if (key is not YamlScalarNode scalar ||
+                    string.IsNullOrEmpty(scalar.Value) ||
+                    !permittedRuleFields.Contains(scalar.Value))
+                    throw new InvalidOperationException(
+                        $"Unknown typed-v1 policy rule[{index}] field.");
+            }
+
+            foreach (var required in permittedRuleFields)
+            {
+                if (!ruleMap.Children.TryGetValue(
+                        new YamlScalarNode(required), out var value) ||
+                    value is not YamlScalarNode scalar ||
+                    string.IsNullOrWhiteSpace(scalar.Value))
+                    throw new InvalidOperationException(
+                        $"typed-v1 policy rule[{index}].{required} is required and must be non-empty.");
+            }
+
+            var decision = ((YamlScalarNode)ruleMap.Children[
+                new YamlScalarNode("decision")]).Value;
+            if (decision is not ("allow" or "deny" or "flag" or "error"))
+                throw new InvalidOperationException(
+                    $"typed-v1 policy rule[{index}].decision is unsupported.");
+        }
     }
 
     public static PolicyResult Evaluate(PackDefinition pack, JsonNode? input)
