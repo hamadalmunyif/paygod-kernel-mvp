@@ -2,7 +2,7 @@ name: Paygod Kernel CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, research/trivy-typed-v1-composition-20261017 ]
   pull_request:
     branches: [ main ]
 
@@ -83,6 +83,11 @@ jobs:
 
       - name: Verify typed-v1 Pack CLI admission errors leave no canonical receipt
         run: python3 tools/test_typed_policy_run.py --cli ./out/paygod
+
+      - name: Research typed-v1 Trivy severity composition (non-permitting)
+        run: |
+          ./out/paygod test --pack examples/eik-trivy-severity-typed-research
+          python3 tools/test_trivy_typed_composition.py --cli ./out/paygod
 
       - name: Verify EIK Pack init and pre-Kernel structural input negatives
         run: python3 tools/test_eik_onboarding.py --cli ./out/paygod
