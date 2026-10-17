@@ -2,7 +2,7 @@ name: Paygod Kernel CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, research/trivy-typed-v1-composition-20261017 ]
   pull_request:
     branches: [ main ]
 
