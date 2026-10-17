@@ -35,7 +35,7 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.11'
       - run: python3 -m pip install -r tools/requirements.txt
@@ -79,7 +79,7 @@ jobs:
     needs: producer
     runs-on: windows-latest
     steps:
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Assert no producer source tree
