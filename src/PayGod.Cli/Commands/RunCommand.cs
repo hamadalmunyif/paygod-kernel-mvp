@@ -30,7 +30,18 @@ public static class RunCommand
         if (!File.Exists(packPath)) Fail($"Missing pack.yaml: {packPath}");
         if (!input.Exists) Fail($"Missing input file: {input.FullName}");
 
-        var pack = PolicyEngine.LoadPack(packPath);
+        PackDefinition pack;
+        try
+        {
+            pack = PolicyEngine.LoadPack(packPath);
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Invalid Pack field names may conceal an intended typed-v1
+            // profile. Reject before legacy defaults or any output artifact.
+            FailCode("PACK_POLICY_INVALID", ex.Message);
+            return;
+        }
         var scopedTypedRun = pack.spec.policy.evaluation_profile != "legacy-v1";
         // A typed-profile invocation must own a fresh output location: using
         // an existing directory could expose an old receipt after an early
