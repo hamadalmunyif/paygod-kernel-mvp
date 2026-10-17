@@ -414,7 +414,9 @@ public static class PolicyExpression
                 };
             }
 
-            if (char.IsDigit(c) || (c == '.' && _i + 1 < s.Length && char.IsDigit(s[_i + 1])))
+            if (char.IsDigit(c) ||
+                (strictSyntax && c == '-' && _i + 1 < s.Length && char.IsDigit(s[_i + 1])) ||
+                (c == '.' && _i + 1 < s.Length && char.IsDigit(s[_i + 1])))
             {
                 var start = _i++;
                 while (_i < s.Length && (char.IsDigit(s[_i]) || s[_i] == '.' || s[_i] == 'e' || s[_i] == 'E' || s[_i] == '+' || s[_i] == '-')) _i++;
