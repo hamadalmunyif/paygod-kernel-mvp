@@ -23,6 +23,11 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Setup Node (portable verifier parity)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Install Python dependencies
         run: pip install -r tools/requirements.txt
 
@@ -40,6 +45,12 @@ jobs:
 
       - name: Run .NET canonicalization and unit regression tests
         run: dotnet test tests/PayGod.Tests/PayGod.Tests.csproj --configuration Release
+
+      - name: Frozen transport parity corpus — Kernel JS verifier
+        run: node tools/test_transport_parity_corpus.mjs
+
+      - name: Frozen transport parity corpus — Kernel Python verifier
+        run: python3 tools/test_transport_parity_corpus.py
 
       - name: Reject CRLF in JSON schemas
         run: |
