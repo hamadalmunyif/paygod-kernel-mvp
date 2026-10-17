@@ -209,6 +209,40 @@ public class PolicyExpressionTypeSafetyTests
         Assert.Equal(!expected, PolicyExpression.Evaluate(condition, legacyRoot));
     }
 
+    [Theory]
+    [InlineData("input.input.block == true && ignored")]
+    [InlineData("input.input.block == true # unexpected tail")]
+    [InlineData("input.input.block == 1e999")]
+    [InlineData("input.input.word == 'unfinished")]
+    public void TypedProfile_RejectsMalformedRuleEvenWhenEarlierAllowMatches(string invalidRule)
+    {
+        var pack = MakePack("typed-v1");
+        pack.spec.policy.rules.Add(new PolicyRule
+        {
+            name = "not-executed-but-invalid",
+            condition = invalidRule,
+            decision = "deny",
+            reason = "Invalid syntax must block a preceding allow too."
+        });
+        var root = JsonNode.Parse("{\"input\":{\"block\":false}}")!;
+        Assert.Throws<InvalidOperationException>(() => PolicyEngine.Evaluate(pack, root));
+    }
+
+    [Fact]
+    public void LegacyProfile_UnreachedInvalidRuleKeepsHistoricalShortCircuit()
+    {
+        var pack = MakePack("legacy-v1");
+        pack.spec.policy.rules.Add(new PolicyRule
+        {
+            name = "legacy-unreached",
+            condition = "input.input.block == true && ignored",
+            decision = "deny",
+            reason = "Old semantics pinned for historical replay only."
+        });
+        var root = JsonNode.Parse("{\"input\":{\"block\":false}}")!;
+        Assert.Equal("allow", PolicyEngine.Evaluate(pack, root).Decision);
+    }
+
     [Fact]
     public void LegacyProfile_NegatedMissingPathBehaviorIsPinnedForHistoricalReplayOnly()
     {
