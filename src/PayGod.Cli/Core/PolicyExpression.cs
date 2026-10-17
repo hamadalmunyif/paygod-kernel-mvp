@@ -12,7 +12,7 @@ public static class PolicyExpression
 {
     public static bool Evaluate(string expression, JsonNode input, bool strictTypes = false)
     {
-        var parser = new Parser(expression);
+        var parser = new Parser(expression, strictTypes);
         var ast = parser.ParseExpression();
         parser.Expect(TokenType.EOF);
         var ctx = new EvalContext(input, strictTypes);
@@ -328,7 +328,7 @@ public static class PolicyExpression
 
     private sealed record Token(TokenType Type, string Text);
 
-    private sealed class Lexer(string s)
+    private sealed class Lexer(string s, bool strictSyntax)
     {
         private int _i;
 
@@ -369,6 +369,8 @@ public static class PolicyExpression
                 while (_i < s.Length && s[_i] != quote) _i++;
                 var text = s[start.._i];
                 if (_i < s.Length) _i++;
+                else if (strictSyntax)
+                    throw new InvalidOperationException("Unterminated policy string literal.");
                 return new(TokenType.String, text);
             }
 
@@ -386,7 +388,9 @@ public static class PolicyExpression
                 '>' => new(TokenType.Gt, ">"),
                 '<' => new(TokenType.Lt, "<"),
                 '=' when Peek('>') => (_i++, new Token(TokenType.Arrow, "=>")).Item2,
-                _ => new(TokenType.EOF, "")
+                _ => strictSyntax
+                    ? throw new InvalidOperationException($"Unsupported character in policy expression: U+{(int)c:X4}.")
+                    : new(TokenType.EOF, "")
             };
 
             bool Peek(char ch) => _i < s.Length && s[_i] == ch;
@@ -398,9 +402,9 @@ public static class PolicyExpression
         }
     }
 
-    private sealed class Parser(string s)
+    private sealed class Parser(string s, bool strictSyntax)
     {
-        private readonly Lexer _lx = new(s);
+        private readonly Lexer _lx = new(s, strictSyntax);
         private Token _cur = new(TokenType.EOF, "");
 
         public Expr ParseExpression()
@@ -481,7 +485,9 @@ public static class PolicyExpression
                 case TokenType.False: Consume(TokenType.False); return new BoolLiteral(false);
                 case TokenType.Number:
                     var numText = _cur.Text; Consume(TokenType.Number);
-                    _ = double.TryParse(numText, NumberStyles.Float, CultureInfo.InvariantCulture, out var d);
+                    var parsed = double.TryParse(numText, NumberStyles.Float, CultureInfo.InvariantCulture, out var d);
+                    if (strictSyntax && (!parsed || !double.IsFinite(d)))
+                        throw new InvalidOperationException("Invalid or non-finite policy numeric literal.");
                     return new NumberLiteral(d);
                 case TokenType.String:
                     var sText = _cur.Text; Consume(TokenType.String);
