@@ -19,6 +19,16 @@ public static class PolicyExpression
         return ast.Eval(ctx).AsBool(ctx.StrictTypes);
     }
 
+    // Parse the complete expression without evaluating source values. An
+    // unreachable malformed rule must not be hidden by earlier allow rules.
+    // Only called by the explicit typed-v1 profile, not legacy replay.
+    public static void ValidateSyntax(string expression)
+    {
+        var parser = new Parser(expression, strictSyntax: true);
+        parser.ParseExpression();
+        parser.Expect(TokenType.EOF);
+    }
+
     private sealed class EvalContext
     {
         public JsonNode Input { get; }
