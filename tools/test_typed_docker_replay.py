@@ -81,25 +81,37 @@ def main():
 
         command = shlex.split(replay)
         assert command[0:2] == ["docker", "run"], command
-        first_replay = run(command)
-        assert first_replay.returncode == 0, (
-            first_replay.stdout[-4000:], first_replay.stderr[-4000:])
-        replay_dir = parent_dir / "fresh-replay"
-        replay_receipt = replay_dir / "receipt.json"
-        assert replay_receipt.is_file()
-        observed = json.loads(replay_receipt.read_text(encoding="utf-8"))
-        assert observed["verdict"]["value"] == original["verdict"]["value"] == "allow"
-        assert observed["input"]["canonical_hash"] == original["input"]["canonical_hash"]
-        assert observed["pack"]["digest_sha256"] == original["pack"]["digest_sha256"]
-        assert (replay_dir / "manifest.json").is_file()
-        print("PASS: actual Docker replay completed into a new child, same bounded verdict/input/Pack")
-
-        previous_bytes = replay_receipt.read_bytes()
-        repeated = run(command)
-        assert repeated.returncode == 2, (repeated.stdout, repeated.stderr)
-        assert "OUTPUT_DIRECTORY_NOT_FRESH" in repeated.stderr, repeated.stderr
-        assert replay_receipt.read_bytes() == previous_bytes
-        print("PASS: second replay refused stale child without modifying prior receipt")
+        try:
+            first_replay = run(command)
+            assert first_replay.returncode == 0, (
+                first_replay.stdout[-4000:], first_replay.stderr[-4000:])
+            replay_dir = parent_dir / "fresh-replay"
+            replay_receipt = replay_dir / "receipt.json"
+            assert replay_receipt.is_file()
+            observed = json.loads(replay_receipt.read_text(encoding="utf-8"))
+            assert observed["verdict"]["value"] == original["verdict"]["value"] == "allow"
+            assert observed["input"]["canonical_hash"] == original["input"]["canonical_hash"]
+            assert observed["pack"]["digest_sha256"] == original["pack"]["digest_sha256"]
+            assert (replay_dir / "manifest.json").is_file()
+            print("PASS: actual Docker replay completed into a new child, same bounded verdict/input/Pack")
+    
+            previous_bytes = replay_receipt.read_bytes()
+            repeated = run(command)
+            assert repeated.returncode == 2, (repeated.stdout, repeated.stderr)
+            assert "OUTPUT_DIRECTORY_NOT_FRESH" in repeated.stderr, repeated.stderr
+            assert replay_receipt.read_bytes() == previous_bytes
+            print("PASS: second replay refused stale child without modifying prior receipt")
+        finally:
+            # Docker writes bind-mounted files as root by default. Reassign
+            # ONLY our isolated test parent to the invoking runner user
+            # before Python TemporaryDirectory cleanup; never chmod shared
+            # filesystem paths or alter canonical evidence during testing.
+            cleanup = run([
+                "docker", "run", "--rm", "--entrypoint", "/bin/chown",
+                "-v", f"{parent_dir}:/out-parent:rw",
+                IMAGE, "-R", f"{os.getuid()}:{os.getgid()}", "/out-parent",
+            ])
+            assert cleanup.returncode == 0, (cleanup.stdout, cleanup.stderr)
 
     print("PASS: bounded typed-v1 Docker replay smoke; NOT bitwise receipt identity")
 
