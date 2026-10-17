@@ -124,6 +124,18 @@ Reviewed source Pack conditions at `d347213`: `secrets-in-repo-guard` (`== 0`), 
 
 ## Approval, rollback and nonclaims
 
+
+
+## 2026-10-17 synchronized-main adversarial findings
+
+After synchronization with the F-005 Kernel main, final-head adversarial review found three additional typed-v1-only issues. These corrections remain **proposed** and do not accept this ADR.
+
+1. **Lexical path-root binding.** Whole-policy strict preflight now rejects every path root that is neither the reserved top-level `input` root nor a lexically in-scope `any()` lambda. This prevents an unbound path such as `typo.ok` from being hidden behind an empty array or a short-circuiting Boolean expression. Runtime source-value/type checks remain separate.
+2. **Typed rule-mapping admission.** For `typed-v1` only, Pack loading now validates each policy-rule mapping before YamlDotNet's permissive deserializer can ignore unsupported fields. The admitted rule contract is exactly `name`, `condition`, `decision`, and `reason`; all are required/non-empty and `decision` is limited to `allow|deny|flag|error`. Historical `legacy-v1` rule deserialization is not silently migrated.
+3. **Runner identity during replay.** A typed-v1 replay command now propagates the recorded `PAYGOD_RUNNER_IMAGE` and `PAYGOD_RUNNER_DIGEST` into the replay container. When the recorded digest is a valid `sha256:<64hex>` content identifier, Docker is invoked using that immutable identifier rather than the mutable tag. The Docker witness requires the replayed Receipt to retain the same runner identity. A missing digest remains explicitly `unknown`; this proposal does not manufacture an immutable identity when one was not recorded.
+
+These fixes strengthen semantic/replay reproducibility only. They do not prove source authenticity, Pack author authority, scanner completeness, trusted time, issuer mandate, or permission to release/payment-execute.
+
 Before merge: exact-SHA CI green (except historical intentional RED witness), owner-reviewed architecture decision, version/replay plan, negative mutation, and independently checked CLI no-bundle-on-failure. Rollback: leave canonical `main` unchanged while draft; if released, use an approved versioned rollback and preserve exported historical receipts and verifier compatibility.
 
 An accepted typed comparison engine **does not** establish source genuineness, scan-completion, CVE remediation, independent timestamp, external release authority, or an institutional pilot.
