@@ -198,6 +198,17 @@ public class PolicyExpressionTypeSafetyTests
         Assert.True(PolicyExpression.Evaluate("input.input.block == false && trailing", input));
     }
 
+    [Theory]
+    [InlineData("input.input.count == 0.0000000001", false)]
+    [InlineData("input.input.count != 0.0000000001", true)]
+    public void TypedNumericEquality_IsExact_NotLegacyEpsilon(string condition, bool expected)
+    {
+        const string json = "{\"input\":{\"count\":0}}";
+        Assert.Equal(expected, Evaluate(condition, json));
+        var legacyRoot = JsonNode.Parse(json)!;
+        Assert.Equal(!expected, PolicyExpression.Evaluate(condition, legacyRoot));
+    }
+
     [Fact]
     public void LegacyProfile_NegatedMissingPathBehaviorIsPinnedForHistoricalReplayOnly()
     {
