@@ -49,6 +49,13 @@ def main():
                 assert all(x.exists() for x in (receipt, manifest, ledger)), name
                 recorded = json.loads(receipt.read_text(encoding="utf-8"))
                 assert recorded["verdict"]["value"] == decision, (name, recorded["verdict"])
+                # Receiver's replay must mount an existing parent and use a
+                # new child: bind-mounting /out itself precreates it, violating
+                # the typed-v1 no-stale-output contract.
+                replay = recorded["replay"]["command"]
+                assert '-v "<OUT_PARENT_DIR>:/out-parent:rw"' in replay, replay
+                assert "--out /out-parent/<NEW_RUN_SUBDIR>" in replay, replay
+                assert '-v "<OUT_DIR>:/out:rw"' not in replay, replay
             print(f"PASS: typed-v1 {name}, exit={p.returncode}, receipt={'yes' if decision else 'no'}")
         # Duplicate source keys can be consumed differently by different
         # runtimes; typed-v1 rejects raw object keys before materialization.
