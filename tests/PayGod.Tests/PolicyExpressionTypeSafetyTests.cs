@@ -203,6 +203,8 @@ public class PolicyExpressionTypeSafetyTests
     [InlineData("input.input.count != 0", false)]
     [InlineData("input.input.count < 1", true)]
     [InlineData("input.input.count == 1", false)]
+    [InlineData("input.input.count > -1", true)]
+    [InlineData("input.input.count == -1", false)]
     public void TypedNumericSafeIntegerComparison_IsExact(string condition, bool expected)
     {
         Assert.Equal(expected, Evaluate(condition, "{\"input\":{\"count\":0}}"));
