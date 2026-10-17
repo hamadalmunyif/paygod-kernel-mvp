@@ -50,6 +50,25 @@ def main():
                 recorded = json.loads(receipt.read_text(encoding="utf-8"))
                 assert recorded["verdict"]["value"] == decision, (name, recorded["verdict"])
             print(f"PASS: typed-v1 {name}, exit={p.returncode}, receipt={'yes' if decision else 'no'}")
+        # Duplicate source keys can be consumed differently by different
+        # runtimes; typed-v1 rejects raw object keys before materialization.
+        # This includes hidden nested objects that a rule did not reference.
+        duplicates = [
+            ("duplicate-block", '{"input":{"block":false,"block":true}}'),
+            ("duplicate-nested", '{"input":{"block":false,"nested":{"x":1,"x":2}}}'),
+            ("duplicate-in-array", '{"input":{"block":false,"items":[{"x":1,"x":2}]}}'),
+        ]
+        for name, raw in duplicates:
+            source = tmp / f"{name}.json"
+            output = tmp / f"out-{name}"
+            source.write_text(raw, encoding="utf-8")
+            p = subprocess.run([cli, "run", "--pack", str(PACK),
+                                "--input", str(source), "--out", str(output)],
+                               capture_output=True, text=True)
+            assert p.returncode == 2, (name, p.returncode, p.stdout, p.stderr)
+            assert "INPUT_JSON_DUPLICATE_KEY" in p.stderr, (name, p.stderr)
+            assert not output.exists(), (name, "duplicate input minted output")
+            print(f"PASS: typed-v1 {name} duplicate rejected with no artifacts")
         # Refuse reuse of a directory holding an old canonical receipt.
         # An error must never silently overwrite or pretend to replace it.
         prior = tmp / "preexisting-output"
