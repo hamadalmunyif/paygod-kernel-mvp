@@ -210,6 +210,33 @@ def main():
         assert not reserved_output.exists(), "reserved hidden lambda minted allow"
         print("PASS: unreachable reserved input lambda rejected before allow")
 
+        # Rule-order cannot hide a static type error in a later rule.
+        # CLI must reject before creating any canonical output directory.
+        for name, expr in [
+            ("boolean-order", "true > false"),
+            ("bool-number-equality", "true == 1"),
+            ("number-string-equality", "1 == '1'"),
+        ]:
+            pack_dir = tmp / f"pack-static-{name}"
+            pack_dir.mkdir()
+            (pack_dir / "pack.yaml").write_text(
+                base_pack + "\n" +
+                '      - name: unreachable-static-mismatch\n'
+                f'        condition: "{expr}"\n'
+                '        decision: deny\n'
+                '        reason: Static mismatch must abort the whole Pack\n',
+                encoding="utf-8")
+            target = tmp / f"out-static-{name}"
+            p = subprocess.run([
+                cli, "run", "--pack", str(pack_dir),
+                "--input", str(tmp / "known-false.json"),
+                "--out", str(target)],
+                capture_output=True, text=True)
+            assert p.returncode == 2, (name, p.returncode, p.stdout, p.stderr)
+            assert "POLICY_INPUT_REJECTED" in p.stderr, (name, p.stderr)
+            assert not target.exists(), (name, "unreachable invalid comparison minted receipt")
+            print(f"PASS: typed-v1 {name} rejected before allow/evidence")
+
         # Refuse reuse of a directory holding an old canonical receipt.
         # An error must never silently overwrite or pretend to replace it.
         prior = tmp / "preexisting-output"
