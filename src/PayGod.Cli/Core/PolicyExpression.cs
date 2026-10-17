@@ -591,6 +591,9 @@ public static class PolicyExpression
                     Consume(TokenType.LParen);
                     if (_cur.Type != TokenType.Ident) throw new InvalidOperationException("Expected variable name in any()");
                     var varName = _cur.Text;
+                    if (strictSyntax && varName == "input")
+                        throw new InvalidOperationException(
+                            "Policy any() cannot shadow reserved input root.");
                     Consume(TokenType.Ident);
                     Consume(TokenType.Arrow);
                     var pred = ParseOr();
