@@ -1,0 +1,859 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="Hamad Almunyif">
+      
+      
+        <link rel="canonical" href="https://hamadalmunyif.github.io/paygod-kernel-mvp/open-collaboration/TARGETS/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Open-source target map and contribution ordering - PayGod Kernel MVP</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#open-source-target-map-and-contribution-ordering" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="PayGod Kernel MVP" class="md-header__button md-logo" aria-label="PayGod Kernel MVP" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PayGod Kernel MVP
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Open-source target map and contribution ordering
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hamadalmunyif/paygod-kernel-mvp" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hamadalmunyif/paygod-kernel-mvp
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guide/introduction/" class="md-tabs__link">
+          
+  
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../dev/architecture/" class="md-tabs__link">
+          
+  
+  
+  Developer Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="PayGod Kernel MVP" class="md-nav__button md-logo" aria-label="PayGod Kernel MVP" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PayGod Kernel MVP
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hamadalmunyif/paygod-kernel-mvp" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hamadalmunyif/paygod-kernel-mvp
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/contracts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contracts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="open-source-target-map-and-contribution-ordering">Open-source target map and contribution ordering</h1>
+<p>Snapshot: 2026-10-12. Repositories were checked as public and not archived via connected GitHub metadata. Targeting is an internal research priority, NOT a partner agreement, product endorsement or proof of operational integration.</p>
+<h2 id="selection-rule">Selection rule</h2>
+<p>Rate each candidate 0–5 on: real upstream user problem (35%), narrow testable patch (25%), proximity to PayGod trust boundary (20%), maintainer access/community clarity (10%), low risk or no-spend implementation (10%). Scores are candidate hypotheses and must be recomputed from issue/CI evidence, not presented as market facts. <strong>Tier A first</strong>, <strong>Tier B read/reproduce</strong>, <strong>Tier C only after a grounded need</strong>.</p>
+<p>Fork budget: 1 active external code fork at a time for the first 30 days; maximum 2 concurrently only when both have a working witness and maintainer engagement. A directory of candidate links is not a reason to fork.</p>
+<h2 id="tier-a-active-engineering-conversations">Tier A — active engineering conversations</h2>
+<table>
+<thead>
+<tr>
+<th>Repo</th>
+<th>Upstream-first contribution</th>
+<th>Optional PayGod research</th>
+<th>Stage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/Virtual-Protocol/acp-cli">Virtual-Protocol/acp-cli</a></td>
+<td>Finish Issue #79 / PR #105: headless resource update/delete with regression, predictable CLI JSON and safe failures</td>
+<td>Shadow resource-change evidence, never API mandatory dependency</td>
+<td>OPEN PR — improve current fork first</td>
+</tr>
+<tr>
+<td><a href="https://github.com/flop-labs/tclk">flop-labs/tclk</a></td>
+<td>Issue #172: rail-observed reconciliation/conformance; first agree interface and test expectation; follow CONTRIBUTING + AGENTS.md</td>
+<td>Separately verify signed coordination vs independently observed value</td>
+<td>ISSUE/DESIGN — no fork yet</td>
+</tr>
+<tr>
+<td><a href="https://github.com/Virtual-Protocol/butler-skills">Virtual-Protocol/butler-skills</a></td>
+<td>Author-native validator/fixture test that demonstrates any specific owner-mandate-to-version ambiguity; avoid claiming missing built-in hash controls</td>
+<td>Optional signed version/owner mandate continuity receipt</td>
+<td>RESEARCH — no fork yet</td>
+</tr>
+<tr>
+<td><a href="https://github.com/Virtual-Protocol/acp-node-v2">Virtual-Protocol/acp-node-v2</a></td>
+<td>Evaluator isolation or deterministic job event fixtures, only after confirming existing safeguards and owner interest</td>
+<td>External evaluator-state vs native ACP chain reconciliation</td>
+<td>RESEARCH — no fork yet</td>
+</tr>
+</tbody>
+</table>
+<h2 id="tier-b-protocol-and-ecosystem-interoperability">Tier B — protocol and ecosystem interoperability</h2>
+<table>
+<thead>
+<tr>
+<th>Repo</th>
+<th>Existing native capability to respect</th>
+<th>First useful contribution to upstream</th>
+<th>PayGod-only experiment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/google-agentic-commerce/AP2">google-agentic-commerce/AP2</a></td>
+<td>Signed intent, payment/checkout mandate chain and receipts; standards decisions also belong to FIDO process</td>
+<td>SDK/samples tests for double use, settlement-status evidence, archived verifier keys; don't assume the upstream sample issue is verified</td>
+<td>Compare multi-protocol mandate and external receipts</td>
+</tr>
+<tr>
+<td><a href="https://github.com/Universal-Commerce-Protocol/ucp">Universal-Commerce-Protocol/ucp</a></td>
+<td>Checkout model and AP2-compatible extension</td>
+<td>Conformance vectors for failed/partial checkout and status reconciliation</td>
+<td>Cross-provider portable witness</td>
+</tr>
+<tr>
+<td><a href="https://github.com/coinbase/x402">coinbase/x402</a></td>
+<td>Native HTTP 402 settlement flow</td>
+<td>Test negative facilitator outcomes, idempotency and proof surfaces using no-value fixtures</td>
+<td>Receipt vs provider-side external proof</td>
+</tr>
+<tr>
+<td><a href="https://github.com/a2aproject/A2A">a2aproject/A2A</a></td>
+<td>Cross-agent tasks, state and discovery; not itself financial settlement proof</td>
+<td>Task transition evidence compatibility examples and disputed source labels</td>
+<td>Read-only A2A task state + PayGod shadow</td>
+</tr>
+<tr>
+<td><a href="https://github.com/modelcontextprotocol/modelcontextprotocol">modelcontextprotocol/modelcontextprotocol</a></td>
+<td>MCP tool interoperability and authorization ecosystem</td>
+<td>Secure tool invocation/audit example, or negative tests after maintainer discussion</td>
+<td>Tool-call lineage into proof envelope</td>
+</tr>
+</tbody>
+</table>
+<h2 id="tier-c-infrastructure-foundations-and-long-run-options">Tier C — infrastructure foundations and long-run options</h2>
+<table>
+<thead>
+<tr>
+<th>Repo</th>
+<th>Relevant strong native primitive</th>
+<th>Default first interaction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/sigstore/cosign">sigstore/cosign</a></td>
+<td>Signing, verification and supply-chain transparency</td>
+<td>Test interoperability with detached evidence/signature and expiry; do not claim cosign attests source truth</td>
+</tr>
+<tr>
+<td><a href="https://github.com/in-toto/attestation">in-toto/attestation</a></td>
+<td>Provenance predicate and attestation envelopes</td>
+<td>Evidence mapping without inventing an attestation format</td>
+</tr>
+<tr>
+<td><a href="https://github.com/spiffe/spire">spiffe/spire</a></td>
+<td>Workload identity issuance/trust domains</td>
+<td>How authenticated workload identity differs from organizational decision authority</td>
+</tr>
+<tr>
+<td><a href="https://github.com/open-telemetry/opentelemetry-specification">open-telemetry/opentelemetry-specification</a></td>
+<td>Trace/span interoperability</td>
+<td>Propagate source correlation identifiers; do not call tracing a verified financial receipt</td>
+</tr>
+<tr>
+<td><a href="https://github.com/open-policy-agent/opa">open-policy-agent/opa</a></td>
+<td>Mature policy execution</td>
+<td>Compare policy decision records, without making OPA an unregistered second canonical PayGod decision authority</td>
+</tr>
+</tbody>
+</table>
+<h2 id="watchlist-d-agent-runtimes-industrial-evidence-and-data-spaces-no-fork-at-this-stage">Watchlist D — agent runtimes, industrial evidence and data spaces (NO FORK at this stage)</h2>
+<p>These are open doors for future cross-sector workflows, not active joint projects. This layer matters if the same evidence/authority question recurs outside payments.</p>
+<table>
+<thead>
+<tr>
+<th>Repo</th>
+<th>Potential partner-native benefit</th>
+<th>PayGod shadow question</th>
+<th>First evidence needed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/openai/openai-agents-python">openai/openai-agents-python</a></td>
+<td>Reproducible handoff, guardrail and external-action trace tests, if a maintainer requests a concrete fix</td>
+<td>Can an action's owner mandate be carried separately from trace semantics?</td>
+<td>Actual failing native test, not a generic wrapper</td>
+</tr>
+<tr>
+<td><a href="https://github.com/langchain-ai/langgraph">langchain-ai/langgraph</a></td>
+<td>Durable state, checkpoint/retry test vectors where external effects are involved</td>
+<td>Can the outcome of a replayed consequential tool action be externally evidenced?</td>
+<td>Native replay/side-effect fixture</td>
+</tr>
+<tr>
+<td><a href="https://github.com/microsoft/agent-framework">microsoft/agent-framework</a></td>
+<td>Typed workflow and executor interoperability tests, if a specific gap emerges</td>
+<td>Can evaluator/workflow events be reconciled with external evidence?</td>
+<td>Upstream-native event/actor baseline</td>
+</tr>
+<tr>
+<td><a href="https://github.com/open62541/open62541">open62541/open62541</a></td>
+<td>OPC UA data-quality/time/status capture tests without altering industrial device/control paths</td>
+<td>Source measurement quality vs portable attested CEMS evidence</td>
+<td>Deidentified or synthetic read-only industrial stream</td>
+</tr>
+<tr>
+<td><a href="https://github.com/eclipse-milo/milo">eclipse-milo/milo</a></td>
+<td>OPC UA client read-only evidence mapping and negative source-quality tests</td>
+<td>Same CEMS ingestion question across Java implementation</td>
+<td>Native OPC UA status/quality fixture</td>
+</tr>
+<tr>
+<td><a href="https://github.com/eclipse-edc/Connector">eclipse-edc/Connector</a></td>
+<td>Contract-controlled data exchange receipt/transfer interoperability</td>
+<td>Does the received evidence remain independently verifiable without trusting sender-side dashboard?</td>
+<td>Realistic, non-sensitive transfer fixture</td>
+</tr>
+<tr>
+<td><a href="https://github.com/ethereum/ERCs">ethereum/ERCs</a></td>
+<td>Standards analysis only when a concrete identity or wallet mandate interoperability issue emerges</td>
+<td>Does protocol-standard authorization survive transfer to offchain evidence?</td>
+<td>Existing EIP/ERC reference and working compliance vectors</td>
+</tr>
+</tbody>
+</table>
+<p>Repositories were verified as public and non-archived at snapshot. Their inclusion does NOT authorize modifications to OPC UA control systems, production sensors, token/payment contracts, or model-agent deployments. Industrial integration begins read-only; no process-control commands, no public client telemetry, no regulatory certification claim.</p>
+<h2 id="explicit-out-of-scope-early-targets">Explicit out-of-scope early targets</h2>
+<p>A new cryptocurrency token, a replacement settlement chain, an ACP/TCLK fork with rewritten wire format, a mandatory PayGod SDK in upstream, a generic cross-industry DSL, or commercial bank integration without an authentic external partner witness. Reconsider only with concrete demand and ADR.</p>
+<h2 id="native-integration-architecture">Native integration architecture</h2>
+<p>Upstream event/receipt/observation -&gt; independent capture with provenance -&gt; explicit admission policy (WITHHELD on unknown mandatory fact) -&gt; existing PayGod canonical path only if it can represent input -&gt; portable original evidence and labeled mapping -&gt; independent verifier -&gt; diagnostic comparison with native state.</p>
+<p>In shadow mode PayGod must not affect external action. An external enforcer is a SEPARATE future optional product that would require actual nonbypassability proof and owner/rail authorization.</p>
+<h2 id="diversity-anti-lock-in">Diversity / anti-lock-in</h2>
+<p>Prefer protocol-neutral evidence and adapters; every integration target gets at least one deliberate comparator to avoid optimising solely for the first partner's implementation. Example comparators: ACP vs A2A job, TCLK coordination vs x402 settlement, Butler duty vs signed supply-chain artifact, AP2 native verifier vs independent observer.</p>
+<h2 id="what-establishes-a-reciprocal-relationship">What establishes a reciprocal relationship?</h2>
+<ol>
+<li>Upstream confirms a native problem, gives feedback or merges a useful fix.</li>
+<li>Our patch improves their native workflows without imposing PayGod.</li>
+<li>Their maintainers or external users independently repeat and validate a witness.</li>
+<li>Only then discuss optional joint adapters/test vectors and business exploration.
+No collaborator or partnership is claimed from an opened PR or GitHub issue.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "navigation.top", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

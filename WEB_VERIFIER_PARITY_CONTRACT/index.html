@@ -1,0 +1,848 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="Hamad Almunyif">
+      
+      
+        <link rel="canonical" href="https://hamadalmunyif.github.io/paygod-kernel-mvp/WEB_VERIFIER_PARITY_CONTRACT/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Kernel ↔ Website Verifier Parity Contract - PayGod Kernel MVP</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#kernel-website-verifier-parity-contract" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="PayGod Kernel MVP" class="md-header__button md-logo" aria-label="PayGod Kernel MVP" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PayGod Kernel MVP
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Kernel ↔ Website Verifier Parity Contract
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hamadalmunyif/paygod-kernel-mvp" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hamadalmunyif/paygod-kernel-mvp
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../guide/introduction/" class="md-tabs__link">
+          
+  
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../dev/architecture/" class="md-tabs__link">
+          
+  
+  
+  Developer Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="PayGod Kernel MVP" class="md-nav__button md-logo" aria-label="PayGod Kernel MVP" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PayGod Kernel MVP
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hamadalmunyif/paygod-kernel-mvp" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hamadalmunyif/paygod-kernel-mvp
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guide/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dev/contracts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contracts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="kernel-website-verifier-parity-contract">Kernel ↔ Website Verifier Parity Contract</h1>
+<p>Status: <strong>PROPOSED / DOCUMENTATION CONTRACT — NOT A PRODUCTION OR AUTHORITY CLAIM</strong><br />
+Date: 2026-10-17</p>
+<h2 id="purpose">Purpose</h2>
+<p>Define what the PayGod website/browser verifier may claim to implement from the canonical Kernel, how that relationship is evidenced, and what remains outside browser parity.</p>
+<p>The Kernel remains the source of decision semantics and canonical protocol definitions. The website is a <strong>recipient-side verifier surface</strong>. It must not become an alternate policy engine, receipt issuer, source-admission authority or release authority.</p>
+<h2 id="authority-order">Authority order</h2>
+<ol>
+<li>Versioned Kernel source and specifications.</li>
+<li>Frozen Kernel test corpus / Git blob identities.</li>
+<li>Independent implementations that reproduce the frozen corpus.</li>
+<li>Website build and browser verifier tests.</li>
+<li>Deployment metadata and live browser smoke.</li>
+</ol>
+<p>A lower layer cannot redefine a higher layer. A green website build cannot change Kernel semantics.</p>
+<h2 id="canonical-source-snapshot">Canonical source snapshot</h2>
+<p>Observed on Kernel <code>main@81e8020065434d0af3557444c28bd3e128d06899</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Role</th>
+<th>Git blob</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/PayGod.Cli/Core/Canonicalizer.cs</code></td>
+<td>.NET implementation of <code>paygod-c14n-v1</code></td>
+<td><code>52d4f67bb58e5d26ee690fdf52eec4196b6f0a99</code></td>
+</tr>
+<tr>
+<td><code>spec/test-vectors/canonical-json.json</code></td>
+<td>canonical accepted/rejected corpus</td>
+<td><code>3880d3a45b417ae95cae9a7b8cebb1c8c47722d8</code></td>
+</tr>
+<tr>
+<td><code>spec/test-vectors/ledger-chaining.json</code></td>
+<td>ledger canonical/hash corpus</td>
+<td><code>ac16a235641f22101dab93187af0eb992f010987</code></td>
+</tr>
+<tr>
+<td><code>spec/test-vectors/transport-parity-v1.json</code></td>
+<td>portable transport verifier corpus</td>
+<td><code>d3e682cb7f4f82cc88c4b8fd3ec7fb99d53357da</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>paygod-c14n-v1</code> is a restricted deterministic JSON profile, <strong>not RFC 8785</strong>. It accepts null, Boolean, string, array, object and safe integer values; rejects floating/exponent numeric forms and unsafe integers; requires NFC object/property names; and preserves string values without silent Unicode normalization.</p>
+<h2 id="website-evidence-snapshot">Website evidence snapshot</h2>
+<p>Observed pinned website source snapshot <code>paygod-cloud-starter@af7061963367288c6fb3830e5723e5f5bc63230e</code> on <code>website/paygod-production</code>:</p>
+<ul>
+<li><code>website/src/verifier.mjs</code> implements browser <code>paygod-c14n-v1</code>, transport verification and optional recipient-supplied issuer trust.</li>
+<li><code>website/tests/fixtures/kernel-c14n-reference-20261014.json</code> has Git blob <code>3880d3a45b417ae95cae9a7b8cebb1c8c47722d8</code>, exactly matching the Kernel canonical corpus blob above.</li>
+<li><code>website/tests/kernel_c14n_reference.mjs</code> verifies canonical bytes and SHA-256 against that frozen corpus and separately rejects decimal, exponent and unsafe integer lexical forms.</li>
+<li>Browser and standalone Python verifier tests separately exercise bundle/manifest/ledger/receipt checks and issuer-auth negative cases.</li>
+</ul>
+<p>This pinned source snapshot establishes the website implementation context used by the parity evidence below. It does <strong>not</strong> by itself prove live production state; deployment metadata and live smoke remain separate release evidence.</p>
+<h2 id="currently-proven-cross-runtime-parity">Currently proven cross-runtime parity</h2>
+<p>The frozen canonical corpus contains 11 cases:</p>
+<ul>
+<li>8 accepted canonicalization cases.</li>
+<li>3 fail-closed rejection cases.</li>
+</ul>
+<p>The website additionally checks three raw numeric lexical rejects before <code>JSON.parse</code>.</p>
+<p>The shared evidence therefore supports this claim:</p>
+<blockquote>
+<p>The tested website implementation reproduces the frozen Kernel <code>paygod-c14n-v1</code> canonical bytes / hashes for the shared accepted vectors and rejects the shared canonical bad vectors under the tested implementation.</p>
+</blockquote>
+<p>It does <strong>not</strong> support the stronger claim that the browser is a complete implementation of every Kernel verifier, policy, admission, replay or authority rule.</p>
+<h2 id="current-parity-state">Current parity state</h2>
+<p>The first six rows below are the dimensions for which frozen shared corpora are consumed across the tested implementations. The remaining rows are explicit boundary dimensions: they are intentionally <strong>not</strong> established by browser/shared-corpus parity and are listed to prevent overclaiming.</p>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Current state</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Canonical JSON</td>
+<td><strong>SHARED PARITY CONFIRMED / BOUNDED</strong></td>
+<td>blob <code>3880d3a45b417ae95cae9a7b8cebb1c8c47722d8</code>; website canonical gate passes</td>
+</tr>
+<tr>
+<td>Ledger chaining</td>
+<td><strong>SHARED PARITY CONFIRMED / BOUNDED</strong></td>
+<td>blob <code>ac16a235641f22101dab93187af0eb992f010987</code>; website ledger gate passes</td>
+</tr>
+<tr>
+<td>Manifest / bundle digest</td>
+<td><strong>SHARED TRANSPORT CORPUS / TESTED</strong></td>
+<td>transport blob <code>d3e682cb7f4f82cc88c4b8fd3ec7fb99d53357da</code></td>
+</tr>
+<tr>
+<td>Receipt binding</td>
+<td><strong>SHARED TRANSPORT CORPUS / TESTED</strong></td>
+<td>same frozen transport corpus</td>
+</tr>
+<tr>
+<td>External receipt commitment</td>
+<td><strong>SHARED TRANSPORT CORPUS / TESTED</strong></td>
+<td>wrong-pin + coherent-rewrite cases</td>
+</tr>
+<tr>
+<td>Issuer signature / trust store</td>
+<td><strong>SHARED TRANSPORT CORPUS / TESTED</strong></td>
+<td>trusted issuer + wrong trust key cases</td>
+</tr>
+<tr>
+<td>Replay</td>
+<td>Kernel standalone/Docker witnesses exist</td>
+<td>browser remains explicit <code>not_performed</code>; execution replay is not browser parity</td>
+</tr>
+<tr>
+<td>Time</td>
+<td>producer clock checks exist</td>
+<td>remains separate from trusted timestamp authority</td>
+</tr>
+<tr>
+<td>Policy evaluation / typed-v1</td>
+<td>Kernel-only</td>
+<td><strong>OUT OF WEBSITE PARITY</strong> unless separately designed and approved</td>
+</tr>
+<tr>
+<td>Evidence admission / source truth</td>
+<td>ADR 0003 / source-specific</td>
+<td><strong>OUT OF WEBSITE PARITY</strong></td>
+</tr>
+<tr>
+<td>Issuer mandate / release authority</td>
+<td>separate trust/authorization problem</td>
+<td><strong>OUT OF WEBSITE PARITY</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The first Kernel transport-corpus run preserved a real divergence: JS passed while Python returned <code>cryptography_backend_unavailable</code> for the trusted-issuer case. The corpus was not rewritten. The existing pinned issuer-auth backend was installed in the CI path. Codex then identified two cross-platform byte-preservation risks: Python text-mode materialization and Git checkout newline conversion. Both were corrected without changing corpus bytes or expected outcomes: Python now writes exact UTF-8 bytes, and <code>.gitattributes</code> pins the frozen corpora to <code>eol=lf</code> with an explicit CI <code>git check-attr eol</code> gate. PR #125 passed 8/8 workflow families at exact head <code>0585ee622ffe7683ce36beac322beebc95025a0b</code>, Codex completed with no findings, and the corpus/fixes were merged to Kernel <code>main@81e8020065434d0af3557444c28bd3e128d06899</code>.</p>
+<p>Website PR #22 copies the exact same transport corpus blob. Its current exact head <code>bf43c9627c8868a59e15cedca11357841e23abe5</code> passes LF-checkout enforcement, canonical parity, ledger parity, browser-JS transport parity, vendored-Python transport parity, privacy-contract checks, and existing verifier regressions. It remains pre-merge evidence until the website merge train completes and the merged production SHA is correlated to deployment/live smoke.</p>
+<h2 id="required-claim-language">Required claim language</h2>
+<p>Allowed when exact evidence is green:</p>
+<ul>
+<li>“matches the pinned Kernel canonical corpus”</li>
+<li>“recipient-side integrity verification”</li>
+<li>“issuer authenticity verified against recipient-supplied trusted key” when that exact check succeeds</li>
+<li>“replay not performed” when execution was not independently replayed</li>
+<li>“producer-supplied time” when no independent time authority exists</li>
+</ul>
+<p>Not allowed from browser parity alone:</p>
+<ul>
+<li>“same as the Kernel in all semantics”</li>
+<li>“source is true/authentic”</li>
+<li>“scanner completed correctly”</li>
+<li>“decision was authorized”</li>
+<li>“release/payment is authorized”</li>
+<li>“trusted timestamp”</li>
+<li>“independently replayed” when replay was not executed</li>
+</ul>
+<h2 id="change-control">Change control</h2>
+<p>Any change to <code>paygod-c14n-v1</code>, its canonical source corpus, or decision-critical transport format must:</p>
+<ol>
+<li>change through the Kernel first;</li>
+<li>create a new reviewed Kernel commit and, where applicable, a new corpus blob identity;</li>
+<li>update the website consumer explicitly;</li>
+<li>run cross-runtime negative and positive tests;</li>
+<li>preserve prior versioned fixtures needed for historical verification;</li>
+<li>avoid silently relabeling an older website implementation as compatible.</li>
+</ol>
+<p>The <strong>corpus Git blob</strong> is the strongest identity for exact shared test bytes. Branch names and moving <code>main</code> SHAs are contextual provenance, not substitutes for the frozen blob.</p>
+<h2 id="next-falsifiable-milestone">Next falsifiable milestone</h2>
+<p>The next milestone is no longer another local parity vector. It is <strong>exact-SHA release correlation</strong>:</p>
+<ol>
+<li>merge the Kernel-owned corpus and documentation through controlled reviewed PRs;</li>
+<li>merge website parity changes in dependency order;</li>
+<li>require a push-triggered Website Verifier on the exact merged production-branch SHA;</li>
+<li>require Vercel production deployment metadata to point to that exact SHA;</li>
+<li>perform live production smoke on the public routes;</li>
+<li>record the final merged Kernel and website SHAs in the Observatory evidence record.</li>
+</ol>
+<p>Until that release correlation is complete, parity is verified in source/CI but not yet described as deployed exact-SHA production evidence.</p>
+<h2 id="nonclaims">Nonclaims</h2>
+<p>This document does not accept ADR 0004, merge PR #115, prove external recipient adoption, certify a security scanner, configure production branch protection, authorize a payment/release, or elevate the website into Kernel authority.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate", "navigation.top", "search.suggest", "search.highlight", "content.tabs.link", "content.code.annotation", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

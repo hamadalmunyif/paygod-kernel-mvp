@@ -1,0 +1,9 @@
+{
+  "evidence": [
+    {
+      "ref": "urn:example:evidence:sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "hash_alg": "sha256",
+      "note": "refs-only; no raw payload; no PII"
+    }
+  ]
+}
