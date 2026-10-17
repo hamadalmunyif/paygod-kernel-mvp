@@ -10,21 +10,76 @@ namespace PayGod.Cli.Core;
 /// </summary>
 public static class PolicyExpression
 {
-    public static bool Evaluate(string expression, JsonNode input)
+    public static bool Evaluate(string expression, JsonNode input, bool strictTypes = false)
     {
-        var parser = new Parser(expression);
+        var parser = new Parser(expression, strictTypes);
         var ast = parser.ParseExpression();
         parser.Expect(TokenType.EOF);
-        var ctx = new EvalContext(input);
-        return ast.Eval(ctx).AsBool();
+        var ctx = new EvalContext(input, strictTypes);
+        return ast.Eval(ctx).AsBool(ctx.StrictTypes);
+    }
+
+    // Parse the complete expression without evaluating source values. An
+    // unreachable malformed rule must not be hidden by earlier allow rules.
+    // Only called by the explicit typed-v1 profile, not legacy replay.
+    public static void ValidateSyntax(string expression)
+    {
+        var parser = new Parser(expression, strictSyntax: true);
+        var ast = parser.ParseExpression();
+        parser.Expect(TokenType.EOF);
+        RequireStaticallyBooleanContext(ast, "top-level policy condition");
+    }
+
+    // A typed policy is parsed completely even if its first rule ALLOWs.
+    // Reject impossible comparisons of statically known types during that
+    // parse rather than waiting for a potentially unreachable rule to Eval().
+    // A PathRef has unknown type until actual admitted input is evaluated.
+    private enum StaticKind { Unknown, Boolean, SafeInteger, String }
+
+    private static StaticKind InferStaticKind(Expr expr) => expr switch
+    {
+        BoolLiteral or NotExpr or BinaryBoolExpr or CompareExpr or AnyExpr
+            => StaticKind.Boolean,
+        SafeIntegerLiteral => StaticKind.SafeInteger,
+        StringLiteral => StaticKind.String,
+        _ => StaticKind.Unknown
+    };
+
+    private static void RequireStaticallyValidComparison(TokenType op, Expr left, Expr right)
+    {
+        var lhs = InferStaticKind(left);
+        var rhs = InferStaticKind(right);
+        if (lhs == StaticKind.Unknown || rhs == StaticKind.Unknown)
+            return; // Runtime admission must check both operands, even under not.
+        if (lhs != rhs)
+            throw new InvalidOperationException(
+                "typed-v1 policy comparison has incompatible static operand types.");
+        if (lhs == StaticKind.Boolean && op is not (TokenType.Eq or TokenType.Ne))
+            throw new InvalidOperationException(
+                "typed-v1 Boolean literals/expressions support equality or inequality only.");
+    }
+
+    private static void RequireStaticallyBooleanContext(Expr expr, string context)
+    {
+        var kind = InferStaticKind(expr);
+        if (kind is StaticKind.SafeInteger or StaticKind.String)
+            throw new InvalidOperationException(
+                $"typed-v1 {context} requires a Boolean expression.");
+        // Unknown is permitted here because PathRef type is source-dependent
+        // and will still be checked fail-closed during strict evaluation.
     }
 
     private sealed class EvalContext
     {
         public JsonNode Input { get; }
+        public bool StrictTypes { get; }
         private readonly Dictionary<string, JsonNode?> _vars = new(StringComparer.Ordinal);
 
-        public EvalContext(JsonNode input) => Input = input;
+        public EvalContext(JsonNode input, bool strictTypes)
+        {
+            Input = input;
+            StrictTypes = strictTypes;
+        }
 
         public JsonNode? ResolveVar(string name)
         {
@@ -33,12 +88,24 @@ public static class PolicyExpression
         }
 
         public void SetVar(string name, JsonNode? value) => _vars[name] = value;
+        public bool TryGetVar(string name, out JsonNode? value) => _vars.TryGetValue(name, out value);
+        public void RemoveVar(string name) => _vars.Remove(name);
     }
 
     private readonly record struct Value(JsonNode? Node)
     {
-        public bool AsBool()
+        public bool AsBool(bool strictTypes = false)
         {
+            // Only real JSON Boolean may stand as a truth value in typed-v1.
+            // Missing/null/string/number/array/object are not evidence of false.
+            if (strictTypes)
+            {
+                var kind = Node?.GetValueKind();
+                if (kind is System.Text.Json.JsonValueKind.True or System.Text.Json.JsonValueKind.False)
+                    return kind == System.Text.Json.JsonValueKind.True;
+                throw new InvalidOperationException(
+                    "Policy Boolean expression requires a present JSON boolean.");
+            }
             if (Node is null) return false;
             if (Node is JsonValue v)
             {
@@ -90,6 +157,12 @@ public static class PolicyExpression
         public override Value Eval(EvalContext ctx) => new(JsonValue.Create(value));
     }
 
+    // typed-v1 authored numbers are c14n-v1 safe integers, never doubles.
+    private sealed class SafeIntegerLiteral(long value) : Expr
+    {
+        public override Value Eval(EvalContext ctx) => new(JsonValue.Create(value));
+    }
+
     private sealed class StringLiteral(string value) : Expr
     {
         public override Value Eval(EvalContext ctx) => new(JsonValue.Create(value));
@@ -117,23 +190,23 @@ public static class PolicyExpression
 
     private sealed class NotExpr(Expr inner) : Expr
     {
-        public override Value Eval(EvalContext ctx) => new(JsonValue.Create(!inner.Eval(ctx).AsBool()));
+        public override Value Eval(EvalContext ctx) => new(JsonValue.Create(!inner.Eval(ctx).AsBool(ctx.StrictTypes)));
     }
 
     private sealed class BinaryBoolExpr(TokenType op, Expr left, Expr right) : Expr
     {
         public override Value Eval(EvalContext ctx)
         {
-            var l = left.Eval(ctx).AsBool();
+            var l = left.Eval(ctx).AsBool(ctx.StrictTypes);
             if (op == TokenType.And)
             {
                 if (!l) return new(JsonValue.Create(false));
-                return new(JsonValue.Create(right.Eval(ctx).AsBool()));
+                return new(JsonValue.Create(right.Eval(ctx).AsBool(ctx.StrictTypes)));
             }
             if (op == TokenType.Or)
             {
                 if (l) return new(JsonValue.Create(true));
-                return new(JsonValue.Create(right.Eval(ctx).AsBool()));
+                return new(JsonValue.Create(right.Eval(ctx).AsBool(ctx.StrictTypes)));
             }
             return new(JsonValue.Create(false));
         }
@@ -146,6 +219,13 @@ public static class PolicyExpression
             var l = left.Eval(ctx);
             var r = right.Eval(ctx);
 
+            // Typed comparisons: a missing/null operand is not negative evidence.
+            // Disallow implicit string/number/boolean coercion in policy comparisons.
+            // Invalid operands raise an evaluation error (including under 'not'),
+            // rather than emitting a false result that a negation could turn
+            // into an unsafe allow. Admission still gates external source facts.
+            if (!ctx.StrictTypes)
+            {
             var ln = l.AsNumber();
             var rn = r.AsNumber();
             if (ln.HasValue && rn.HasValue)
@@ -190,7 +270,90 @@ public static class PolicyExpression
                 _ => false
             };
             return new(JsonValue.Create(bres));
+            }
+            
+            // Explicit new profile only; never alter historic pack replay defaults.
+            var lk = l.Node?.GetValueKind();
+            var rk = r.Node?.GetValueKind();
+            if (lk is null || rk is null)
+                throw new InvalidOperationException("Policy comparison requires present, non-null operands.");
+
+            // paygod-c14n-v1 source numbers are bounded safe integers; numeric
+            // equality in a security policy must not use legacy 1e-9 fuzz.
+            if (lk == System.Text.Json.JsonValueKind.Number &&
+                rk == System.Text.Json.JsonValueKind.Number)
+            {
+                // Evaluator equality must not depend on binary floating point.
+                // paygod-c14n-v1 source and explicit typed policy literals are
+                // bounded integers; compare the exact 64-bit values.
+                var ln = RequireTypedSafeInteger(l);
+                var rn = RequireTypedSafeInteger(r);
+                var result = op switch
+                {
+                    TokenType.Eq => ln == rn,
+                    TokenType.Ne => ln != rn,
+                    TokenType.Gt => ln > rn,
+                    TokenType.Ge => ln >= rn,
+                    TokenType.Lt => ln < rn,
+                    TokenType.Le => ln <= rn,
+                    _ => false
+                };
+                return new(JsonValue.Create(result));
+            }
+
+            if (lk == System.Text.Json.JsonValueKind.String &&
+                rk == System.Text.Json.JsonValueKind.String)
+            {
+                var cmp = string.CompareOrdinal(l.AsString(), r.AsString());
+                var result = op switch
+                {
+                    TokenType.Eq => cmp == 0,
+                    TokenType.Ne => cmp != 0,
+                    TokenType.Gt => cmp > 0,
+                    TokenType.Ge => cmp >= 0,
+                    TokenType.Lt => cmp < 0,
+                    TokenType.Le => cmp <= 0,
+                    _ => false
+                };
+                return new(JsonValue.Create(result));
+            }
+
+            var lhsBool = lk is System.Text.Json.JsonValueKind.True or System.Text.Json.JsonValueKind.False;
+            var rhsBool = rk is System.Text.Json.JsonValueKind.True or System.Text.Json.JsonValueKind.False;
+            if (lhsBool && rhsBool)
+            {
+                var lhs = lk == System.Text.Json.JsonValueKind.True;
+                var rhs = rk == System.Text.Json.JsonValueKind.True;
+                // Ordering booleans is undefined for typed-v1. Returning false
+                // here would let a surrounding 'not' turn malformed policy
+                // syntax into an ALLOW, violating fail-closed evaluation.
+                if (op is not TokenType.Eq and not TokenType.Ne)
+                    throw new InvalidOperationException(
+                        "Policy Boolean comparison supports equality and inequality only.");
+                var result = op == TokenType.Eq ? lhs == rhs : lhs != rhs;
+                return new(JsonValue.Create(result));
+            }
+
+            // A false result under 'not' could become an unsafe allow.
+            // Refuse malformed/cross-kind comparisons instead of producing a
+            // boolean that the policy could invert.
+            throw new InvalidOperationException("Policy comparison operands have incompatible or unsupported types.");
         }
+    }
+
+    private static long RequireTypedSafeInteger(Value value)
+    {
+        // ToJsonString retains the lexical JSON number for parsed source
+        // nodes and emits an integer for SafeIntegerLiteral values.
+        // Reject decimal/exponent source forms instead of coercing to double.
+        if (value.Node is not JsonValue number ||
+            !long.TryParse(number.ToJsonString(), NumberStyles.AllowLeadingSign,
+                CultureInfo.InvariantCulture, out var integral) ||
+            integral < -Canonicalizer.SafeIntegerMax ||
+            integral > Canonicalizer.SafeIntegerMax)
+            throw new InvalidOperationException(
+                "typed-v1 numeric comparisons require canonical safe integers.");
+        return integral;
     }
 
     private sealed class AnyExpr(PathRef arrayPath, string varName, Expr predicate) : Expr
@@ -198,12 +361,42 @@ public static class PolicyExpression
         public override Value Eval(EvalContext ctx)
         {
             var arrVal = arrayPath.Eval(ctx).Node;
-            if (arrVal is not JsonArray arr) return new(JsonValue.Create(false));
+            if (arrVal is not JsonArray arr)
+            {
+                if (ctx.StrictTypes)
+                    throw new InvalidOperationException("Policy any() requires a present JSON array.");
+                return new(JsonValue.Create(false));
+            }
+
+            if (ctx.StrictTypes)
+            {
+                // An inner any(v => ...) may shadow an outer any(v => ...).
+                // Restore lexical binding even on early success or exception.
+                // Preserve old legacy-v1 variable behavior for historical replay.
+                if (varName == "input")
+                    throw new InvalidOperationException("Policy any() cannot shadow the reserved input root.");
+                var hadPrevious = ctx.TryGetVar(varName, out var previous);
+                try
+                {
+                    foreach (var item in arr)
+                    {
+                        ctx.SetVar(varName, item);
+                        if (predicate.Eval(ctx).AsBool(true))
+                            return new(JsonValue.Create(true));
+                    }
+                    return new(JsonValue.Create(false));
+                }
+                finally
+                {
+                    if (hadPrevious) ctx.SetVar(varName, previous);
+                    else ctx.RemoveVar(varName);
+                }
+            }
 
             foreach (var item in arr)
             {
                 ctx.SetVar(varName, item);
-                if (predicate.Eval(ctx).AsBool()) return new(JsonValue.Create(true));
+                if (predicate.Eval(ctx).AsBool(ctx.StrictTypes)) return new(JsonValue.Create(true));
             }
             return new(JsonValue.Create(false));
         }
@@ -235,7 +428,7 @@ public static class PolicyExpression
 
     private sealed record Token(TokenType Type, string Text);
 
-    private sealed class Lexer(string s)
+    private sealed class Lexer(string s, bool strictSyntax)
     {
         private int _i;
 
@@ -261,7 +454,9 @@ public static class PolicyExpression
                 };
             }
 
-            if (char.IsDigit(c) || (c == '.' && _i + 1 < s.Length && char.IsDigit(s[_i + 1])))
+            if (char.IsDigit(c) ||
+                (strictSyntax && c == '-' && _i + 1 < s.Length && char.IsDigit(s[_i + 1])) ||
+                (c == '.' && _i + 1 < s.Length && char.IsDigit(s[_i + 1])))
             {
                 var start = _i++;
                 while (_i < s.Length && (char.IsDigit(s[_i]) || s[_i] == '.' || s[_i] == 'e' || s[_i] == 'E' || s[_i] == '+' || s[_i] == '-')) _i++;
@@ -276,6 +471,8 @@ public static class PolicyExpression
                 while (_i < s.Length && s[_i] != quote) _i++;
                 var text = s[start.._i];
                 if (_i < s.Length) _i++;
+                else if (strictSyntax)
+                    throw new InvalidOperationException("Unterminated policy string literal.");
                 return new(TokenType.String, text);
             }
 
@@ -293,7 +490,9 @@ public static class PolicyExpression
                 '>' => new(TokenType.Gt, ">"),
                 '<' => new(TokenType.Lt, "<"),
                 '=' when Peek('>') => (_i++, new Token(TokenType.Arrow, "=>")).Item2,
-                _ => new(TokenType.EOF, "")
+                _ => strictSyntax
+                    ? throw new InvalidOperationException($"Unsupported character in policy expression: U+{(int)c:X4}.")
+                    : new(TokenType.EOF, "")
             };
 
             bool Peek(char ch) => _i < s.Length && s[_i] == ch;
@@ -305,9 +504,10 @@ public static class PolicyExpression
         }
     }
 
-    private sealed class Parser(string s)
+    private sealed class Parser(string s, bool strictSyntax)
     {
-        private readonly Lexer _lx = new(s);
+        private readonly Lexer _lx = new(s, strictSyntax);
+        private readonly HashSet<string> _lambdaScopes = new(StringComparer.Ordinal);
         private Token _cur = new(TokenType.EOF, "");
 
         public Expr ParseExpression()
@@ -328,6 +528,11 @@ public static class PolicyExpression
             {
                 Consume(TokenType.Or);
                 var right = ParseAnd();
+                if (strictSyntax)
+                {
+                    RequireStaticallyBooleanContext(left, "or left operand");
+                    RequireStaticallyBooleanContext(right, "or right operand");
+                }
                 left = new BinaryBoolExpr(TokenType.Or, left, right);
             }
             return left;
@@ -340,6 +545,11 @@ public static class PolicyExpression
             {
                 Consume(TokenType.And);
                 var right = ParseUnary();
+                if (strictSyntax)
+                {
+                    RequireStaticallyBooleanContext(left, "and left operand");
+                    RequireStaticallyBooleanContext(right, "and right operand");
+                }
                 left = new BinaryBoolExpr(TokenType.And, left, right);
             }
             return left;
@@ -350,7 +560,10 @@ public static class PolicyExpression
             if (_cur.Type == TokenType.Not)
             {
                 Consume(TokenType.Not);
-                return new NotExpr(ParseUnary());
+                var inner = ParseUnary();
+                if (strictSyntax)
+                    RequireStaticallyBooleanContext(inner, "not operand");
+                return new NotExpr(inner);
             }
             return ParsePrimary();
         }
@@ -373,6 +586,8 @@ public static class PolicyExpression
                 var op = _cur.Type;
                 _cur = _lx.Next();
                 var right = ParseValue();
+                if (strictSyntax)
+                    RequireStaticallyValidComparison(op, left, right);
                 return new CompareExpr(op, left, right);
             }
 
@@ -388,7 +603,18 @@ public static class PolicyExpression
                 case TokenType.False: Consume(TokenType.False); return new BoolLiteral(false);
                 case TokenType.Number:
                     var numText = _cur.Text; Consume(TokenType.Number);
-                    _ = double.TryParse(numText, NumberStyles.Float, CultureInfo.InvariantCulture, out var d);
+                    if (strictSyntax)
+                    {
+                        if (!long.TryParse(numText, NumberStyles.AllowLeadingSign,
+                                CultureInfo.InvariantCulture, out var integer) ||
+                            integer < -Canonicalizer.SafeIntegerMax ||
+                            integer > Canonicalizer.SafeIntegerMax)
+                            throw new InvalidOperationException(
+                                "typed-v1 policy numeric literals must be safe integers.");
+                        return new SafeIntegerLiteral(integer);
+                    }
+                    _ = double.TryParse(numText, NumberStyles.Float,
+                        CultureInfo.InvariantCulture, out var d);
                     return new NumberLiteral(d);
                 case TokenType.String:
                     var sText = _cur.Text; Consume(TokenType.String);
@@ -403,6 +629,9 @@ public static class PolicyExpression
         private Expr ParsePathOrAny()
         {
             var root = _cur.Text;
+            if (strictSyntax && root != "input" && !_lambdaScopes.Contains(root))
+                throw new InvalidOperationException(
+                    $"typed-v1 policy path root '{root}' is not input or an in-scope any() lambda.");
             Consume(TokenType.Ident);
             var segments = new List<string>();
 
@@ -421,10 +650,32 @@ public static class PolicyExpression
                     Consume(TokenType.LParen);
                     if (_cur.Type != TokenType.Ident) throw new InvalidOperationException("Expected variable name in any()");
                     var varName = _cur.Text;
+                    if (strictSyntax && varName == "input")
+                        throw new InvalidOperationException(
+                            "Policy any() cannot shadow reserved input root.");
                     Consume(TokenType.Ident);
                     Consume(TokenType.Arrow);
-                    var pred = ParseOr();
+
+                    // Track lexical lambda roots during strict preflight so an
+                    // unreachable typo like any(v => typo.ok) cannot be hidden
+                    // by an empty array or an earlier short-circuiting allow.
+                    // Reusing a lambda name in a nested any() is legal and the
+                    // outer binding remains in scope after the inner predicate.
+                    var alreadyBound = strictSyntax && _lambdaScopes.Contains(varName);
+                    if (strictSyntax && !alreadyBound) _lambdaScopes.Add(varName);
+                    Expr pred;
+                    try
+                    {
+                        pred = ParseOr();
+                    }
+                    finally
+                    {
+                        if (strictSyntax && !alreadyBound) _lambdaScopes.Remove(varName);
+                    }
+
                     Consume(TokenType.RParen);
+                    if (strictSyntax)
+                        RequireStaticallyBooleanContext(pred, "any() predicate");
                     return new AnyExpr(pathRef, varName, pred);
                 }
 

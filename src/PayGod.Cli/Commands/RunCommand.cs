@@ -29,19 +29,55 @@ public static class RunCommand
         var packPath = Path.Join(packDir, "pack.yaml");
         if (!File.Exists(packPath)) Fail($"Missing pack.yaml: {packPath}");
         if (!input.Exists) Fail($"Missing input file: {input.FullName}");
-        outDir.Create();
 
-        var pack = PolicyEngine.LoadPack(packPath);
+        PackDefinition pack;
+        try
+        {
+            pack = PolicyEngine.LoadPack(packPath);
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Invalid Pack field names may conceal an intended typed-v1
+            // profile. Reject before legacy defaults or any output artifact.
+            FailCode("PACK_POLICY_INVALID", ex.Message);
+            return;
+        }
+        var scopedTypedRun = pack.spec.policy.evaluation_profile != "legacy-v1";
+        // A typed-profile invocation must own a fresh output location: using
+        // an existing directory could expose an old receipt after an early
+        // error, and make a consumer mistake stale files for current output.
+        // Do not delete or rewrite prior evidence on a failed invocation.
+        if (scopedTypedRun && Directory.Exists(outDir.FullName))
+        {
+            FailCode("OUTPUT_DIRECTORY_NOT_FRESH",
+                "Typed-profile execution requires a new output directory.");
+            return;
+        }
+        if (!scopedTypedRun) outDir.Create();
 
         JsonNode inputJson;
         try
         {
-            inputJson = JsonNode.Parse(File.ReadAllText(input.FullName))
+            var rawInput = File.ReadAllText(input.FullName);
+            // Parse raw bytes BEFORE JsonNode materialization for typed-v1.
+            // A JSON object with duplicate property names is ambiguous across
+            // consumers and must never be allowed to reach an ALLOW decision.
+            if (scopedTypedRun)
+            {
+                using var rawDocument = JsonDocument.Parse(rawInput);
+                RequireUniqueJsonKeys(rawDocument.RootElement);
+            }
+            inputJson = JsonNode.Parse(rawInput)
                 ?? throw new JsonException("Input JSON produced a null document.");
         }
         catch (JsonException ex)
         {
             FailCode("INPUT_JSON_INVALID", ex.Message);
+            return;
+        }
+        catch (InvalidOperationException ex) when (scopedTypedRun)
+        {
+            FailCode("INPUT_JSON_DUPLICATE_KEY", ex.Message);
             return;
         }
 
@@ -58,6 +94,28 @@ public static class RunCommand
             return;
         }
 
+        // Preserve legacy profile replay while refusing malformed evidence
+        // before writing ANY canonical artifacts for explicit typed-v1 Packs.
+        // This is only evaluator-type admission; source completeness and truth
+        // require external evidence admission under ADR 0003.
+        PolicyResult? typedResult = null;
+        if (pack.spec.policy.evaluation_profile != "legacy-v1")
+        {
+            try
+            {
+                typedResult = PolicyEngine.Evaluate(pack, inputJson);
+            }
+            catch (InvalidOperationException ex)
+            {
+                FailCode("POLICY_INPUT_REJECTED", ex.Message);
+                return;
+            }
+        }
+
+        // Create a new output location only after typed evaluation succeeded.
+        // This does not authorize concurrent writers; use a unique path per run.
+        if (scopedTypedRun) outDir.Create();
+
         var packDigest = Sha256Hex(File.ReadAllBytes(packPath));
         var packObj = new { name = pack.metadata.name, version = pack.metadata.version, path = packDir, digest_sha256 = packDigest };
 
@@ -69,7 +127,7 @@ public static class RunCommand
         var planPath = Path.Join(outDir.FullName, "plan.json");
         WriteJson(planPath, plan);
 
-        var result = PolicyEngine.Evaluate(pack, inputJson);
+        var result = typedResult ?? PolicyEngine.Evaluate(pack, inputJson);
         var findings = new List<object>();
         if (result.Decision == "flag")
             findings.Add(new { kind = "flag", severity = "medium", code = "PACK_FLAG", message = result.Reason, rule_name = result.RuleName, evidence_refs = Array.Empty<string>() });
@@ -117,6 +175,32 @@ public static class RunCommand
         var clockValue = Environment.GetEnvironmentVariable("PAYGOD_CLOCK") ?? "unset";
         var runnerImage = Environment.GetEnvironmentVariable("PAYGOD_RUNNER_IMAGE") ?? "paygod/runner:dev";
         var runnerDigest = Environment.GetEnvironmentVariable("PAYGOD_RUNNER_DIGEST") ?? "unknown";
+        // A bind-mounted Docker output directory already exists. For typed-v1
+        // the CLI requires a fresh *child* path, so mount the existing parent,
+        // not the target directory. Preserve historical replay commands.
+        var replayMount = scopedTypedRun
+            ? "-v \"<OUT_PARENT_DIR>:/out-parent:rw\""
+            : "-v \"<OUT_DIR>:/out:rw\"";
+        var replayOut = scopedTypedRun
+            ? "/out-parent/<NEW_RUN_SUBDIR>"
+            : "/out";
+
+        // typed-v1 replay propagates the exact recorded runner identity into
+        // the child and, when a valid sha256 content identifier is available,
+        // executes that immutable identifier instead of the mutable image tag.
+        // Legacy replay strings remain unchanged for historical witnesses.
+        var typedReplayRunner = scopedTypedRun && IsSha256RunnerDigest(runnerDigest)
+            ? runnerDigest
+            : runnerImage;
+        var replayEnvironment = scopedTypedRun
+            ? $"-e PAYGOD_CLOCK={ShellQuote(clockValue)} -e PAYGOD_STRICT=1 " +
+              $"-e PAYGOD_RUNNER_IMAGE={ShellQuote(runnerImage)} " +
+              $"-e PAYGOD_RUNNER_DIGEST={ShellQuote(runnerDigest)} "
+            : $"-e PAYGOD_CLOCK={clockValue} -e PAYGOD_STRICT=1 ";
+        var replayRunnerArg = scopedTypedRun
+            ? ShellQuote(typedReplayRunner)
+            : runnerImage;
+
         var receipt = new
         {
             api_version = "paygod/v1", kind = "Receipt", spec_version = "0.2.0", generated_at = clockValue,
@@ -129,13 +213,52 @@ public static class RunCommand
             verdict = new { value = verdict, rule_name = result.RuleName, reason = result.Reason },
             replay = new
             {
-                command = $"docker run --rm -e PAYGOD_CLOCK={clockValue} -e PAYGOD_STRICT=1 " +
-                          $"-v \"<PACK_DIR>:/pack:ro\" -v \"<INPUT_FILE>:/input/input.json:ro\" -v \"<OUT_DIR>:/out:rw\" " +
-                          $"{runnerImage} run --pack /pack --input /input/input.json --out /out"
+                command = $"docker run --rm {replayEnvironment}" +
+                          $"-v \"<PACK_DIR>:/pack:ro\" -v \"<INPUT_FILE>:/input/input.json:ro\" {replayMount} " +
+                          $"{replayRunnerArg} run --pack /pack --input /input/input.json --out {replayOut}"
             }
         };
         WriteJson(Path.Join(outDir.FullName, "receipt.json"), receipt);
         Console.WriteLine("OK: Run complete.");
+    }
+
+    private static bool IsSha256RunnerDigest(string value)
+    {
+        if (!value.StartsWith("sha256:", StringComparison.Ordinal) || value.Length != 71)
+            return false;
+        return value.AsSpan(7).ToString().All(Uri.IsHexDigit);
+    }
+
+    private static string ShellQuote(string value)
+    {
+        // Replay command is a POSIX-shell template. Single-quote each
+        // environment/image argument so recorded runner identity cannot alter
+        // the command structure when operators execute the emitted command.
+        return "'" + value.Replace("'", "'\"'\"'", StringComparison.Ordinal) + "'";
+    }
+
+    // Lexical object-key admission is scoped to the opted-in typed-v1 profile.
+    // This does not prove source authenticity, scanner completeness, or
+    // authorized release; those must be admitted independently.
+    private static void RequireUniqueJsonKeys(JsonElement element)
+    {
+        switch (element.ValueKind)
+        {
+            case JsonValueKind.Object:
+                var seen = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var property in element.EnumerateObject())
+                {
+                    if (!seen.Add(property.Name))
+                        throw new InvalidOperationException(
+                            "Duplicate JSON property name in typed-v1 input.");
+                    RequireUniqueJsonKeys(property.Value);
+                }
+                break;
+            case JsonValueKind.Array:
+                foreach (var item in element.EnumerateArray())
+                    RequireUniqueJsonKeys(item);
+                break;
+        }
     }
 
     private static void AppendLedger(string ledgerPath, object packObj, string inputHash, string verdict, PolicyResult result, string runTs)
