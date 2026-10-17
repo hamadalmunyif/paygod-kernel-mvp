@@ -29,6 +29,35 @@ public static class PolicyExpression
         parser.Expect(TokenType.EOF);
     }
 
+    // A typed policy is parsed completely even if its first rule ALLOWs.
+    // Reject impossible comparisons of statically known types during that
+    // parse rather than waiting for a potentially unreachable rule to Eval().
+    // A PathRef has unknown type until actual admitted input is evaluated.
+    private enum StaticKind { Unknown, Boolean, SafeInteger, String }
+
+    private static StaticKind InferStaticKind(Expr expr) => expr switch
+    {
+        BoolLiteral or NotExpr or BinaryBoolExpr or CompareExpr or AnyExpr
+            => StaticKind.Boolean,
+        SafeIntegerLiteral => StaticKind.SafeInteger,
+        StringLiteral => StaticKind.String,
+        _ => StaticKind.Unknown
+    };
+
+    private static void RequireStaticallyValidComparison(TokenType op, Expr left, Expr right)
+    {
+        var lhs = InferStaticKind(left);
+        var rhs = InferStaticKind(right);
+        if (lhs == StaticKind.Unknown || rhs == StaticKind.Unknown)
+            return; // Runtime admission must check both operands, even under not.
+        if (lhs != rhs)
+            throw new InvalidOperationException(
+                "typed-v1 policy comparison has incompatible static operand types.");
+        if (lhs == StaticKind.Boolean && op is not (TokenType.Eq or TokenType.Ne))
+            throw new InvalidOperationException(
+                "typed-v1 Boolean literals/expressions support equality or inequality only.");
+    }
+
     private sealed class EvalContext
     {
         public JsonNode Input { get; }
@@ -532,6 +561,8 @@ public static class PolicyExpression
                 var op = _cur.Type;
                 _cur = _lx.Next();
                 var right = ParseValue();
+                if (strictSyntax)
+                    RequireStaticallyValidComparison(op, left, right);
                 return new CompareExpr(op, left, right);
             }
 
