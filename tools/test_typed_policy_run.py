@@ -237,6 +237,32 @@ def main():
             assert not target.exists(), (name, "unreachable invalid comparison minted receipt")
             print(f"PASS: typed-v1 {name} rejected before allow/evidence")
 
+        # An empty array must not hide a statically non-Boolean any() predicate.
+        # The malformed predicate is in a later rule after a matching allow, so
+        # only whole-policy semantic preflight can prevent a false receipt.
+        nonboolean_any_dir = tmp / "pack-empty-any-nonboolean"
+        nonboolean_any_dir.mkdir()
+        (nonboolean_any_dir / "pack.yaml").write_text(
+            base_pack + "\n" +
+            '      - name: unreachable-empty-any-nonboolean\n'
+            '        condition: "not input.items.any(v => 1)"\n'
+            '        decision: allow\n'
+            '        reason: Empty array cannot make a numeric predicate valid\n',
+            encoding="utf-8")
+        empty_any_source = tmp / "empty-any.json"
+        empty_any_source.write_text(
+            '{"input":{"block":false},"items":[]}', encoding="utf-8")
+        empty_any_output = tmp / "out-empty-any-nonboolean"
+        p = subprocess.run([
+            cli, "run", "--pack", str(nonboolean_any_dir),
+            "--input", str(empty_any_source), "--out", str(empty_any_output)],
+            capture_output=True, text=True)
+        assert p.returncode == 2, (p.returncode, p.stdout, p.stderr)
+        assert "POLICY_INPUT_REJECTED" in p.stderr, p.stderr
+        assert not empty_any_output.exists(), (
+            "empty any() with non-Boolean predicate minted canonical evidence")
+        print("PASS: typed-v1 empty any() non-Boolean predicate rejected; no artifacts")
+
         # Refuse reuse of a directory holding an old canonical receipt.
         # An error must never silently overwrite or pretend to replace it.
         prior = tmp / "preexisting-output"
