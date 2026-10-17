@@ -60,7 +60,7 @@ It does **not** support the stronger claim that the browser is a complete implem
 
 ## Current parity state
 
-The following dimensions now have frozen shared corpora consumed across the tested implementations:
+The first six rows below are the dimensions for which frozen shared corpora are consumed across the tested implementations. The remaining rows are explicit boundary dimensions: they are intentionally **not** established by browser/shared-corpus parity and are listed to prevent overclaiming.
 
 | Dimension | Current state | Evidence |
 | --- | --- | --- |
