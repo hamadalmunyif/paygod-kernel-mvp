@@ -23,8 +23,16 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Setup Node (portable verifier parity)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Install Python dependencies
         run: pip install -r tools/requirements.txt
+
+      - name: Install pinned issuer-auth backend for transport parity
+        run: python -m pip install -r tools/requirements-issuer-auth.txt
 
       - name: Provider separation lint (packs/core)
         run: python3 tools/ci/lint_core_packs_providers.py
@@ -38,8 +46,30 @@ jobs:
       - name: Verify Spec Compliance (Python reference)
         run: python3 tools/verify_spec.py
 
+      - name: Verify frozen corpus checkout is pinned to LF
+        shell: bash
+        run: |
+          for p in \
+            spec/test-vectors/canonical-json.json \
+            spec/test-vectors/ledger-chaining.json \
+            spec/test-vectors/transport-parity-v1.json
+          do
+            attr="$(git check-attr eol -- "$p")"
+            echo "$attr"
+            case "$attr" in
+              *"eol: lf") ;;
+              *) echo "ERROR: $p is not pinned to eol=lf" >&2; exit 1 ;;
+            esac
+          done
+
       - name: Run .NET canonicalization and unit regression tests
         run: dotnet test tests/PayGod.Tests/PayGod.Tests.csproj --configuration Release
+
+      - name: Frozen transport parity corpus — Kernel JS verifier
+        run: node tools/test_transport_parity_corpus.mjs
+
+      - name: Frozen transport parity corpus — Kernel Python verifier
+        run: python3 tools/test_transport_parity_corpus.py
 
       - name: Reject CRLF in JSON schemas
         run: |
