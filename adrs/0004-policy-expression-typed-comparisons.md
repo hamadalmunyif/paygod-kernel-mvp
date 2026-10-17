@@ -64,6 +64,12 @@ A second review identified a policy parser fail-open: unknown characters (`&`, `
 
 In **opt-in typed-v1 only**, the parser/lexer now rejects unknown characters, invalid/non-finite numeric literals and unterminated policy strings. Actual CLI negative tests require exit 2, `POLICY_INPUT_REJECTED` and **no output artifacts** for malformed policy syntax. Unit tests pin the historical legacy-v1 truncation behavior for reproducibility, not as an endorsement. Even a correctly parsed policy does not prove external source completeness, issuance authority, or trusted time; Issues #111/#116 remain separately governed.
 
+## Exact numeric equality in typed-v1 (2026-10-17)
+
+A further adversarial case showed that the historical evaluator's `1e-9` comparison tolerance can treat the canonical integer `0` as equal to an authored numeric literal `0.0000000001`. In an opt-in security decision this is not sound equality. Typed-v1 now compares numeric equality and inequality **exactly** (`==` and `!=` on parsed finite numbers); the existing legacy-v1 epsilon comparator remains byte-for-byte unchanged for historic replay. Added unit cases assert the deliberate difference between profiles.
+
+The current canonical profile accepts source **safe integers**, not arbitrary floating-point JSON. This exact comparison does not validate Pack authors' choices of literal precision, prove external data completeness, or authorize external releases. Before ADR acceptance, decide whether authored fractional numeric literals should be forbidden by a subsequent versioned Pack contract; do not silently migrate legacy Packs.
+
 ## Compatibility and scope review
 
 Reviewed source Pack conditions at `d347213`: `secrets-in-repo-guard` (`== 0`), `critical-cve-blocker` (`!= 'fixed'`, ordered numeric, `not any`), `cross-border-pii-guard` (typed Boolean equality), `ghg-scope-1-2-guard` (nonempty string and truthy references), `iso27001-policy-review` (typed Boolean and `any`), `aws/admin-drift-detection` (string equality/inequality), gas rehearsal (Boolean and string equality), and EIK saved-report example. Existing well-typed fixtures are expected to preserve their decisions, but **CI at repair HEAD must be inspected**. Wrong-typed or missing data changes to an evaluation error **only for explicitly opted-in `typed-v1`** Packs. Existing unmodified legacy Packs preserve their historical behavior, including risks that require source admission.
