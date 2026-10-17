@@ -1,0 +1,187 @@
+{
+  "profile": "paygod-transport-parity-v1",
+  "source_note": "Public deterministic test corpus. RFC 8032 test key material is non-secret and test-only.",
+  "transport_format": "paygod-demo-transport/1",
+  "fixtures": {
+    "base": {
+      "files": {
+        "findings.json": "{\"api_version\":\"paygod/v1\",\"kind\":\"FindingsReport\",\"findings\":[]}\n",
+        "ledger.jsonl": "{\"entry_index\":0,\"timestamp\":\"2026-10-17T00:00:00+00:00\",\"previous_hash\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"data\":{\"verdict\":\"allow\",\"rule_name\":\"transport-parity-rule\",\"reason\":\"shared transport parity allow\",\"pack\":{\"name\":\"transport-parity\",\"version\":\"1.0.0\",\"path\":\"spec/test-vectors/transport-parity-v1\",\"digest_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\"},\"input_hash\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"evidence_refs\":[]},\"record_hash\":\"74c41dd0fc952a64c9a9ebb75922c2b7d7fac19e54927015ad8de7f3e1e36757\"}\n",
+        "manifest.json": "{\n  \"api_version\": \"paygod/v1\",\n  \"kind\": \"Manifest\",\n  \"generated_at\": \"2026-10-17T00:00:00+00:00\",\n  \"pack\": {\n    \"name\": \"transport-parity\",\n    \"version\": \"1.0.0\",\n    \"path\": \"spec/test-vectors/transport-parity-v1\",\n    \"digest_sha256\": \"1111111111111111111111111111111111111111111111111111111111111111\"\n  },\n  \"input\": {\n    \"canonical_hash\": \"2222222222222222222222222222222222222222222222222222222222222222\"\n  },\n  \"bundle\": {\n    \"algorithm\": \"sha256\",\n    \"digest_method\": \"sha256(join_lines(name='name=sha256' sorted by name))\",\n    \"file_count\": 2,\n    \"bundle_digest\": \"02ce162e09dcbdc391a984dbfde38b804331dec48e86bc45654fe98b6a49f430\"\n  },\n  \"files\": [\n    {\n      \"name\": \"findings.json\",\n      \"sha256\": \"02c5a679ec6e845881602e7c96a6b20aee8c4ba990ab1e560bed48bc3302471b\",\n      \"bytes\": 66\n    },\n    {\n      \"name\": \"ledger.jsonl\",\n      \"sha256\": \"1975529e6090e2bba1ceb908b11622a48397cc681627561fd8b030350bb1d907\",\n      \"bytes\": 608\n    }\n  ]\n}\n",
+        "receipt.json": "{\n  \"api_version\": \"paygod/v1\",\n  \"kind\": \"Receipt\",\n  \"spec_version\": \"0.2.0\",\n  \"generated_at\": \"2026-10-17T00:00:00+00:00\",\n  \"clock\": {\n    \"value\": \"2026-10-17T00:00:00+00:00\",\n    \"source\": \"env:PAYGOD_CLOCK\"\n  },\n  \"canonicalization\": {\n    \"json\": \"paygod-c14n-v1\"\n  },\n  \"runner\": {\n    \"image\": \"paygod/transport-parity\",\n    \"image_digest\": \"unknown\"\n  },\n  \"pack\": {\n    \"name\": \"transport-parity\",\n    \"version\": \"1.0.0\",\n    \"path\": \"spec/test-vectors/transport-parity-v1\",\n    \"digest_sha256\": \"1111111111111111111111111111111111111111111111111111111111111111\"\n  },\n  \"input\": {\n    \"canonical_hash\": \"2222222222222222222222222222222222222222222222222222222222222222\"\n  },\n  \"bundle\": {\n    \"bundle_digest\": \"02ce162e09dcbdc391a984dbfde38b804331dec48e86bc45654fe98b6a49f430\",\n    \"manifest_sha256\": \"5b73549b9cd95c63d39ece08404d98dc9fe110b789027d9c097eff5a9902fb44\",\n    \"files\": [\n      {\n        \"name\": \"findings.json\",\n        \"sha256\": \"02c5a679ec6e845881602e7c96a6b20aee8c4ba990ab1e560bed48bc3302471b\",\n        \"bytes\": 66\n      },\n      {\n        \"name\": \"ledger.jsonl\",\n        \"sha256\": \"1975529e6090e2bba1ceb908b11622a48397cc681627561fd8b030350bb1d907\",\n        \"bytes\": 608\n      }\n    ]\n  },\n  \"verdict\": {\n    \"value\": \"allow\",\n    \"rule_name\": \"transport-parity-rule\",\n    \"reason\": \"shared transport parity allow\"\n  },\n  \"replay\": {\n    \"command\": \"not performed by integrity verifier\"\n  }\n}\n",
+        "receipt.sig.json": "{\n  \"profile\": \"paygod-ed25519-receipt-v1\",\n  \"algorithm\": \"Ed25519\",\n  \"key_id\": \"transport-parity-rfc8032-key\",\n  \"receipt_sha256\": \"c0a762fffcb1c26897f1c4bb261748d9540d66f5d0731402c20c61a3dfc45300\",\n  \"signature_b64\": \"F1HBoX0NYJ6+jJ/vImT0EBMh3zPFbSwt6vzBdBQxpN+5qvZxazUXTYgUN7O/0CWTxaj6I3c/oeqiTOAIlzaOCw==\"\n}\n"
+      }
+    },
+    "coherent_rewrite": {
+      "files": {
+        "findings.json": "{\"api_version\":\"paygod/v1\",\"kind\":\"FindingsReport\",\"findings\":[]}\n",
+        "ledger.jsonl": "{\"entry_index\":0,\"timestamp\":\"2026-10-17T00:00:00+00:00\",\"previous_hash\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"data\":{\"verdict\":\"deny\",\"rule_name\":\"transport-parity-rule\",\"reason\":\"shared transport parity deny rewrite\",\"pack\":{\"name\":\"transport-parity\",\"version\":\"1.0.0\",\"path\":\"spec/test-vectors/transport-parity-v1\",\"digest_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\"},\"input_hash\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"evidence_refs\":[]},\"record_hash\":\"7ca1ddd2caebb1e87dfee35cbafbe6191e52f569ba3ea01dc1bac95aba41f1d7\"}\n",
+        "manifest.json": "{\n  \"api_version\": \"paygod/v1\",\n  \"kind\": \"Manifest\",\n  \"generated_at\": \"2026-10-17T00:00:00+00:00\",\n  \"pack\": {\n    \"name\": \"transport-parity\",\n    \"version\": \"1.0.0\",\n    \"path\": \"spec/test-vectors/transport-parity-v1\",\n    \"digest_sha256\": \"1111111111111111111111111111111111111111111111111111111111111111\"\n  },\n  \"input\": {\n    \"canonical_hash\": \"2222222222222222222222222222222222222222222222222222222222222222\"\n  },\n  \"bundle\": {\n    \"algorithm\": \"sha256\",\n    \"digest_method\": \"sha256(join_lines(name='name=sha256' sorted by name))\",\n    \"file_count\": 2,\n    \"bundle_digest\": \"c8338297b8077e5e4a48e298e41e99d0f311cc3aba38fafca43db1e4fb202332\"\n  },\n  \"files\": [\n    {\n      \"name\": \"findings.json\",\n      \"sha256\": \"02c5a679ec6e845881602e7c96a6b20aee8c4ba990ab1e560bed48bc3302471b\",\n      \"bytes\": 66\n    },\n    {\n      \"name\": \"ledger.jsonl\",\n      \"sha256\": \"006f08333cdf8d3ea2eadf2e2e269144b3d37e2d4306b11bb1cd73321e7afff3\",\n      \"bytes\": 614\n    }\n  ]\n}\n",
+        "receipt.json": "{\n  \"api_version\": \"paygod/v1\",\n  \"kind\": \"Receipt\",\n  \"spec_version\": \"0.2.0\",\n  \"generated_at\": \"2026-10-17T00:00:00+00:00\",\n  \"clock\": {\n    \"value\": \"2026-10-17T00:00:00+00:00\",\n    \"source\": \"env:PAYGOD_CLOCK\"\n  },\n  \"canonicalization\": {\n    \"json\": \"paygod-c14n-v1\"\n  },\n  \"runner\": {\n    \"image\": \"paygod/transport-parity\",\n    \"image_digest\": \"unknown\"\n  },\n  \"pack\": {\n    \"name\": \"transport-parity\",\n    \"version\": \"1.0.0\",\n    \"path\": \"spec/test-vectors/transport-parity-v1\",\n    \"digest_sha256\": \"1111111111111111111111111111111111111111111111111111111111111111\"\n  },\n  \"input\": {\n    \"canonical_hash\": \"2222222222222222222222222222222222222222222222222222222222222222\"\n  },\n  \"bundle\": {\n    \"bundle_digest\": \"c8338297b8077e5e4a48e298e41e99d0f311cc3aba38fafca43db1e4fb202332\",\n    \"manifest_sha256\": \"42227f33e6b231bad5a12fe418609ff756b8cb9209d2be719c1624c4dd117d95\",\n    \"files\": [\n      {\n        \"name\": \"findings.json\",\n        \"sha256\": \"02c5a679ec6e845881602e7c96a6b20aee8c4ba990ab1e560bed48bc3302471b\",\n        \"bytes\": 66\n      },\n      {\n        \"name\": \"ledger.jsonl\",\n        \"sha256\": \"006f08333cdf8d3ea2eadf2e2e269144b3d37e2d4306b11bb1cd73321e7afff3\",\n        \"bytes\": 614\n      }\n    ]\n  },\n  \"verdict\": {\n    \"value\": \"deny\",\n    \"rule_name\": \"transport-parity-rule\",\n    \"reason\": \"shared transport parity deny rewrite\"\n  },\n  \"replay\": {\n    \"command\": \"not performed by integrity verifier\"\n  }\n}\n",
+        "receipt.sig.json": "{\n  \"profile\": \"paygod-ed25519-receipt-v1\",\n  \"algorithm\": \"Ed25519\",\n  \"key_id\": \"transport-parity-rfc8032-key\",\n  \"receipt_sha256\": \"c0a762fffcb1c26897f1c4bb261748d9540d66f5d0731402c20c61a3dfc45300\",\n  \"signature_b64\": \"F1HBoX0NYJ6+jJ/vImT0EBMh3zPFbSwt6vzBdBQxpN+5qvZxazUXTYgUN7O/0CWTxaj6I3c/oeqiTOAIlzaOCw==\"\n}\n"
+      }
+    }
+  },
+  "trust_stores": {
+    "valid": {
+      "profile": "paygod-ed25519-trust-v1",
+      "keys": [
+        {
+          "key_id": "transport-parity-rfc8032-key",
+          "algorithm": "Ed25519",
+          "public_key_b64": "11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo="
+        }
+      ]
+    },
+    "wrong_key": {
+      "profile": "paygod-ed25519-trust-v1",
+      "keys": [
+        {
+          "key_id": "transport-parity-rfc8032-key",
+          "algorithm": "Ed25519",
+          "public_key_b64": "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
+        }
+      ]
+    }
+  },
+  "expected_constants": {
+    "base_receipt_sha256": "c0a762fffcb1c26897f1c4bb261748d9540d66f5d0731402c20c61a3dfc45300",
+    "base_manifest_sha256": "5b73549b9cd95c63d39ece08404d98dc9fe110b789027d9c097eff5a9902fb44",
+    "base_bundle_digest": "02ce162e09dcbdc391a984dbfde38b804331dec48e86bc45654fe98b6a49f430",
+    "base_ledger_head": "74c41dd0fc952a64c9a9ebb75922c2b7d7fac19e54927015ad8de7f3e1e36757",
+    "rewrite_receipt_sha256": "13b48668e3596164cebe7392c1e977e9da336099b6f1d9f889fbc36a731e9fcf",
+    "rewrite_manifest_sha256": "42227f33e6b231bad5a12fe418609ff756b8cb9209d2be719c1624c4dd117d95",
+    "rewrite_bundle_digest": "c8338297b8077e5e4a48e298e41e99d0f311cc3aba38fafca43db1e4fb202332",
+    "rewrite_ledger_head": "7ca1ddd2caebb1e87dfee35cbafbe6191e52f569ba3ea01dc1bac95aba41f1d7"
+  },
+  "cases": [
+    {
+      "name": "clean_no_trust",
+      "fixture": "base",
+      "expected_receipt_sha256": "c0a762fffcb1c26897f1c4bb261748d9540d66f5d0731402c20c61a3dfc45300",
+      "expected": {
+        "status": "valid",
+        "integrity": "verified",
+        "issuer_authenticity": "not_verified",
+        "replay": "not_performed",
+        "time_authority": "producer_supplied",
+        "receipt_sha256": "c0a762fffcb1c26897f1c4bb261748d9540d66f5d0731402c20c61a3dfc45300",
+        "manifest_sha256": "5b73549b9cd95c63d39ece08404d98dc9fe110b789027d9c097eff5a9902fb44",
+        "bundle_digest": "02ce162e09dcbdc391a984dbfde38b804331dec48e86bc45654fe98b6a49f430",
+        "ledger_head": "74c41dd0fc952a64c9a9ebb75922c2b7d7fac19e54927015ad8de7f3e1e36757"
+      }
+    },
+    {
+      "name": "clean_trusted_issuer",
+      "fixture": "base",
+      "trust_store": "valid",
+      "expected_receipt_sha256": "c0a762fffcb1c26897f1c4bb261748d9540d66f5d0731402c20c61a3dfc45300",
+      "expected": {
+        "status": "valid",
+        "integrity": "verified",
+        "issuer_authenticity": "verified",
+        "replay": "not_performed",
+        "time_authority": "producer_supplied",
+        "receipt_sha256": "c0a762fffcb1c26897f1c4bb261748d9540d66f5d0731402c20c61a3dfc45300",
+        "manifest_sha256": "5b73549b9cd95c63d39ece08404d98dc9fe110b789027d9c097eff5a9902fb44",
+        "bundle_digest": "02ce162e09dcbdc391a984dbfde38b804331dec48e86bc45654fe98b6a49f430",
+        "ledger_head": "74c41dd0fc952a64c9a9ebb75922c2b7d7fac19e54927015ad8de7f3e1e36757"
+      }
+    },
+    {
+      "name": "wrong_trust_key",
+      "fixture": "base",
+      "trust_store": "wrong_key",
+      "expected_receipt_sha256": "c0a762fffcb1c26897f1c4bb261748d9540d66f5d0731402c20c61a3dfc45300",
+      "expected": {
+        "status": "valid",
+        "integrity": "verified",
+        "issuer_authenticity": "failed",
+        "replay": "not_performed",
+        "time_authority": "producer_supplied",
+        "issuer_reason": "signature_invalid"
+      }
+    },
+    {
+      "name": "payload_byte_tamper",
+      "fixture": "base",
+      "set_file": {
+        "name": "findings.json",
+        "content": "{\"api_version\":\"paygod/v1\",\"kind\":\"FindingsReport\",\"findings\":[{\"id\":\"tamper\"}]}\n"
+      },
+      "expected": {
+        "status": "invalid",
+        "integrity": "failed"
+      }
+    },
+    {
+      "name": "unexpected_member",
+      "fixture": "base",
+      "set_file": {
+        "name": "extra.txt",
+        "content": "noise\n"
+      },
+      "expected": {
+        "status": "invalid",
+        "integrity": "failed"
+      }
+    },
+    {
+      "name": "receipt_verdict_substitution",
+      "fixture": "base",
+      "set_file": {
+        "name": "receipt.json",
+        "content": "{\n  \"api_version\": \"paygod/v1\",\n  \"kind\": \"Receipt\",\n  \"spec_version\": \"0.2.0\",\n  \"generated_at\": \"2026-10-17T00:00:00+00:00\",\n  \"clock\": {\n    \"value\": \"2026-10-17T00:00:00+00:00\",\n    \"source\": \"env:PAYGOD_CLOCK\"\n  },\n  \"canonicalization\": {\n    \"json\": \"paygod-c14n-v1\"\n  },\n  \"runner\": {\n    \"image\": \"paygod/transport-parity\",\n    \"image_digest\": \"unknown\"\n  },\n  \"pack\": {\n    \"name\": \"transport-parity\",\n    \"version\": \"1.0.0\",\n    \"path\": \"spec/test-vectors/transport-parity-v1\",\n    \"digest_sha256\": \"1111111111111111111111111111111111111111111111111111111111111111\"\n  },\n  \"input\": {\n    \"canonical_hash\": \"2222222222222222222222222222222222222222222222222222222222222222\"\n  },\n  \"bundle\": {\n    \"bundle_digest\": \"02ce162e09dcbdc391a984dbfde38b804331dec48e86bc45654fe98b6a49f430\",\n    \"manifest_sha256\": \"5b73549b9cd95c63d39ece08404d98dc9fe110b789027d9c097eff5a9902fb44\",\n    \"files\": [\n      {\n        \"name\": \"findings.json\",\n        \"sha256\": \"02c5a679ec6e845881602e7c96a6b20aee8c4ba990ab1e560bed48bc3302471b\",\n        \"bytes\": 66\n      },\n      {\n        \"name\": \"ledger.jsonl\",\n        \"sha256\": \"1975529e6090e2bba1ceb908b11622a48397cc681627561fd8b030350bb1d907\",\n        \"bytes\": 608\n      }\n    ]\n  },\n  \"verdict\": {\n    \"value\": \"deny\",\n    \"rule_name\": \"transport-parity-rule\",\n    \"reason\": \"shared transport parity allow\"\n  },\n  \"replay\": {\n    \"command\": \"not performed by integrity verifier\"\n  }\n}\n"
+      },
+      "expected": {
+        "status": "invalid",
+        "integrity": "failed"
+      }
+    },
+    {
+      "name": "missing_ledger",
+      "fixture": "base",
+      "remove_file": "ledger.jsonl",
+      "expected": {
+        "status": "invalid",
+        "integrity": "failed"
+      }
+    },
+    {
+      "name": "wrong_external_receipt_pin",
+      "fixture": "base",
+      "expected_receipt_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "expected": {
+        "status": "invalid",
+        "integrity": "failed"
+      }
+    },
+    {
+      "name": "coherent_rewrite_unpinned",
+      "fixture": "coherent_rewrite",
+      "expected": {
+        "status": "valid",
+        "integrity": "verified",
+        "issuer_authenticity": "failed",
+        "replay": "not_performed",
+        "time_authority": "producer_supplied",
+        "issuer_reason": "receipt_commitment_mismatch",
+        "receipt_sha256": "13b48668e3596164cebe7392c1e977e9da336099b6f1d9f889fbc36a731e9fcf",
+        "manifest_sha256": "42227f33e6b231bad5a12fe418609ff756b8cb9209d2be719c1624c4dd117d95",
+        "bundle_digest": "c8338297b8077e5e4a48e298e41e99d0f311cc3aba38fafca43db1e4fb202332",
+        "ledger_head": "7ca1ddd2caebb1e87dfee35cbafbe6191e52f569ba3ea01dc1bac95aba41f1d7"
+      }
+    },
+    {
+      "name": "coherent_rewrite_pinned_to_original",
+      "fixture": "coherent_rewrite",
+      "expected_receipt_sha256": "c0a762fffcb1c26897f1c4bb261748d9540d66f5d0731402c20c61a3dfc45300",
+      "expected": {
+        "status": "invalid",
+        "integrity": "failed",
+        "issuer_authenticity": "failed",
+        "issuer_reason": "receipt_commitment_mismatch"
+      }
+    }
+  ]
+}

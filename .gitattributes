@@ -1,3 +1,6 @@
 # Keep hashing stable across OSes
 contracts/schemas/**/*.json text eol=lf
 contracts/schema-manifest.json text eol=lf
+spec/test-vectors/canonical-json.json text eol=lf
+spec/test-vectors/ledger-chaining.json text eol=lf
+spec/test-vectors/transport-parity-v1.json text eol=lf
