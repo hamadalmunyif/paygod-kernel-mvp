@@ -323,6 +323,37 @@ public class PolicyExpressionTypeSafetyTests
         Assert.Throws<InvalidOperationException>(() => Evaluate(policy, raw));
     }
 
+    [Theory]
+    [InlineData("input.items.any(v => 1)")]
+    [InlineData("not input.items.any(v => 1)")]
+    [InlineData("input.items.any(v => 'yes')")]
+    [InlineData("not 1")]
+    [InlineData("1 and true")]
+    [InlineData("false or 'yes'")]
+    [InlineData("1")]
+    public void TypedPolicy_RejectsStaticallyNonBooleanContextsDuringPreflight(
+        string expression)
+    {
+        Assert.Throws<InvalidOperationException>(() =>
+            PolicyExpression.ValidateSyntax(expression));
+    }
+
+    [Fact]
+    public void TypedWholePolicyPreflight_RejectsNonBooleanAnyPredicateOnEmptyArray()
+    {
+        var pack = MakePack("typed-v1");
+        pack.spec.policy.rules.Add(new PolicyRule
+        {
+            name = "unreachable-empty-any-nonboolean",
+            condition = "not input.items.any(v => 1)",
+            decision = "allow",
+            reason = "Empty array must not hide a malformed numeric predicate."
+        });
+        var input = JsonNode.Parse(
+            "{\"input\":{\"block\":false},\"items\":[]}")!;
+        Assert.Throws<InvalidOperationException>(() => PolicyEngine.Evaluate(pack, input));
+    }
+
     [Fact]
     public void OptedInPack_RejectsWrongTypedBooleanBeforeAllow()
     {
