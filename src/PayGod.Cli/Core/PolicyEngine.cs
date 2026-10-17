@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using YamlDotNet.RepresentationModel;
 
 namespace PayGod.Cli.Core;
 
@@ -57,7 +58,37 @@ public static class PolicyEngine
     public static PackDefinition LoadPack(string path)
     {
         var content = File.ReadAllText(path);
+        // The Pack JSON Schema sets spec.policy.additionalProperties=false,
+        // but YamlDotNet's IgnoreUnmatchedProperties would otherwise silently
+        // ignore a misspelled evaluation_profile and fall back to legacy-v1.
+        // Check policy keys for EVERY Pack, including legacy, BEFORE producing
+        // a decision. This is Pack authoring admission, not source provenance.
+        ValidatePolicyPropertyNames(content);
         return YamlDeserializer.Deserialize<PackDefinition>(content);
+    }
+
+    private static void ValidatePolicyPropertyNames(string rawYaml)
+    {
+        var stream = new YamlStream();
+        using var reader = new StringReader(rawYaml);
+        stream.Load(reader);
+        if (stream.Documents.Count != 1 ||
+            stream.Documents[0].RootNode is not YamlMappingNode root ||
+            !root.Children.TryGetValue(new YamlScalarNode("spec"), out var spec) ||
+            spec is not YamlMappingNode specMap ||
+            !specMap.Children.TryGetValue(new YamlScalarNode("policy"), out var policy) ||
+            policy is not YamlMappingNode policyMap)
+            throw new InvalidOperationException("Pack must have one spec.policy mapping.");
+
+        foreach (var key in policyMap.Children.Keys)
+        {
+            if (key is not YamlScalarNode scalar ||
+                scalar.Value is not ("rules" or "evaluation_profile"))
+                throw new InvalidOperationException(
+                    "Unknown spec.policy field: only rules and evaluation_profile are permitted.");
+        }
+        if (!policyMap.Children.ContainsKey(new YamlScalarNode("rules")))
+            throw new InvalidOperationException("Pack spec.policy.rules is required.");
     }
 
     public static PolicyResult Evaluate(PackDefinition pack, JsonNode? input)
