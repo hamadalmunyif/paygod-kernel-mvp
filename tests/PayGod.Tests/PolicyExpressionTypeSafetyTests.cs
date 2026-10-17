@@ -357,6 +357,69 @@ public class PolicyExpressionTypeSafetyTests
         Assert.Throws<InvalidOperationException>(() => PolicyEngine.Evaluate(pack, root));
     }
 
+    [Fact]
+    public void TypedProfile_ReservedLambdaInUnreachedRule_FailsSyntaxPreflight()
+    {
+        var pack = MakePack("typed-v1");
+        pack.spec.policy.rules.Add(new PolicyRule
+        {
+            name = "hidden-reserved-lambda",
+            condition = "input.groups.any(input => true)",
+            decision = "deny",
+            reason = "Reserved input root must be rejected during grammar preflight."
+        });
+        var root = JsonNode.Parse("{\"input\":{\"block\":false},\"groups\":[]}")!;
+        Assert.Throws<InvalidOperationException>(() => PolicyEngine.Evaluate(pack, root));
+    }
+
+    [Theory]
+    [InlineData("evaluation_profıle")]
+    [InlineData("evaluation_profiIe")]
+    [InlineData("evaluation_profile_extra")]
+    public void PackYaml_UnknownPolicyKey_DoesNotSilentlyUseLegacy(string key)
+    {
+        var temp = Path.GetTempFileName();
+        try
+        {
+            var yaml = "api_version: paygod/v1\n" +
+                       "kind: Pack\n" +
+                       "metadata:\n  name: guard-test\n  version: 2.0.0\n" +
+                       "spec:\n  policy:\n    " + key + ": typed-v1\n" +
+                       "    rules:\n      - name: allow\n" +
+                       "        condition: \"input.input.block == false\"\n" +
+                       "        decision: allow\n        reason: regression\n";
+            File.WriteAllText(temp, yaml);
+            Assert.Throws<InvalidOperationException>(() => PolicyEngine.LoadPack(temp));
+        }
+        finally
+        {
+            File.Delete(temp);
+        }
+    }
+
+    [Theory]
+    [InlineData("legacy-v1")]
+    [InlineData("typed-v1")]
+    public void PackYaml_ValidDeclaredEvaluationProfile_Parses(string profile)
+    {
+        var temp = Path.GetTempFileName();
+        try
+        {
+            var yaml = "api_version: paygod/v1\nkind: Pack\n" +
+                       "metadata:\n  name: guard-test\n  version: 2.0.0\n" +
+                       "spec:\n  policy:\n    evaluation_profile: " + profile + "\n" +
+                       "    rules:\n      - name: allow\n" +
+                       "        condition: \"input.input.block == false\"\n" +
+                       "        decision: allow\n        reason: regression\n";
+            File.WriteAllText(temp, yaml);
+            Assert.Equal(profile, PolicyEngine.LoadPack(temp).spec.policy.evaluation_profile);
+        }
+        finally
+        {
+            File.Delete(temp);
+        }
+    }
+
     private static PackDefinition MakePack(string profile) => new()
     {
         spec = new PackSpec
