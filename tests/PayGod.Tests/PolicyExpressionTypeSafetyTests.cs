@@ -199,14 +199,50 @@ public class PolicyExpressionTypeSafetyTests
     }
 
     [Theory]
-    [InlineData("input.input.count == 0.0000000001", false)]
-    [InlineData("input.input.count != 0.0000000001", true)]
-    public void TypedNumericEquality_IsExact_NotLegacyEpsilon(string condition, bool expected)
+    [InlineData("input.input.count == 0", true)]
+    [InlineData("input.input.count != 0", false)]
+    [InlineData("input.input.count < 1", true)]
+    [InlineData("input.input.count == 1", false)]
+    public void TypedNumericSafeIntegerComparison_IsExact(string condition, bool expected)
     {
-        const string json = "{\"input\":{\"count\":0}}";
-        Assert.Equal(expected, Evaluate(condition, json));
-        var legacyRoot = JsonNode.Parse(json)!;
-        Assert.Equal(!expected, PolicyExpression.Evaluate(condition, legacyRoot));
+        Assert.Equal(expected, Evaluate(condition, "{\"input\":{\"count\":0}}"));
+    }
+
+    [Theory]
+    [InlineData("input.input.count == 0.0000000001")]
+    [InlineData("input.input.count != 0.0000000001")]
+    [InlineData("input.input.count == 1.0")]
+    [InlineData("input.input.count == 1e0")]
+    [InlineData("input.input.count == 9007199254740992")]
+    public void TypedPolicy_RejectsFractionalExponentAndUnsafeLiterals(string expression)
+    {
+        Assert.Throws<InvalidOperationException>(
+            () => Evaluate(expression, "{\"input\":{\"count\":0}}"));
+    }
+
+    [Theory]
+    [InlineData("{\"input\":{\"count\":1.0}}")]
+    [InlineData("{\"input\":{\"count\":1e0}}")]
+    [InlineData("{\"input\":{\"count\":9007199254740992}}")]
+    public void TypedNumericInput_RejectsNonCanonicalIntegerForms(string json)
+    {
+        Assert.Throws<InvalidOperationException>(
+            () => Evaluate("input.input.count == 1", json));
+    }
+
+    [Fact]
+    public void TypedNumericSafeIntegerBoundary_ComparedWithoutDoubleRounding()
+    {
+        const string atBoundary = "{\"input\":{\"count\":9007199254740991}}";
+        Assert.True(Evaluate("input.input.count == 9007199254740991", atBoundary));
+        Assert.False(Evaluate("input.input.count == 9007199254740990", atBoundary));
+    }
+
+    [Fact]
+    public void LegacyProfile_FractionalEpsilonRemainsPinnedForReplay()
+    {
+        var root = JsonNode.Parse("{\"input\":{\"count\":0}}")!;
+        Assert.True(PolicyExpression.Evaluate("input.input.count == 0.0000000001", root));
     }
 
     [Theory]
