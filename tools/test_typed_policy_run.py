@@ -82,6 +82,55 @@ def main():
         base_pack = (PACK / "pack.yaml").read_text(encoding="utf-8")
         original_rule = 'condition: "input.input.block == false"'
         assert base_pack.count(original_rule) == 1
+
+        # typed-v1 rule mappings are admitted before deserialization. A schema-
+        # invalid typo must not be silently ignored beside a valid allow field.
+        rule_typo_dir = tmp / "pack-rule-field-typo"
+        rule_typo_dir.mkdir()
+        typed_allow_decision = '        decision: "allow"'
+        assert base_pack.count(typed_allow_decision) == 1
+        (rule_typo_dir / "pack.yaml").write_text(
+            base_pack.replace(
+                typed_allow_decision,
+                typed_allow_decision + '\n        decsion: "deny"',
+                1),
+            encoding="utf-8")
+        rule_typo_output = tmp / "out-rule-field-typo"
+        p = subprocess.run([
+            cli, "run", "--pack", str(rule_typo_dir),
+            "--input", str(tmp / "known-false.json"),
+            "--out", str(rule_typo_output)],
+            capture_output=True, text=True)
+        assert p.returncode == 2, (p.returncode, p.stdout, p.stderr)
+        assert "PACK_POLICY_INVALID" in p.stderr, p.stderr
+        assert not rule_typo_output.exists(), (
+            "unknown typed-v1 rule field minted canonical evidence")
+        print("PASS: typed-v1 unknown rule field rejected before artifacts")
+
+        # Unbound path roots must fail whole-policy preflight even when hidden
+        # behind an empty any() and an earlier matching allow.
+        unbound_dir = tmp / "pack-unbound-root"
+        unbound_dir.mkdir()
+        (unbound_dir / "pack.yaml").write_text(
+            base_pack + "\n" +
+            '      - name: unreachable-unbound-root\n'
+            '        condition: "not input.items.any(v => typo.ok)"\n'
+            '        decision: deny\n'
+            '        reason: Unbound root must abort whole typed policy\n',
+            encoding="utf-8")
+        unbound_source = tmp / "unbound-root.json"
+        unbound_source.write_text(
+            '{"input":{"block":false},"items":[]}', encoding="utf-8")
+        unbound_output = tmp / "out-unbound-root"
+        p = subprocess.run([
+            cli, "run", "--pack", str(unbound_dir),
+            "--input", str(unbound_source), "--out", str(unbound_output)],
+            capture_output=True, text=True)
+        assert p.returncode == 2, (p.returncode, p.stdout, p.stderr)
+        assert "POLICY_INPUT_REJECTED" in p.stderr, p.stderr
+        assert not unbound_output.exists(), (
+            "unbound typed-v1 root minted canonical evidence")
+        print("PASS: typed-v1 unbound root rejected during whole-policy preflight")
         lexer_cases = [
             ("unknown-ampersand", "input.input.block == false && input.input.required"),
             ("unknown-pipe", "input.input.block == false || true"),
