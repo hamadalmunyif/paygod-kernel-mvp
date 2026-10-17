@@ -420,6 +420,58 @@ public class PolicyExpressionTypeSafetyTests
         }
     }
 
+    [Theory]
+    [InlineData("true > false")]
+    [InlineData("true >= false")]
+    [InlineData("true < false")]
+    [InlineData("true <= false")]
+    [InlineData("true == 1")]
+    [InlineData("false != 'false'")]
+    [InlineData("1 == '1'")]
+    [InlineData("1 != true")]
+    [InlineData("'ready' < false")]
+    public void TypedWholePolicyPreflight_RejectsUnreachableStaticallyInvalidComparison(
+        string invalidRule)
+    {
+        var pack = MakePack("typed-v1");
+        pack.spec.policy.rules.Add(new PolicyRule
+        {
+            name = "unreachable-but-invalid",
+            condition = invalidRule,
+            decision = "deny",
+            reason = "An earlier allow cannot hide a statically impossible comparison."
+        });
+        var input = JsonNode.Parse("{\"input\":{\"block\":false}}")!;
+        Assert.Throws<InvalidOperationException>(() => PolicyEngine.Evaluate(pack, input));
+    }
+
+    [Theory]
+    [InlineData("true == false")]
+    [InlineData("1 < 2")]
+    [InlineData("'a' != 'b'")]
+    [InlineData("input.input.block == false")]
+    [InlineData("not input.items.any(v => v.required == true)")]
+    public void TypedWholePolicyPreflight_KeepsSupportedAndSourceDependentExpressions(
+        string expression)
+    {
+        PolicyExpression.ValidateSyntax(expression);
+    }
+
+    [Fact]
+    public void LegacyPolicy_UnreachableStaticMismatch_KeepsHistoricalFirstMatch()
+    {
+        var pack = MakePack("legacy-v1");
+        pack.spec.policy.rules.Add(new PolicyRule
+        {
+            name = "legacy-unreached-mismatch",
+            condition = "true > false",
+            decision = "deny",
+            reason = "Older replay behavior is intentionally not migrated."
+        });
+        var input = JsonNode.Parse("{\"input\":{\"block\":false}}")!;
+        Assert.Equal("allow", PolicyEngine.Evaluate(pack, input).Decision);
+    }
+
     private static PackDefinition MakePack(string profile) => new()
     {
         spec = new PackSpec
