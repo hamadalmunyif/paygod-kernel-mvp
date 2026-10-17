@@ -28,6 +28,7 @@ Observed on Kernel `main@203bee9ac5668975bf5248c57f922c214567d415`:
 | `src/PayGod.Cli/Core/Canonicalizer.cs` | .NET implementation of `paygod-c14n-v1` | `52d4f67bb58e5d26ee690fdf52eec4196b6f0a99` |
 | `spec/test-vectors/canonical-json.json` | canonical accepted/rejected corpus | `3880d3a45b417ae95cae9a7b8cebb1c8c47722d8` |
 | `spec/test-vectors/ledger-chaining.json` | ledger canonical/hash corpus | `ac16a235641f22101dab93187af0eb992f010987` |
+| `spec/test-vectors/transport-parity-v1.json` | portable transport verifier corpus | `d3e682cb7f4f82cc88c4b8fd3ec7fb99d53357da` |
 
 `paygod-c14n-v1` is a restricted deterministic JSON profile, **not RFC 8785**. It accepts null, Boolean, string, array, object and safe integer values; rejects floating/exponent numeric forms and unsafe integers; requires NFC object/property names; and preserves string values without silent Unicode normalization.
 
@@ -57,23 +58,27 @@ The shared evidence therefore supports this claim:
 
 It does **not** support the stronger claim that the browser is a complete implementation of every Kernel verifier, policy, admission, replay or authority rule.
 
-## Parity dimensions still to promote
+## Current parity state
 
-A future Full Parity Corpus should move each dimension independently:
+The following dimensions now have frozen shared corpora consumed across the tested implementations:
 
-| Dimension | Current state | Promotion requirement |
+| Dimension | Current state | Evidence |
 | --- | --- | --- |
-| Canonical JSON | **SHARED CORPUS / TESTED** | keep exact source blob pin and byte/hash parity |
-| Ledger chaining | Kernel corpus exists; website tests ledger locally | import/pin the Kernel ledger corpus and compare exact hashes cross-runtime |
-| Manifest / bundle digest | website local regression coverage | define versioned Kernel transport vectors and consume them unchanged |
-| Receipt binding | website local regression coverage | shared positive + mutation corpus from Kernel |
-| External receipt commitment | website tested locally | shared Kernel vector for coherent rewrite + original pin |
-| Issuer signature / trust store | browser + Python demo tests | shared versioned trust/signature corpus with explicit recipient trust semantics |
-| Replay | Kernel standalone/Docker witnesses exist | keep browser status explicit as `not_performed`; do not simulate execution authority |
-| Time | producer clock checks exist | keep separate from trusted timestamp authority |
+| Canonical JSON | **SHARED PARITY CONFIRMED / BOUNDED** | blob `3880d3a45b417ae95cae9a7b8cebb1c8c47722d8`; website canonical gate passes |
+| Ledger chaining | **SHARED PARITY CONFIRMED / BOUNDED** | blob `ac16a235641f22101dab93187af0eb992f010987`; website ledger gate passes |
+| Manifest / bundle digest | **SHARED TRANSPORT CORPUS / TESTED** | transport blob `d3e682cb7f4f82cc88c4b8fd3ec7fb99d53357da` |
+| Receipt binding | **SHARED TRANSPORT CORPUS / TESTED** | same frozen transport corpus |
+| External receipt commitment | **SHARED TRANSPORT CORPUS / TESTED** | wrong-pin + coherent-rewrite cases |
+| Issuer signature / trust store | **SHARED TRANSPORT CORPUS / TESTED** | trusted issuer + wrong trust key cases |
+| Replay | Kernel standalone/Docker witnesses exist | browser remains explicit `not_performed`; execution replay is not browser parity |
+| Time | producer clock checks exist | remains separate from trusted timestamp authority |
 | Policy evaluation / typed-v1 | Kernel-only | **OUT OF WEBSITE PARITY** unless separately designed and approved |
 | Evidence admission / source truth | ADR 0003 / source-specific | **OUT OF WEBSITE PARITY** |
 | Issuer mandate / release authority | separate trust/authorization problem | **OUT OF WEBSITE PARITY** |
+
+The first Kernel transport-corpus run preserved a real divergence: JS passed while Python returned `cryptography_backend_unavailable` for the trusted-issuer case. The corpus was not rewritten. The existing pinned issuer-auth backend was installed in the CI path, after which Kernel JS and Python passed the unchanged blob at PR #125 head `eca3bad90d07d0d79b80b50aed3b13dfec7c3c5a`.
+
+Website PR #22 copied the exact same transport corpus blob and passed both browser-JS and vendored-Python transport corpus gates at Website Verifier run `39064262758`.
 
 ## Required claim language
 
@@ -110,14 +115,16 @@ The **corpus Git blob** is the strongest identity for exact shared test bytes. B
 
 ## Next falsifiable milestone
 
-Create a versioned Full Parity Corpus that extends beyond canonical JSON to ledger, manifest/bundle, receipt binding, external receipt commitment and issuer-auth/trust cases. Run the same frozen corpus through .NET Kernel/reference tooling, standalone Python verifier and browser verifier.
+The next milestone is no longer another local parity vector. It is **exact-SHA release correlation**:
 
-A valid outcome may be either:
+1. merge the Kernel-owned corpus and documentation through controlled reviewed PRs;
+2. merge website parity changes in dependency order;
+3. require a push-triggered Website Verifier on the exact merged production-branch SHA;
+4. require Vercel production deployment metadata to point to that exact SHA;
+5. perform live production smoke on the public routes;
+6. record the final merged Kernel and website SHAs in the Observatory evidence record.
 
-- `PARITY_CONFIRMED` for the scoped dimension, or
-- `DIVERGENCE_FOUND` with exact vector, implementation and bytes.
-
-Do not repair or normalize a divergence before preserving the failing witness.
+Until that release correlation is complete, parity is verified in source/CI but not yet described as deployed exact-SHA production evidence.
 
 ## Nonclaims
 
