@@ -1,0 +1,197 @@
+name: Trivy Native Source vs PayGod Shadow (Research Only)
+
+# Isolated optional *public image* native source witness; not on main,
+# not a release gate and never a Kernel-authorized deployment.
+on:
+  push:
+    branches:
+      - research/trivy-readonly-preflight-shadow-20261016
+    paths:
+      - .github/workflows/trivy-native-source-shadow.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write        # Only this research workflow may request OIDC provenance.
+  attestations: write    # Store a signed GitHub statement for the public test JSON.
+  artifact-metadata: write
+
+jobs:
+  native-trivy-shadow:
+    name: Native Trivy saved report and shadow comparison
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Install pinned Trivy binary version via SHA-pinned official setup
+        uses: aquasecurity/setup-trivy@e07451d2e059ed86c2870430ea286b3a9e0bf241
+        with:
+          version: v0.75.0
+          cache: false
+
+      - name: Pull public test image and record immutable repo digest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p native-source
+          docker pull docker.io/library/alpine:3.21
+          subject="$(docker image inspect --format='{{index .RepoDigests 0}}' docker.io/library/alpine:3.21)"
+          case "$subject" in
+            *@sha256:????????????????????????????????????????????????????????????????) ;;
+            *) echo "::error::Public image had no pinned repo digest"; exit 1 ;;
+          esac
+          printf '%s\n' "$subject" > native-source/subject.txt
+          echo "Native public image subject recorded: $subject"
+
+      - name: Produce actual native Trivy JSON and write untrusted-source run metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          trivy --version | tee native-source/trivy-version.txt
+          subject="$(cat native-source/subject.txt)"
+          trivy image --scanners vuln --format json --exit-code 0 \
+            --output native-source/trivy.json "$subject" \
+            2>&1 | tee native-source/trivy.log
+          printf '%s\n' "$?" > native-source/trivy-exit.txt
+          sha256sum native-source/trivy.json > native-source/report-sha256.txt
+          sha256sum .github/workflows/trivy-native-source-shadow.yml > native-source/workflow-sha256.txt
+          printf '%s\n' "$GITHUB_SHA" > native-source/workflow-commit.txt
+          echo 'Native scanner produced JSON at observed branch SHA; this alone does not prove full scan coverage or issuer authenticity.'
+
+      - name: "Read only shadow: never translate into a PayGod decision or receipt"
+        shell: bash
+        run: |
+          set -euo pipefail
+          subject="$(cat native-source/subject.txt)"
+          python3 tools/eik_trivy_shadow.py \
+            --report native-source/trivy.json \
+            --expected-artifact "$subject" \
+            --scanner-exit-code "$(cat native-source/trivy-exit.txt)" \
+            --scanner-arg=image \
+            --scanner-arg=--scanners=vuln \
+            --scanner-arg=--format=json \
+            | tee native-source/paygod-shadow-diagnostic.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          diag = json.loads(Path("native-source/paygod-shadow-diagnostic.json").read_text())
+          assert diag["kernel_called"] is False
+          assert diag["receipt_issued"] is False
+          assert diag["source_attested"] is False
+          assert diag["paygod_decision"] is None
+          assert diag["status"] in ("WITHHELD_NOT_RUN", "SHADOW_BLOCK_CANDIDATE")
+          print("Bounded shadow status:", diag["status"], "Reasons:", diag["reason_codes"])
+          PY
+
+      - name: Native-only blocking counterfactual on the same pinned subject
+        shell: bash
+        run: |
+          set -euo pipefail
+          subject="$(cat native-source/subject.txt)"
+          # This is a separate vendor-native gate, not an added filter on
+          # the separately preserved raw all-severity source report.
+          set +e
+          trivy image --scanners vuln --severity HIGH,CRITICAL \
+            --exit-code 1 --format json \
+            --output native-source/native-high-critical-gate.json "$subject" \
+            2>&1 | tee native-source/native-gate.log
+          native_rc="${PIPESTATUS[0]}"
+          set -e
+          printf '%s\n' "$native_rc" > native-source/native-gate-exit.txt
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          native = json.loads(Path("native-source/native-high-critical-gate.json").read_text())
+          high = sum(
+              v.get("Severity") in {"HIGH", "CRITICAL"}
+              for result in native.get("Results", [])
+              for v in result.get("Vulnerabilities", []) or []
+          )
+          shadow = json.loads(Path("native-source/paygod-shadow-diagnostic.json").read_text())
+          assert high > 0, "Expected high/critical in native comparator"
+          assert shadow["status"] == "SHADOW_BLOCK_CANDIDATE"
+          assert shadow["details"]["high_or_critical"] == high
+          print("Native-only HIGH/CRITICAL finding count:", high)
+          print("Native exit code recorded separately; shadow has no decision authority.")
+          PY
+          if [[ "$native_rc" -ne 1 ]]; then
+            echo "::error::Native Trivy did not return expected severity gate exit (observed: $native_rc)"
+            exit 1
+          fi
+          echo "Native Trivy blocks pinned public image without PayGod (exit code 1)."
+
+      - name: Attest provenance of exact public Trivy report bytes (GitHub native)
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: native-source/trivy.json
+
+      - name: Independently verify GitHub-native report provenance statement
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh --version
+          gh attestation verify native-source/trivy.json \
+            --repo "$GITHUB_REPOSITORY" \
+            --format json \
+            > native-source/attestation-verification.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("native-source/attestation-verification.json").read_text())
+          assert isinstance(report, list) and report, "No valid native GitHub report attestation"
+          print("Verified attestation for exact raw Trivy report bytes via native GitHub CLI")
+          print("Does not independently authenticate scan coverage, validity of advisories or source data truth.")
+          PY
+
+      - name: Publish ONLY public-image report and non-authoritative diagnostics
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: native-trivy-public-image-shadow
+          path: native-source/
+          retention-days: 7
+          if-no-files-found: error
+ 
+  no-checkout-native-recipient:
+    name: "No-checkout Windows: native GitHub attestation verify and tamper rejection"
+    needs: native-trivy-shadow
+    runs-on: windows-2022
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - name: Download report without repository checkout or producer filesystem
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: native-trivy-public-image-shadow
+          path: native-source
+
+      - name: Verify exact report independently with GitHub native tool
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $report = "native-source/trivy.json"
+          gh --version
+          gh attestation verify $report --repo $env:GITHUB_REPOSITORY --format json | Set-Content -Encoding utf8 native-source/receiver-verification.json
+          if ($LASTEXITCODE -ne 0) { throw "native signature verification failed in fresh Windows runner" }
+          $checks = Get-Content native-source/receiver-verification.json -Raw | ConvertFrom-Json
+          if (-not $checks) { throw "missing verified attestation" }
+          $diagnostic = Get-Content native-source/paygod-shadow-diagnostic.json -Raw | ConvertFrom-Json
+          if ($diagnostic.kernel_called -ne $false -or $diagnostic.receipt_issued -ne $false -or $null -ne $diagnostic.paygod_decision) {
+            throw "shadow artifact unexpectedly claims a Kernel decision"
+          }
+          Copy-Item $report "native-source/trivy-tampered.json"
+          Add-Content -Encoding utf8 "native-source/trivy-tampered.json" "tamper"
+          gh attestation verify "native-source/trivy-tampered.json" --repo $env:GITHUB_REPOSITORY --format json *> $null
+          if ($LASTEXITCODE -eq 0) { throw "tampered report incorrectly passed native signature check" }
+          Write-Output "PASS: fresh no-checkout Windows runner verifies genuine Trivy report using native GitHub attestation and rejects tampering."
+          Write-Output "LIMIT: same-owner workflow/repository; NOT independent human recipient or source-truth proof."
+          # An intentionally failing tamper probe leaves LASTEXITCODE=1; explicitly
+          # report the assertion step as success once the rejection is confirmed.
+          exit 0
