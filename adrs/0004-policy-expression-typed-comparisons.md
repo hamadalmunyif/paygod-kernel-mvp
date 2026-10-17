@@ -76,6 +76,12 @@ A typed-v1 policy that returns `allow` from its first matching rule previously n
 
 Scope: this validates grammar, not all unreachable *runtime* operand types, external source completeness or conflicting policy author intent. Pack authoring review is still needed to decide rule precedence and what `allow` actually grants; no production release authority is asserted. This remains a PR candidate pending exact-HEAD CI and ADR approval.
 
+## Nested any() lexical scope — 2026-10-17 P1 review finding
+
+The GitHub Codex review on PR #115 identified a shadowed lambda variable in nested `any()`: `input.groups.any(v => v.items.any(v => v.ok) and v.required)` overwrote the outer `v` with the inner item. An inner `required:true` could therefore make an **outer required:false** predicate true, potentially selecting an allow rule. The opt-in typed-v1 evaluator now saves/restores the previous binding in a `finally` block (including on early success or error) and rejects shadowing the reserved `input` root. Legacy-v1 evaluation remains byte-semantically unchanged for existing historical replay. Unit tests reproduce the attacker-owned nested item; CLI tests check the actual receipt verdict for both outer false and true.
+
+These are bounded semantic tests, not proof of a trusted source, scanner completeness, safe authored policies, allowed release or replay/time authority. A fresh exact-head CI and reviewer acknowledgement are required before ADR approval. GitHub CodeQL separately flagged floating-point equality; canonical source numeric restrictions, authored literals and alternative integer-only comparison semantics still need a deliberate disposition rather than dismissing the warning solely because unit tests are green.
+
 ## Compatibility and scope review
 
 Reviewed source Pack conditions at `d347213`: `secrets-in-repo-guard` (`== 0`), `critical-cve-blocker` (`!= 'fixed'`, ordered numeric, `not any`), `cross-border-pii-guard` (typed Boolean equality), `ghg-scope-1-2-guard` (nonempty string and truthy references), `iso27001-policy-review` (typed Boolean and `any`), `aws/admin-drift-detection` (string equality/inequality), gas rehearsal (Boolean and string equality), and EIK saved-report example. Existing well-typed fixtures are expected to preserve their decisions, but **CI at repair HEAD must be inspected**. Wrong-typed or missing data changes to an evaluation error **only for explicitly opted-in `typed-v1`** Packs. Existing unmodified legacy Packs preserve their historical behavior, including risks that require source admission.
