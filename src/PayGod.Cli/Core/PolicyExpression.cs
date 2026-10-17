@@ -220,6 +220,8 @@ public static class PolicyExpression
             if (lk is null || rk is null)
                 throw new InvalidOperationException("Policy comparison requires present, non-null operands.");
 
+            // paygod-c14n-v1 source numbers are bounded safe integers; numeric
+            // equality in a security policy must not use legacy 1e-9 fuzz.
             if (lk == System.Text.Json.JsonValueKind.Number &&
                 rk == System.Text.Json.JsonValueKind.Number)
             {
@@ -230,8 +232,8 @@ public static class PolicyExpression
 
                 var result = op switch
                 {
-                    TokenType.Eq => Math.Abs(ln.Value - rn.Value) < 1e-9,
-                    TokenType.Ne => Math.Abs(ln.Value - rn.Value) >= 1e-9,
+                    TokenType.Eq => ln.Value == rn.Value,
+                    TokenType.Ne => ln.Value != rn.Value,
                     TokenType.Gt => ln.Value > rn.Value,
                     TokenType.Ge => ln.Value >= rn.Value,
                     TokenType.Lt => ln.Value < rn.Value,
