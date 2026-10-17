@@ -69,6 +69,37 @@ def main():
             assert "INPUT_JSON_DUPLICATE_KEY" in p.stderr, (name, p.stderr)
             assert not output.exists(), (name, "duplicate input minted output")
             print(f"PASS: typed-v1 {name} duplicate rejected with no artifacts")
+        # Attacker-controlled or malformed policy syntax must not be silently
+        # truncated into a permissive expression by the typed-v1 lexer.
+        # This exercises the real CLI before any canonical output is written.
+        base_pack = (PACK / "pack.yaml").read_text(encoding="utf-8")
+        original_rule = 'condition: "input.input.block == false"'
+        assert base_pack.count(original_rule) == 1
+        lexer_cases = [
+            ("unknown-ampersand", "input.input.block == false && input.input.required"),
+            ("unknown-pipe", "input.input.block == false || true"),
+            ("unknown-comment", "input.input.block == false # ignored"),
+            ("invalid-number", "input.input.count == 1e999"),
+            ("malformed-number", "input.input.count == 1-1"),
+            ("unterminated-string", "input.input.word == 'open"),
+        ]
+        for name, expression in lexer_cases:
+            pack_dir = tmp / f"pack-{name}"
+            pack_dir.mkdir()
+            (pack_dir / "pack.yaml").write_text(
+                base_pack.replace(original_rule, f'condition: "{expression}"'),
+                encoding="utf-8")
+            source = tmp / f"source-{name}.json"
+            source.write_text('{"input":{"block":false,"count":0,"required":false,"word":"open"}}',
+                              encoding="utf-8")
+            output = tmp / f"out-lexer-{name}"
+            p = subprocess.run([cli, "run", "--pack", str(pack_dir),
+                                "--input", str(source), "--out", str(output)],
+                               capture_output=True, text=True)
+            assert p.returncode == 2, (name, p.returncode, p.stdout, p.stderr)
+            assert "POLICY_INPUT_REJECTED" in p.stderr, (name, p.stderr)
+            assert not output.exists(), (name, "malformed policy minted output")
+            print(f"PASS: typed-v1 {name} policy rejected; no artifacts")
         # Refuse reuse of a directory holding an old canonical receipt.
         # An error must never silently overwrite or pretend to replace it.
         prior = tmp / "preexisting-output"
