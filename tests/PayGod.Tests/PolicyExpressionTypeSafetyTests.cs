@@ -243,6 +243,32 @@ public class PolicyExpressionTypeSafetyTests
         Assert.Equal("allow", PolicyEngine.Evaluate(pack, root).Decision);
     }
 
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public void TypedNestedAny_ReusedLambdaRestoresOuterBinding(bool outerRequired, bool expected)
+    {
+        var json = "{\"groups\":[{\"required\":" +
+                   (outerRequired ? "true" : "false") +
+                   ",\"items\":[{\"ok\":true,\"required\":true}]}]}";
+        const string condition = "input.groups.any(v => v.items.any(v => v.ok) and v.required)";
+        Assert.Equal(expected, Evaluate(condition, json));
+        if (!outerRequired)
+        {
+            // Historical lexical-leak behavior is preserved only for replay.
+            var original = JsonNode.Parse(json)!;
+            Assert.True(PolicyExpression.Evaluate(condition, original));
+        }
+    }
+
+    [Fact]
+    public void TypedNestedAny_ReservedInputVariableRejected()
+    {
+        const string json = "{\"groups\":[{\"required\":true}]}";
+        Assert.Throws<InvalidOperationException>(() =>
+            Evaluate("input.groups.any(input => input.required)", json));
+    }
+
     [Fact]
     public void LegacyProfile_NegatedMissingPathBehaviorIsPinnedForHistoricalReplayOnly()
     {
