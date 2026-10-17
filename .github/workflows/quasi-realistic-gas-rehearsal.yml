@@ -48,7 +48,7 @@ jobs:
           assert data['integrity_verified_count'] == 10
           assert data['expected_deliberate_gaps'] == {'contract_gap': 1, 'provenance_gap': 1}
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: quasi-realistic-gas-rehearsal-result
           path: quasi-realistic-gas-rehearsal-result.json

@@ -36,7 +36,7 @@ jobs:
           print('real_cases=',data['counts']['real_deidentified_cases'])
           assert data['criteria']['engineering_evidence_does_not_substitute_for_real_cases'] is True
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: b2-readiness-result
           path: b2-readiness-result.json

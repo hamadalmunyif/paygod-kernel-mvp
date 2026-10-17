@@ -62,13 +62,13 @@ jobs:
           mkdir -p verifier-dist
           cp tools/verify_portable_evidence.py verifier-dist/paygod-verify.py
           cp tools/issuer_auth.py verifier-dist/issuer_auth.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: eik-synthetic-canonical-evidence
           path: eik-output/evidence/
           if-no-files-found: error
           retention-days: 7
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: eik-standalone-verifier-code
           path: verifier-dist/
