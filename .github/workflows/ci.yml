@@ -78,6 +78,17 @@ jobs:
           ./out/paygod test --pack packs/core/iso27001-policy-review
           ./out/paygod test --pack packs/providers/aws/admin-drift-detection
 
+      - name: GHG Scope 1/2 shape-admission research and synthetic end-to-end witness
+        run: |
+          python3 -m unittest discover -s research/pack-readiness/ghg-scope12-v0 -p 'test_*.py' -v
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          python3 research/pack-readiness/ghg-scope12-v0/admit.py \
+            --input research/pack-readiness/ghg-scope12-v0/fixtures/complete-synthetic.json \
+            --cli ./out/paygod --out "$tmp/bundle"
+          python3 tools/verify_portable_evidence.py "$tmp/bundle" \
+            --allow-unbound-clock --result "$tmp/verification.json"
+
       - name: Verify concise fail-closed input rejection
         run: python3 tools/test_cli_input_rejection.py --cli ./out/paygod
 
