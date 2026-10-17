@@ -100,6 +100,28 @@ def main():
             assert "POLICY_INPUT_REJECTED" in p.stderr, (name, p.stderr)
             assert not output.exists(), (name, "malformed policy minted output")
             print(f"PASS: typed-v1 {name} policy rejected; no artifacts")
+        # A matching first allow rule must not conceal a malformed later rule.
+        # Preflight every typed-v1 rule before evaluation and evidence issuance.
+        appended = """      - name: unreachable-malformed-rule
+        condition: "input.input.block == true && untrusted"
+        decision: deny
+        reason: Unreachable malformed syntax must still reject the Pack.
+"""
+        policy_dir = tmp / "pack-unreachable-invalid"
+        policy_dir.mkdir()
+        (policy_dir / "pack.yaml").write_text(base_pack + "\n" + appended,
+                                              encoding="utf-8")
+        first_allow = tmp / "first-allow.json"
+        first_allow.write_text('{"input":{"block":false}}', encoding="utf-8")
+        output = tmp / "out-unreachable-invalid"
+        p = subprocess.run([cli, "run", "--pack", str(policy_dir),
+                            "--input", str(first_allow), "--out", str(output)],
+                           capture_output=True, text=True)
+        assert p.returncode == 2, (p.returncode, p.stdout, p.stderr)
+        assert "POLICY_INPUT_REJECTED" in p.stderr, p.stderr
+        assert not output.exists(), "unreachable invalid typed policy minted evidence"
+        print("PASS: typed-v1 entire-rule syntax preflight fails before matching allow")
+
         # Refuse reuse of a directory holding an old canonical receipt.
         # An error must never silently overwrite or pretend to replace it.
         prior = tmp / "preexisting-output"
