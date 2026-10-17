@@ -47,12 +47,26 @@ public static class RunCommand
         JsonNode inputJson;
         try
         {
-            inputJson = JsonNode.Parse(File.ReadAllText(input.FullName))
+            var rawInput = File.ReadAllText(input.FullName);
+            // Parse raw bytes BEFORE JsonNode materialization for typed-v1.
+            // A JSON object with duplicate property names is ambiguous across
+            // consumers and must never be allowed to reach an ALLOW decision.
+            if (scopedTypedRun)
+            {
+                using var rawDocument = JsonDocument.Parse(rawInput);
+                RequireUniqueJsonKeys(rawDocument.RootElement);
+            }
+            inputJson = JsonNode.Parse(rawInput)
                 ?? throw new JsonException("Input JSON produced a null document.");
         }
         catch (JsonException ex)
         {
             FailCode("INPUT_JSON_INVALID", ex.Message);
+            return;
+        }
+        catch (InvalidOperationException ex) when (scopedTypedRun)
+        {
+            FailCode("INPUT_JSON_DUPLICATE_KEY", ex.Message);
             return;
         }
 
@@ -169,6 +183,30 @@ public static class RunCommand
         };
         WriteJson(Path.Join(outDir.FullName, "receipt.json"), receipt);
         Console.WriteLine("OK: Run complete.");
+    }
+
+    // Lexical object-key admission is scoped to the opted-in typed-v1 profile.
+    // This does not prove source authenticity, scanner completeness, or
+    // authorized release; those must be admitted independently.
+    private static void RequireUniqueJsonKeys(JsonElement element)
+    {
+        switch (element.ValueKind)
+        {
+            case JsonValueKind.Object:
+                var seen = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var property in element.EnumerateObject())
+                {
+                    if (!seen.Add(property.Name))
+                        throw new InvalidOperationException(
+                            "Duplicate JSON property name in typed-v1 input.");
+                    RequireUniqueJsonKeys(property.Value);
+                }
+                break;
+            case JsonValueKind.Array:
+                foreach (var item in element.EnumerateArray())
+                    RequireUniqueJsonKeys(item);
+                break;
+        }
     }
 
     private static void AppendLedger(string ledgerPath, object packObj, string inputHash, string verdict, PolicyResult result, string runTs)
