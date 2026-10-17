@@ -25,8 +25,9 @@ public static class PolicyExpression
     public static void ValidateSyntax(string expression)
     {
         var parser = new Parser(expression, strictSyntax: true);
-        parser.ParseExpression();
+        var ast = parser.ParseExpression();
         parser.Expect(TokenType.EOF);
+        RequireStaticallyBooleanContext(ast, "top-level policy condition");
     }
 
     // A typed policy is parsed completely even if its first rule ALLOWs.
@@ -56,6 +57,16 @@ public static class PolicyExpression
         if (lhs == StaticKind.Boolean && op is not (TokenType.Eq or TokenType.Ne))
             throw new InvalidOperationException(
                 "typed-v1 Boolean literals/expressions support equality or inequality only.");
+    }
+
+    private static void RequireStaticallyBooleanContext(Expr expr, string context)
+    {
+        var kind = InferStaticKind(expr);
+        if (kind is StaticKind.SafeInteger or StaticKind.String)
+            throw new InvalidOperationException(
+                $"typed-v1 {context} requires a Boolean expression.");
+        // Unknown is permitted here because PathRef type is source-dependent
+        // and will still be checked fail-closed during strict evaluation.
     }
 
     private sealed class EvalContext
@@ -516,6 +527,11 @@ public static class PolicyExpression
             {
                 Consume(TokenType.Or);
                 var right = ParseAnd();
+                if (strictSyntax)
+                {
+                    RequireStaticallyBooleanContext(left, "or left operand");
+                    RequireStaticallyBooleanContext(right, "or right operand");
+                }
                 left = new BinaryBoolExpr(TokenType.Or, left, right);
             }
             return left;
@@ -528,6 +544,11 @@ public static class PolicyExpression
             {
                 Consume(TokenType.And);
                 var right = ParseUnary();
+                if (strictSyntax)
+                {
+                    RequireStaticallyBooleanContext(left, "and left operand");
+                    RequireStaticallyBooleanContext(right, "and right operand");
+                }
                 left = new BinaryBoolExpr(TokenType.And, left, right);
             }
             return left;
@@ -538,7 +559,10 @@ public static class PolicyExpression
             if (_cur.Type == TokenType.Not)
             {
                 Consume(TokenType.Not);
-                return new NotExpr(ParseUnary());
+                var inner = ParseUnary();
+                if (strictSyntax)
+                    RequireStaticallyBooleanContext(inner, "not operand");
+                return new NotExpr(inner);
             }
             return ParsePrimary();
         }
@@ -629,6 +653,8 @@ public static class PolicyExpression
                     Consume(TokenType.Arrow);
                     var pred = ParseOr();
                     Consume(TokenType.RParen);
+                    if (strictSyntax)
+                        RequireStaticallyBooleanContext(pred, "any() predicate");
                     return new AnyExpr(pathRef, varName, pred);
                 }
 
