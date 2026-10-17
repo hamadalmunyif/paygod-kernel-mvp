@@ -164,6 +164,16 @@ public static class RunCommand
         var clockValue = Environment.GetEnvironmentVariable("PAYGOD_CLOCK") ?? "unset";
         var runnerImage = Environment.GetEnvironmentVariable("PAYGOD_RUNNER_IMAGE") ?? "paygod/runner:dev";
         var runnerDigest = Environment.GetEnvironmentVariable("PAYGOD_RUNNER_DIGEST") ?? "unknown";
+        // A bind-mounted Docker output directory already exists. For typed-v1
+        // the CLI requires a fresh *child* path, so mount the existing parent,
+        // not the target directory. Preserve historical replay commands.
+        var replayMount = scopedTypedRun
+            ? "-v \"<OUT_PARENT_DIR>:/out-parent:rw\""
+            : "-v \"<OUT_DIR>:/out:rw\"";
+        var replayOut = scopedTypedRun
+            ? "/out-parent/<NEW_RUN_SUBDIR>"
+            : "/out";
+
         var receipt = new
         {
             api_version = "paygod/v1", kind = "Receipt", spec_version = "0.2.0", generated_at = clockValue,
@@ -177,8 +187,8 @@ public static class RunCommand
             replay = new
             {
                 command = $"docker run --rm -e PAYGOD_CLOCK={clockValue} -e PAYGOD_STRICT=1 " +
-                          $"-v \"<PACK_DIR>:/pack:ro\" -v \"<INPUT_FILE>:/input/input.json:ro\" -v \"<OUT_DIR>:/out:rw\" " +
-                          $"{runnerImage} run --pack /pack --input /input/input.json --out /out"
+                          $"-v \"<PACK_DIR>:/pack:ro\" -v \"<INPUT_FILE>:/input/input.json:ro\" {replayMount} " +
+                          $"{runnerImage} run --pack /pack --input /input/input.json --out {replayOut}"
             }
         };
         WriteJson(Path.Join(outDir.FullName, "receipt.json"), receipt);
