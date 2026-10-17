@@ -65,6 +65,9 @@ def main():
                      "--out", str(original_dir)], env=environment)
         assert first.returncode == 0, (first.stdout, first.stderr)
         original = json.loads((original_dir / "receipt.json").read_text(encoding="utf-8"))
+        runner_id = image_id.stdout.strip()
+        assert original["runner"]["image"] == IMAGE, original["runner"]
+        assert original["runner"]["image_digest"] == runner_id, original["runner"]
         replay = original["replay"]["command"]
         assert '-v "<OUT_PARENT_DIR>:/out-parent:rw"' in replay
         assert "--out /out-parent/<NEW_RUN_SUBDIR>" in replay
@@ -81,6 +84,10 @@ def main():
 
         command = shlex.split(replay)
         assert command[0:2] == ["docker", "run"], command
+        assert "PAYGOD_RUNNER_IMAGE=" + IMAGE in command, command
+        assert "PAYGOD_RUNNER_DIGEST=" + runner_id in command, command
+        child_run_index = command.index("run", 2)
+        assert command[child_run_index - 1] == runner_id, command
         try:
             first_replay = run(command)
             assert first_replay.returncode == 0, (
@@ -92,8 +99,9 @@ def main():
             assert observed["verdict"]["value"] == original["verdict"]["value"] == "allow"
             assert observed["input"]["canonical_hash"] == original["input"]["canonical_hash"]
             assert observed["pack"]["digest_sha256"] == original["pack"]["digest_sha256"]
+            assert observed["runner"] == original["runner"], (observed["runner"], original["runner"])
             assert (replay_dir / "manifest.json").is_file()
-            print("PASS: actual Docker replay completed into a new child, same bounded verdict/input/Pack")
+            print("PASS: actual Docker replay completed with the same pinned runner identity")
     
             previous_bytes = replay_receipt.read_bytes()
             repeated = run(command)
