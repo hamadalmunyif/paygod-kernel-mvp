@@ -76,7 +76,7 @@ The following dimensions now have frozen shared corpora consumed across the test
 | Evidence admission / source truth | ADR 0003 / source-specific | **OUT OF WEBSITE PARITY** |
 | Issuer mandate / release authority | separate trust/authorization problem | **OUT OF WEBSITE PARITY** |
 
-The first Kernel transport-corpus run preserved a real divergence: JS passed while Python returned `cryptography_backend_unavailable` for the trusted-issuer case. The corpus was not rewritten. The existing pinned issuer-auth backend was installed in the CI path, after which Kernel JS and Python passed the unchanged blob at PR #125 head `eca3bad90d07d0d79b80b50aed3b13dfec7c3c5a`.
+The first Kernel transport-corpus run preserved a real divergence: JS passed while Python returned `cryptography_backend_unavailable` for the trusted-issuer case. The corpus was not rewritten. The existing pinned issuer-auth backend was installed in the CI path. Codex then identified a cross-platform newline risk in Python fixture materialization; the test was changed from text-mode writes to exact UTF-8 byte writes without changing corpus bytes or expected outcomes. Kernel JS and Python both pass the unchanged blob at PR #125 head `4d1df77dd498585d1fce2b2523662d9366bf24cc`.
 
 Website PR #22 copied the exact same transport corpus blob and passed both browser-JS and vendored-Python transport corpus gates at Website Verifier run `39064262758`.
 
