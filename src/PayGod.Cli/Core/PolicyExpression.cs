@@ -507,6 +507,7 @@ public static class PolicyExpression
     private sealed class Parser(string s, bool strictSyntax)
     {
         private readonly Lexer _lx = new(s, strictSyntax);
+        private readonly HashSet<string> _lambdaScopes = new(StringComparer.Ordinal);
         private Token _cur = new(TokenType.EOF, "");
 
         public Expr ParseExpression()
@@ -628,6 +629,9 @@ public static class PolicyExpression
         private Expr ParsePathOrAny()
         {
             var root = _cur.Text;
+            if (strictSyntax && root != "input" && !_lambdaScopes.Contains(root))
+                throw new InvalidOperationException(
+                    $"typed-v1 policy path root '{root}' is not input or an in-scope any() lambda.");
             Consume(TokenType.Ident);
             var segments = new List<string>();
 
@@ -651,7 +655,24 @@ public static class PolicyExpression
                             "Policy any() cannot shadow reserved input root.");
                     Consume(TokenType.Ident);
                     Consume(TokenType.Arrow);
-                    var pred = ParseOr();
+
+                    // Track lexical lambda roots during strict preflight so an
+                    // unreachable typo like any(v => typo.ok) cannot be hidden
+                    // by an empty array or an earlier short-circuiting allow.
+                    // Reusing a lambda name in a nested any() is legal and the
+                    // outer binding remains in scope after the inner predicate.
+                    var alreadyBound = strictSyntax && _lambdaScopes.Contains(varName);
+                    if (strictSyntax && !alreadyBound) _lambdaScopes.Add(varName);
+                    Expr pred;
+                    try
+                    {
+                        pred = ParseOr();
+                    }
+                    finally
+                    {
+                        if (strictSyntax && !alreadyBound) _lambdaScopes.Remove(varName);
+                    }
+
                     Consume(TokenType.RParen);
                     if (strictSyntax)
                         RequireStaticallyBooleanContext(pred, "any() predicate");
