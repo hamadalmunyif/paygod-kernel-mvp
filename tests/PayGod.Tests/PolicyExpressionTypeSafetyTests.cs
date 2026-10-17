@@ -404,6 +404,134 @@ public class PolicyExpressionTypeSafetyTests
     }
 
     [Theory]
+    [InlineData("not input.items.any(v => typo.ok)")]
+    [InlineData("true or typo.ok")]
+    [InlineData("input.items.any(v => v.ok and typo.ok)")]
+    public void TypedPreflight_RejectsUnboundPathRoots(string expression)
+    {
+        Assert.Throws<InvalidOperationException>(() =>
+            PolicyExpression.ValidateSyntax(expression));
+    }
+
+    [Fact]
+    public void TypedWholePolicyPreflight_UnboundRootCannotHideBehindEarlierAllowOrEmptyArray()
+    {
+        var pack = MakePack("typed-v1");
+        pack.spec.policy.rules.Add(new PolicyRule
+        {
+            name = "unreachable-unbound-root",
+            condition = "not input.items.any(v => typo.ok)",
+            decision = "deny",
+            reason = "Unbound roots must be rejected before any rule can mint evidence."
+        });
+        var input = JsonNode.Parse(
+            "{\"input\":{\"block\":false},\"items\":[]}")!;
+        Assert.Throws<InvalidOperationException>(() => PolicyEngine.Evaluate(pack, input));
+    }
+
+    [Fact]
+    public void TypedPreflight_AllowsInputAndLexicallyScopedNestedLambdaRoots()
+    {
+        PolicyExpression.ValidateSyntax(
+            "input.groups.any(v => v.items.any(w => w.ok) and v.required)");
+    }
+
+    [Fact]
+    public void PackYaml_TypedRuleUnknownFieldRejectedBeforeDeserialization()
+    {
+        var temp = Path.GetTempFileName();
+        try
+        {
+            var yaml = "api_version: paygod/v1\n" +
+                       "kind: Pack\n" +
+                       "metadata:\n  name: guard-test\n  version: 2.0.0\n" +
+                       "spec:\n  policy:\n    evaluation_profile: typed-v1\n" +
+                       "    rules:\n      - name: allow\n" +
+                       "        condition: \"input.input.block == false\"\n" +
+                       "        decision: allow\n" +
+                       "        decsion: deny\n" +
+                       "        reason: regression\n";
+            File.WriteAllText(temp, yaml);
+            Assert.Throws<InvalidOperationException>(() => PolicyEngine.LoadPack(temp));
+        }
+        finally
+        {
+            File.Delete(temp);
+        }
+    }
+
+    [Fact]
+    public void PackYaml_TypedRuleMissingRequiredFieldRejectedBeforeDeserialization()
+    {
+        var temp = Path.GetTempFileName();
+        try
+        {
+            var yaml = "api_version: paygod/v1\n" +
+                       "kind: Pack\n" +
+                       "metadata:\n  name: guard-test\n  version: 2.0.0\n" +
+                       "spec:\n  policy:\n    evaluation_profile: typed-v1\n" +
+                       "    rules:\n      - name: allow\n" +
+                       "        condition: \"input.input.block == false\"\n" +
+                       "        decision: allow\n";
+            File.WriteAllText(temp, yaml);
+            Assert.Throws<InvalidOperationException>(() => PolicyEngine.LoadPack(temp));
+        }
+        finally
+        {
+            File.Delete(temp);
+        }
+    }
+
+    [Fact]
+    public void PackYaml_TypedRuleUnsupportedDecisionRejectedBeforeDeserialization()
+    {
+        var temp = Path.GetTempFileName();
+        try
+        {
+            var yaml = "api_version: paygod/v1\n" +
+                       "kind: Pack\n" +
+                       "metadata:\n  name: guard-test\n  version: 2.0.0\n" +
+                       "spec:\n  policy:\n    evaluation_profile: typed-v1\n" +
+                       "    rules:\n      - name: allow\n" +
+                       "        condition: \"input.input.block == false\"\n" +
+                       "        decision: permit\n" +
+                       "        reason: regression\n";
+            File.WriteAllText(temp, yaml);
+            Assert.Throws<InvalidOperationException>(() => PolicyEngine.LoadPack(temp));
+        }
+        finally
+        {
+            File.Delete(temp);
+        }
+    }
+
+    [Fact]
+    public void PackYaml_LegacyRuleUnknownFieldKeepsHistoricalDeserializerBehavior()
+    {
+        var temp = Path.GetTempFileName();
+        try
+        {
+            var yaml = "api_version: paygod/v1\n" +
+                       "kind: Pack\n" +
+                       "metadata:\n  name: guard-test\n  version: 1.0.0\n" +
+                       "spec:\n  policy:\n    evaluation_profile: legacy-v1\n" +
+                       "    rules:\n      - name: allow\n" +
+                       "        condition: \"input.input.block == false\"\n" +
+                       "        decision: allow\n" +
+                       "        decsion: deny\n" +
+                       "        reason: replay-compat\n";
+            File.WriteAllText(temp, yaml);
+            var loaded = PolicyEngine.LoadPack(temp);
+            Assert.Equal("legacy-v1", loaded.spec.policy.evaluation_profile);
+            Assert.Equal("allow", loaded.spec.policy.rules[0].decision);
+        }
+        finally
+        {
+            File.Delete(temp);
+        }
+    }
+
+    [Theory]
     [InlineData("evaluation_profıle")]
     [InlineData("evaluation_profiIe")]
     [InlineData("evaluation_profile_extra")]
