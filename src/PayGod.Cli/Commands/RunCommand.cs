@@ -185,6 +185,22 @@ public static class RunCommand
             ? "/out-parent/<NEW_RUN_SUBDIR>"
             : "/out";
 
+        // typed-v1 replay propagates the exact recorded runner identity into
+        // the child and, when a valid sha256 content identifier is available,
+        // executes that immutable identifier instead of the mutable image tag.
+        // Legacy replay strings remain unchanged for historical witnesses.
+        var typedReplayRunner = scopedTypedRun && IsSha256RunnerDigest(runnerDigest)
+            ? runnerDigest
+            : runnerImage;
+        var replayEnvironment = scopedTypedRun
+            ? $"-e PAYGOD_CLOCK={ShellQuote(clockValue)} -e PAYGOD_STRICT=1 " +
+              $"-e PAYGOD_RUNNER_IMAGE={ShellQuote(runnerImage)} " +
+              $"-e PAYGOD_RUNNER_DIGEST={ShellQuote(runnerDigest)} "
+            : $"-e PAYGOD_CLOCK={clockValue} -e PAYGOD_STRICT=1 ";
+        var replayRunnerArg = scopedTypedRun
+            ? ShellQuote(typedReplayRunner)
+            : runnerImage;
+
         var receipt = new
         {
             api_version = "paygod/v1", kind = "Receipt", spec_version = "0.2.0", generated_at = clockValue,
@@ -197,13 +213,28 @@ public static class RunCommand
             verdict = new { value = verdict, rule_name = result.RuleName, reason = result.Reason },
             replay = new
             {
-                command = $"docker run --rm -e PAYGOD_CLOCK={clockValue} -e PAYGOD_STRICT=1 " +
+                command = $"docker run --rm {replayEnvironment}" +
                           $"-v \"<PACK_DIR>:/pack:ro\" -v \"<INPUT_FILE>:/input/input.json:ro\" {replayMount} " +
-                          $"{runnerImage} run --pack /pack --input /input/input.json --out {replayOut}"
+                          $"{replayRunnerArg} run --pack /pack --input /input/input.json --out {replayOut}"
             }
         };
         WriteJson(Path.Join(outDir.FullName, "receipt.json"), receipt);
         Console.WriteLine("OK: Run complete.");
+    }
+
+    private static bool IsSha256RunnerDigest(string value)
+    {
+        if (!value.StartsWith("sha256:", StringComparison.Ordinal) || value.Length != 71)
+            return false;
+        return value.AsSpan(7).ToString().All(Uri.IsHexDigit);
+    }
+
+    private static string ShellQuote(string value)
+    {
+        // Replay command is a POSIX-shell template. Single-quote each
+        // environment/image argument so recorded runner identity cannot alter
+        // the command structure when operators execute the emitted command.
+        return "'" + value.Replace("'", "'\"'\"'", StringComparison.Ordinal) + "'";
     }
 
     // Lexical object-key admission is scoped to the opted-in typed-v1 profile.
