@@ -70,6 +70,12 @@ A further adversarial case showed that the historical evaluator's `1e-9` compari
 
 The current canonical profile accepts source **safe integers**, not arbitrary floating-point JSON. This exact comparison does not validate Pack authors' choices of literal precision, prove external data completeness, or authorize external releases. Before ADR acceptance, decide whether authored fractional numeric literals should be forbidden by a subsequent versioned Pack contract; do not silently migrate legacy Packs.
 
+## Whole-policy grammar preflight (2026-10-17, additional counterexample)
+
+A typed-v1 policy that returns `allow` from its first matching rule previously never **parsed** later rules. Consequently an unrecognized `&&`, a malformed numeric literal or an unterminated string in a later rule could be stored in the signed Pack while an earlier well-typed allow still minted a canonical receipt. The new draft evaluates **syntax for every rule** first, without evaluating facts, then preserves the documented first-match order. Direct unit tests assert malformed unreachable policy is rejected; an actual CLI negative case requires exit 2 / `POLICY_INPUT_REJECTED` / no output directory. **Legacy-v1 remains unchanged.**
+
+Scope: this validates grammar, not all unreachable *runtime* operand types, external source completeness or conflicting policy author intent. Pack authoring review is still needed to decide rule precedence and what `allow` actually grants; no production release authority is asserted. This remains a PR candidate pending exact-HEAD CI and ADR approval.
+
 ## Compatibility and scope review
 
 Reviewed source Pack conditions at `d347213`: `secrets-in-repo-guard` (`== 0`), `critical-cve-blocker` (`!= 'fixed'`, ordered numeric, `not any`), `cross-border-pii-guard` (typed Boolean equality), `ghg-scope-1-2-guard` (nonempty string and truthy references), `iso27001-policy-review` (typed Boolean and `any`), `aws/admin-drift-detection` (string equality/inequality), gas rehearsal (Boolean and string equality), and EIK saved-report example. Existing well-typed fixtures are expected to preserve their decisions, but **CI at repair HEAD must be inspected**. Wrong-typed or missing data changes to an evaluation error **only for explicitly opted-in `typed-v1`** Packs. Existing unmodified legacy Packs preserve their historical behavior, including risks that require source admission.
