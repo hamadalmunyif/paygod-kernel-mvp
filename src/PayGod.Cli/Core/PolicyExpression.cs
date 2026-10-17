@@ -48,6 +48,8 @@ public static class PolicyExpression
         }
 
         public void SetVar(string name, JsonNode? value) => _vars[name] = value;
+        public bool TryGetVar(string name, out JsonNode? value) => _vars.TryGetValue(name, out value);
+        public void RemoveVar(string name) => _vars.Remove(name);
     }
 
     private readonly record struct Value(JsonNode? Node)
@@ -303,6 +305,31 @@ public static class PolicyExpression
                 if (ctx.StrictTypes)
                     throw new InvalidOperationException("Policy any() requires a present JSON array.");
                 return new(JsonValue.Create(false));
+            }
+
+            if (ctx.StrictTypes)
+            {
+                // An inner any(v => ...) may shadow an outer any(v => ...).
+                // Restore lexical binding even on early success or exception.
+                // Preserve old legacy-v1 variable behavior for historical replay.
+                if (varName == "input")
+                    throw new InvalidOperationException("Policy any() cannot shadow the reserved input root.");
+                var hadPrevious = ctx.TryGetVar(varName, out var previous);
+                try
+                {
+                    foreach (var item in arr)
+                    {
+                        ctx.SetVar(varName, item);
+                        if (predicate.Eval(ctx).AsBool(true))
+                            return new(JsonValue.Create(true));
+                    }
+                    return new(JsonValue.Create(false));
+                }
+                finally
+                {
+                    if (hadPrevious) ctx.SetVar(varName, previous);
+                    else ctx.RemoveVar(varName);
+                }
             }
 
             foreach (var item in arr)
