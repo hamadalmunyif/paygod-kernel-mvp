@@ -28,11 +28,11 @@ The new evaluation profile is **proposed and not accepted** until the exact test
 
 ## Decision proposal (conditional)
 
-1. **Only with explicit `typed-v1` opt-in**, compare numbers to numbers, strings to strings and booleans to booleans. Retain existing numeric epsilon and ordinal string ordering. `legacy-v1` is unchanged by default.
+1. **Only with explicit `typed-v1` opt-in**, compare numbers to numbers, strings to strings and booleans to booleans. Use exact numeric equality/inequality for opt-in typed-v1, plus ordinal string ordering; retain legacy-v1's historical epsilon without alteration. `legacy-v1` is unchanged by default.
 2. In `typed-v1` only, an absent/null operand or mismatched/unsupported JSON type raises a deterministic `InvalidOperationException` before a verdict can be produced. This applies to `==`, `!=` and ordering comparisons. A Boolean `true` vs `false` comparison is well-typed even though `JsonValueKind` differs.
 3. In `typed-v1`, `.any(...)` requires a **present JSON array**; missing/null/wrong-kind source is an evaluation error, not an empty array. A present empty array is permitted but is not proof of a completed external scan. Legacy behavior remains for historic fixtures.
 4. This does **not** add a tri-state Kernel decision, pre-Kernel `WITHHELD`, trust-key proof, receipt format, authorization rail, or external source truth. ADR 0003 remains in force: mandatory source missing/unsupported => **external `WITHHELD / NOT RUN` without calling Kernel**. If generic direct `run` sees malformed type during evaluation, it must fail closed; no fake receipt/verdict can be minted.
-5. The legacy truthiness of a standalone string/array/object path and `not path` is **not** changed in this proposal. This remains a separate source admission / Pack semantics risk and **must not** be marketed as fixed by typed comparison alone.
+5. Preserve legacy-v1 standalone truthiness for historical replay, **but** typed-v1 requires an actual Boolean for standalone paths, `not`, `and/or` and any() predicates. This still does not prove the completeness or authenticity of source facts; incomplete external input must be withheld at admission.
 6. This ADR **does not approve** the repair or a production upgrade. The experiments are isolated to PR #115 until tests, risk review and explicit owner approval.
 
 ## Competing alternatives and rejected shortcuts
