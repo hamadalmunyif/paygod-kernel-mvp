@@ -31,6 +31,9 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r tools/requirements.txt
 
+      - name: Install pinned issuer-auth backend for transport parity
+        run: python -m pip install -r tools/requirements-issuer-auth.txt
+
       - name: Provider separation lint (packs/core)
         run: python3 tools/ci/lint_core_packs_providers.py
 
