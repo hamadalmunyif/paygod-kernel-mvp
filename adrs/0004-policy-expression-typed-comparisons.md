@@ -100,6 +100,14 @@ The P2 finding is that an unreachable rule `input.groups.any(input => true)` can
 
 This is **an unmerged candidate**, not an accepted ADR or a claim that all YAML/JSON-schema properties are validated in the execution path. A reviewer must compare the exact final source SHA and confirm no unintended legacy Pack fixture drift.
 
+## Exact-head Codex P2: static type invalidity in unreachable policy rules (2026-10-17)
+
+After the profile-downgrade P1 and reserved-lambda P2 fixes, Codex found another P2 at [discussion r4303352526](https://github.com/hamadalmunyif/paygod-kernel-mvp/pull/115#discussion_r4303352526): `ValidateSyntax` parsed the entire typed-v1 Pack but did not statically reject `true > false`, `true == 1`, or similar comparisons in a later, unreachable rule. The earlier `allow` could issue evidence although an authored rule had impossible types.
+
+The candidate now checks both literal/known expression kinds during **strict parsing**: Boolean/Boolean only `==` and `!=`, known numeric (safe integer) against numeric, and string against string; comparisons between statically mismatched known kinds are refused before running *any* rule. A `PathRef` is intentionally classified `Unknown`, so externally supplied values continue to require existing strict **runtime** admission; this change is not source schema validation. .NET adversarial vectors and actual CLI tests require `POLICY_INPUT_REJECTED` and no artifacts for unreachable static mismatches. No change is made to `legacy-v1` replay or the first-match order for well-formed policies.
+
+This is scoped to *known typed AST operands*, not a formal type checker for complete external input schemas, and not permission to merge without ADR 0004 approval and exact-HEAD 8/8 CI.
+
 ## Compatibility and scope review
 
 Reviewed source Pack conditions at `d347213`: `secrets-in-repo-guard` (`== 0`), `critical-cve-blocker` (`!= 'fixed'`, ordered numeric, `not any`), `cross-border-pii-guard` (typed Boolean equality), `ghg-scope-1-2-guard` (nonempty string and truthy references), `iso27001-policy-review` (typed Boolean and `any`), `aws/admin-drift-detection` (string equality/inequality), gas rehearsal (Boolean and string equality), and EIK saved-report example. Existing well-typed fixtures are expected to preserve their decisions, but **CI at repair HEAD must be inspected**. Wrong-typed or missing data changes to an evaluation error **only for explicitly opted-in `typed-v1`** Packs. Existing unmodified legacy Packs preserve their historical behavior, including risks that require source admission.
